@@ -1,7 +1,24 @@
 const config = require('config');
 const express = require('express');
+const logger = require('morgan');
+const uuid = require('uuid');
 
 const app = express();
+
+// add uuid to each request
+const assignId = function (req, res, next) {
+  req.id = uuid.v4();
+  next();
+};
+
+app.use(assignId);
+
+// setup logger
+logger.token('id', function getId (req) {
+  return req.id;
+});
+
+app.use(logger(':id :remote-addr :method :url :status :response-time'));
 
 /* the front end code is in another repository and developed independantly 
   we serve the built front end code from here

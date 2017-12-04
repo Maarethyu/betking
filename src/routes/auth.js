@@ -1,8 +1,8 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express');
+const router = express.Router();
 
 router.get('/register', function (req, res) {
-  res.send('register route')
-})
+  res.send('register route');
+});
 
-module.exports = router
+module.exports = router;
