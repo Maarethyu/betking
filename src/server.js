@@ -13,8 +13,12 @@ const app = express();
 app.use(express.static('@/../../client/dist/'));
 
 app.get('/', function (req, res) {
-  res.sendFile('index.html'); // fron the front end folder
+  res.sendFile('index.html'); // from the front end folder
 });
+
+const router = express.Router();
+router.use('', require('./routes/auth')); 
+app.use('/', router); 
 
 app.listen(config.get('PORT'));
 console.log(`server listenging on port ${config.get('PORT')}`);
