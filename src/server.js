@@ -2,7 +2,8 @@ const config = require('config');
 const express = require('express');
 const logger = require('morgan');
 const uuid = require('uuid');
-
+const bodyParser = require('body-parser');
+const expressValidator = require('express-validator');
 const app = express();
 
 // add uuid to each request
@@ -32,6 +33,10 @@ app.use(express.static('@/../../client/dist/'));
 app.get('/', function (req, res) {
   res.sendFile('index.html'); // from the front end folder
 });
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(expressValidator());
 
 const router = express.Router();
 router.use('', require('./routes/auth')); 

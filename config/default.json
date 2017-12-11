@@ -1,3 +1,4 @@
 {
-  "PORT": 3002
+  "PORT": 3002,
+  "DB_CONNECTION_STRING": "postgres://bk:bk@localhost:5432/bk2"
 }
