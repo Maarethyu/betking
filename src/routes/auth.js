@@ -14,6 +14,40 @@ const createSession = async function (res, userId, rememberMe) {
     });
 };
 
+router.post('/login', async function (req, res, next){
+  req.check('password', 'Invalid Password').exists();
+  req.check('username', 'Invalid Username').exists();
+  req.check('rememberme', 'Invalid remember me option').isBoolean();
+
+  const errors = req.validationErrors();
+  if (errors) {
+    return res.status(422).json({errors});
+  }
+
+  // check if user exists, get suer by name
+  const user = await db.getUserByName(req.body.username);
+  if (!user) {
+    return res.status(422).json({error: 'Login failed'});
+  } 
+  
+  const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+  
+  const loginAttempt = await db.logLoginAttempt(user.id, isPasswordCorrect)
+
+  if (user.locked_at) {
+    return res.status(422).json({error: 'Account locked'});
+  }
+
+  if (!isPasswordCorrect) {
+    return res.status(422).json({error: 'Login failed'});
+  }
+  
+  // if require 2fa ask for it, or have it submitted on form?
+
+  await createSession(res, user.id, req.body.rememberme);
+  res.json(user); // TODO don't return user
+});
+
 router.post('/register', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists()
     .isLength({min: 6, max: 50});
@@ -54,7 +88,7 @@ router.post('/register', async function (req, res, next) {
   const user = await db.createUser(req.body.username, hash, req.body.email); 
   if (user) {
     await createSession(res, user.id, false);
-    res.json(user);
+    res.json(user); // TODO this shouldn't return user
   } else {
     res.status(422)
       .end();

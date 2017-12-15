@@ -20,6 +20,12 @@ const isUserNameAlreadyTaken = async (username) => {
   return existingUserName === 1;
 };
 
+// Case-insensitive
+const getUserByName = async (username) => {
+  const user = await db.oneOrNone('SELECT * FROM users WHERE lower(username) = lower($1)', username);
+  return user;
+};
+
 const createUser = async (username, password, email) => {
   const result = await db.one('INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING *', [username, password, email]);
   return result;
@@ -30,7 +36,14 @@ const createSession = async (userId, expires) => {
   return result;
 };
 
+const logLoginAttempt = async (userId, isSuccess) => {
+  const result = await db.one('INSERT INTO login_attempts (user_id, is_success, id) VALUES ($1, $2, $3) RETURNING *', [userId, isSuccess, uuidV4()]);
+  return result;
+};
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken; 
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken; 
 module.exports.createUser = createUser;
 module.exports.createSession = createSession;
+module.exports.getUserByName = getUserByName;
+module.exports.logLoginAttempt = logLoginAttempt;
