@@ -21,13 +21,13 @@ router.post('/login', async function (req, res, next){
 
   const errors = req.validationErrors();
   if (errors) {
-    return res.status(422).json({errors});
+    return res.status(400).json({errors});
   }
 
   // check if user exists, get suer by name
   const user = await db.getUserByName(req.body.username);
   if (!user) {
-    return res.status(422).json({error: 'Login failed'});
+    return res.status(401).json({error: 'Login failed'});
   } 
   
   const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
@@ -35,11 +35,11 @@ router.post('/login', async function (req, res, next){
   const loginAttempt = await db.logLoginAttempt(user.id, isPasswordCorrect)
 
   if (user.locked_at) {
-    return res.status(422).json({error: 'Account locked'});
+    return res.status(401).json({error: 'Account locked'});
   }
 
   if (!isPasswordCorrect) {
-    return res.status(422).json({error: 'Login failed'});
+    return res.status(401).json({error: 'Login failed'});
   }
   
   // if require 2fa ask for it, or have it submitted on form?
@@ -68,19 +68,19 @@ router.post('/register', async function (req, res, next) {
 
   const errors = req.validationErrors();
   if (errors) {
-    return res.status(422).json({errors});
+    return res.status(400).json({errors});
   }
 
   // TODO can this be a custom express-validator?
   const emailExists = await db.isEmailAlreadyTaken(req.body.email);
   if (emailExists) {
-    return res.status(422).json({error: 'email already exists'});
+    return res.status(409).json({error: 'email already exists'});
   }
 
   // TODO can this be a custom express-validator?
   const userNameExists = await db.isUserNameAlreadyTaken(req.body.username);
   if (userNameExists) {
-    return res.status(422).json({error: 'username already exists'});
+    return res.status(409).json({error: 'username already exists'});
   }
 
   const hash = await bcrypt.hash(req.body.password, 10); 
@@ -90,7 +90,7 @@ router.post('/register', async function (req, res, next) {
     await createSession(res, user.id, false);
     res.json(user); // TODO this shouldn't return user
   } else {
-    res.status(422)
+    res.status(500)
       .end();
   }
 });
