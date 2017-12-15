@@ -12,3 +12,12 @@ CREATE TABLE users (
 );
 
 -- settings
+
+CREATE TABLE sessions (
+  id uuid PRIMARY KEY,
+  user_id bigint REFERENCES users(id),
+  -- ip_address     inet                      NOT NULL,
+  -- logged_out_at  timestamp with time zone  NULL,
+  expired_at timestamp with time zone  NOT NULL DEFAULT NOW() + INTERVAL '15 minutes',
+  created_at timestamp with time zone  NOT NULL DEFAULT NOW()
+);

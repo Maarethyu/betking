@@ -3,12 +3,16 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const db = require('../db');
 
-// const completeLogin = function (context, userId, rememberMe, msg) {
-// create session in db (userId, ip, interval)
-// set sessionId cookie
-// check for redirect path
-// context.response.redirect(redirecturl)
-// };
+const createSession = async function (res, userId, rememberMe) {
+  const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks');
+  
+  res.cookie('session', session.id, 
+    {
+      maxAge: rememberMe ? 365 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000, 
+      secure: true, 
+      httpOnly: true
+    });
+};
 
 router.post('/register', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists()
@@ -47,9 +51,9 @@ router.post('/register', async function (req, res, next) {
 
   const hash = await bcrypt.hash(req.body.password, 10); 
   
-  const user = await db.createUser(req.body.username, hash, req.body.email); // ipAddress, appid = 0);
+  const user = await db.createUser(req.body.username, hash, req.body.email); 
   if (user) {
-    // await completeLogin(this, user.id, false, 'Registration a success');
+    await createSession(res, user.id, false);
     res.json(user);
   } else {
     res.status(422)

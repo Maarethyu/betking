@@ -3,6 +3,7 @@ const express = require('express');
 const logger = require('morgan');
 const uuid = require('uuid');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const expressValidator = require('express-validator');
 const app = express();
 
@@ -36,6 +37,7 @@ app.get('/', function (req, res) {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
 app.use(expressValidator());
 
 const router = express.Router();
