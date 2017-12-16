@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const expressValidator = require('express-validator');
 const app = express();
+const mw = require('./middleware');
 
 // add uuid to each request
 const assignId = function (req, res, next) {
@@ -40,8 +41,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(expressValidator());
 
+app.use(mw.attachCurrentUserToRequest());
+
 const router = express.Router();
-router.use('', require('./routes/auth')); 
+router.use('', require('./routes/index')); 
+router.use('/account', require('./routes/account')); 
 app.use('/', router); 
 
 app.listen(config.get('PORT'));

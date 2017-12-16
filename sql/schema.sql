@@ -10,6 +10,9 @@ CREATE TABLE users (
   date_joined timestamp with time zone NOT NULL DEFAULT NOW()
 );
 
+CREATE UNIQUE INDEX unique_username ON users USING btree (lower(uname) text_pattern_ops);
+CREATE INDEX users_lower_email_idx ON users USING btree(lower(email));
+
 CREATE TABLE sessions (
   id uuid PRIMARY KEY,
   user_id bigint REFERENCES users(id),
@@ -24,3 +27,11 @@ CREATE TABLE login_attempts (
   is_success boolean NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX login_attempts_user_id_idx ON login_attempts USING btree(user_id);
+
+CREATE VIEW active_sessions AS
+  SELECT *
+  FROM sessions
+  WHERE expired_at >= NOW()
+  AND logged_out_at IS NULL;

@@ -14,7 +14,7 @@ const createSession = async function (res, userId, rememberMe) {
     });
 };
 
-router.post('/login', async function (req, res, next){
+router.post('/login', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists();
   req.check('username', 'Invalid Username').exists();
   req.check('rememberme', 'Invalid remember me option').isBoolean();
@@ -32,7 +32,7 @@ router.post('/login', async function (req, res, next){
   
   const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
   
-  const loginAttempt = await db.logLoginAttempt(user.id, isPasswordCorrect)
+  const loginAttempt = await db.logLoginAttempt(user.id, isPasswordCorrect);
 
   if (user.locked_at) {
     return res.status(401).json({error: 'Account locked'});
