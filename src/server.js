@@ -41,7 +41,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(expressValidator());
 
-app.use(mw.attachCurrentUserToRequest());
+app.use(mw.attachCurrentUserToRequest);
 
 const router = express.Router();
 router.use('', require('./routes/index')); 
