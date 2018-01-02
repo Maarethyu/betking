@@ -17,7 +17,9 @@ const attachCurrentUserToRequest = async (req, res, next) => {
 const requireLoggedIn = async (req, res, next) => {
   if (!req.currentUser) {
     // this should maybe return login url?
-    throw new Error('Requires logged in user');
+    res.status(401).send('Unauthorized');
+    return;
+    // throw new Error('Requires logged in user');
   }
 
   next();
