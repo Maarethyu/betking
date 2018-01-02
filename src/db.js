@@ -12,13 +12,13 @@ const db = pgp(config.get('DB_CONNECTION_STRING'));
 // Case-insensitive
 const isEmailAlreadyTaken = async (email) => {
   const existingEmail = await db.oneOrNone('SELECT email FROM users WHERE lower(email) = lower($1)', email);
-  return existingEmail === 1;
+  return !!existingEmail;
 };
 
 // Case-insensitive
 const isUserNameAlreadyTaken = async (username) => {
   const existingUserName = await db.oneOrNone('SELECT username FROM users WHERE lower(username) = lower($1)', username);
-  return existingUserName === 1;
+  return !!existingUserName;
 };
 
 // Case-insensitive
@@ -61,3 +61,4 @@ module.exports.createSession = createSession;
 module.exports.getUserByName = getUserByName;
 module.exports.logLoginAttempt = logLoginAttempt;
 module.exports.getUserBySessionId = getUserBySessionId;
+module.exports.logoutSession = logoutSession;
