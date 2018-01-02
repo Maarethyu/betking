@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome!</title>
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>Index</h1>
+    <div v-if="isLoggedIn">
+      <table>
+        <tbody>
+          <tr>
+            <td>Id:</td>
+            <td>{{profile.id}}</td>
+          </tr>
+          <tr>
+            <td>Username:</td>
+            <td>{{profile.username}}</td>
+          </tr>
+          <tr>
+            <td>email:</td>
+            <td>{{profile.email}}</td>
+          </tr>
+          <tr>
+            <td>isEmailVerified:</td>
+            <td>{{profile.isEmailVerified}}</td>
+          </tr>
+          <tr>
+            <td>dateJoined:</td>
+            <td>{{profile.dateJoined}}</td>
+          </tr>
+          </tr>
+        </tbody>
+      </table>
+      <a href="javascript:void(0)" v-on:click.prevent="logout">Logout</a>
+    </div>
+    <div v-else>
+      <p>You are not logged in</p>
+      <a href="/client/login">Login</a>
+      <a href="/client/register">Register</a>
+    </div>
+  </div>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        isPageReady: false,
+        isLoggedIn: false,
+        profile: {}
+      },
+      mounted() {
+        this.fetchMe();
+      },
+      methods: {
+        fetchMe() {
+          axios.get('/account/me')
+            .then(response => {
+              this.isPageReady = true;
+              this.isLoggedIn = true;
+              this.profile = response.data;
+            })
+            .catch(error => {
+              if (error.response && error.response.status === 401) {
+                this.isPageReady = true;
+                this.isLoggedIn = false;
+              } else {
+                throw error;
+              }
+            });
+        },
+        logout() {
+          axios.post('/account/logout')
+            .then(() => {
+              this.fetchMe();
+            })
+        }
+      }
+    })
+  </script>
+</body>
+</html>

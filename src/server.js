@@ -45,7 +45,8 @@ app.use(mw.attachCurrentUserToRequest);
 
 const router = express.Router();
 router.use('', require('./routes/index')); 
-router.use('/account', require('./routes/account')); 
+router.use('/account', require('./routes/account'));
+router.use('/client', require('./client'));
 app.use('/', router); 
 
 app.listen(config.get('PORT'));

@@ -9,7 +9,7 @@ const createSession = async function (res, userId, rememberMe) {
   res.cookie('session', session.id, 
     {
       maxAge: rememberMe ? 365 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000, 
-      secure: true, 
+      secure: false, // TODO -- have cookie.secure as config variable
       httpOnly: true
     });
 };
