@@ -43,14 +43,28 @@ const createSession = async (userId, expires) => {
 };
 
 const logoutSession = async (userId, sessionId) => {
-  // validate userid and sessionid
-  // what to return?
-  const result = await db.one('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1 AND id = $2', [userId, sessionId]);
-  return result;
+  await db.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1 AND id = $2', [userId, sessionId]);
+};
+
+const logoutAllSessions = async (userId) => {
+  await db.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1', userId);
 };
 
 const logLoginAttempt = async (userId, isSuccess) => {
   const result = await db.one('INSERT INTO login_attempts (id, user_id, is_success) VALUES ($1, $2, $3) RETURNING *', [uuidV4(), userId, isSuccess]);
+  return result;
+};
+
+const updateEmail = async (userId, email) => {
+  await db.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]);
+};
+
+const updatePassword = async (userId, hash) => {
+  await db.none('UPDATE users set password = $2 WHERE id = $1', [userId, hash]);
+};
+
+const getActiveSessions = async (userId) => {
+  const result = await db.any('SELECT * FROM active_sessions WHERE user_id = $1', userId);
   return result;
 };
 
@@ -62,3 +76,7 @@ module.exports.getUserByName = getUserByName;
 module.exports.logLoginAttempt = logLoginAttempt;
 module.exports.getUserBySessionId = getUserBySessionId;
 module.exports.logoutSession = logoutSession;
+module.exports.updateEmail = updateEmail;
+module.exports.updatePassword = updatePassword;
+module.exports.getActiveSessions = getActiveSessions;
+module.exports.logoutAllSessions = logoutAllSessions;
