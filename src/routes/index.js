@@ -24,7 +24,6 @@ router.post('/login', async function (req, res, next) {
     return res.status(400).json({errors});
   }
 
-  // check if user exists, get suer by name
   const user = await db.getUserByName(req.body.username);
   if (!user) {
     return res.status(401).json({error: 'Login failed'});

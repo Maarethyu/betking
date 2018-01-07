@@ -16,7 +16,7 @@ CREATE INDEX users_lower_email_idx ON users USING btree(lower(email));
 CREATE TABLE sessions (
   id uuid PRIMARY KEY,
   user_id bigint REFERENCES users(id),
-  -- logged_out_at  timestamp with time zone  NULL,
+  logged_out_at  timestamp with time zone  NULL,
   expired_at timestamp with time zone  NOT NULL DEFAULT NOW() + INTERVAL '15 minutes',
   created_at timestamp with time zone  NOT NULL DEFAULT NOW()
 );

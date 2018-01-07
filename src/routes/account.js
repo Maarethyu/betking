@@ -9,10 +9,10 @@ router.use(mw.requireLoggedIn);
 router.post('/logout', async function (req, res, next) {
   await db.logoutSession(req.currentUser.id, req.cookies.session);
   res.end();
-  // return what?
 });
 
 router.get('/me', async function (req, res, next) {
+  // todo should this header setting be here?
   res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
   res.json({
     id: req.currentUser.id,

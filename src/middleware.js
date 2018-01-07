@@ -18,7 +18,7 @@ const requireLoggedIn = async (req, res, next) => {
   if (!req.currentUser) {
     // this should maybe return login url?
     res.status(401).send('Unauthorized');
-    return;
+    return; // should this be here? do we need   res.end();?
     // throw new Error('Requires logged in user');
   }
 
