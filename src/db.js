@@ -55,6 +55,20 @@ const logLoginAttempt = async (userId, isSuccess) => {
   return result;
 };
 
+const getConsecutiveFailedLogins = async (userId) => {
+  const result = await db.any('SELECT is_success from login_attempts where user_id = $1 ORDER BY created_at desc limit 5', userId);
+
+  let failedAttempts = 0;
+  for (let i = 0; i < result.length; i++) {
+    if (result[i].is_success) break;
+
+    failedAttempts++;
+  }
+
+  // Max value of failedAttempts is 5 (limit = 5)
+  return failedAttempts;
+};
+
 const updateEmail = async (userId, email) => {
   await db.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]);
 };
@@ -74,6 +88,7 @@ module.exports.createUser = createUser;
 module.exports.createSession = createSession;
 module.exports.getUserByName = getUserByName;
 module.exports.logLoginAttempt = logLoginAttempt;
+module.exports.getConsecutiveFailedLogins = getConsecutiveFailedLogins;
 module.exports.getUserBySessionId = getUserBySessionId;
 module.exports.logoutSession = logoutSession;
 module.exports.updateEmail = updateEmail;

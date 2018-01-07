@@ -19,11 +19,8 @@ module.exports = (response, remoteip) => request({
 })
   .then((res) => {
     const validationResponse = JSON.parse(res);
-
-    if (!validationResponse.success) {
-      throw new Error('Invalid captcha');
-    }
+    return validationResponse.success;
   })
   .catch(() => {
-    throw new Error('Invalid captcha');
+    return false;
   });

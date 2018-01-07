@@ -4,6 +4,8 @@
   <title>Login</title>
   <script src="https://unpkg.com/vue"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <script src='https://www.google.com/recaptcha/api.js'></script>
   <style>
     .error {
         color: red;
@@ -34,6 +36,10 @@
         <input id="rememberme" type="checkbox" name="rememberme">
         <div class="error">{{errors.rememberme}}</div>
 
+        <br>
+        <div id="g-recaptcha" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
+        <div class="error">{{errors['g-recaptcha-response']}}</div>
+
         <button type="submit">Login</button>
       </form>
 
@@ -52,10 +58,16 @@
       el: '#app',
       data: {
         isPageReady: false,
+        shouldDisplayCaptcha: false,
+        captchaId: null,
         errors: {}
       },
       mounted() {
         this.fetchMe();
+
+        window.addEventListener('load', () => {
+          this.checkForCaptcha();
+        });
       },
       methods: {
         fetchMe() {
@@ -76,7 +88,9 @@
           const data = {
             username: e.target.elements.username.value,
             password: e.target.elements.password.value,
-            rememberme: e.target.elements.rememberme.checked
+            rememberme: e.target.elements.rememberme.checked,
+            'g-recaptcha-response': e.target.elements['g-recaptcha-response'] &&
+                e.target.elements['g-recaptcha-response'].value
           };
 
           axios.post('/login', data)
@@ -84,6 +98,7 @@
               window.location.href = 'index';
             })
             .catch(error => {
+              this.checkForCaptcha();
               this.showErrors(error.response);
             });
         },
@@ -98,6 +113,16 @@
           this.errors = {
             global: 'An unexpected error occured'
           };
+        },
+        checkForCaptcha() {
+            this.shouldDisplayCaptcha = Cookies.get('require_captcha') === 'yes';
+            if (this.shouldDisplayCaptcha && window.hasOwnProperty('grecaptcha')) {
+                if (this.captchaId !== null) {
+                    grecaptcha.reset(this.captchaId);
+                } else {
+                    this.captchaId = grecaptcha.render('g-recaptcha');
+                }
+            }
         }
       }
     })

@@ -28,22 +28,40 @@ router.post('/login', async function (req, res, next) {
   const user = await db.getUserByName(req.body.username);
   if (!user) {
     return res.status(401).json({error: 'Login failed'});
-  } 
-  
-  const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
-  
-  await db.logLoginAttempt(user.id, isPasswordCorrect);
+  }
 
+  /* Handle captcha validation for failedAttempts > 3 */
+  const failedAttempts = await db.getConsecutiveFailedLogins(user.id);
+
+  const isCaptchaOk = failedAttempts < 3 ||
+    await require('./validators/captchaValidator')(req.body['g-recaptcha-response']);
+
+  /* If user locked out, return */
   if (user.locked_at) {
     return res.status(401).json({error: 'Account locked'});
   }
 
-  if (!isPasswordCorrect) {
+  /* Check for password, log login attempt */
+  const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+
+  const isLoginSuccessful = isPasswordCorrect && isCaptchaOk;
+  
+  await db.logLoginAttempt(user.id, isLoginSuccessful);
+
+  if (!isLoginSuccessful) {
+    if (failedAttempts >= 2) {
+      res.cookie('require_captcha', 'yes', {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: false
+      });
+    }
+
     return res.status(401).json({error: 'Login failed'});
   }
-  
+
   // if require 2fa ask for it, or have it submitted on form?
 
+  res.clearCookie('require_captcha');
   await createSession(res, user.id, req.body.rememberme);
   res.json(user); // TODO don't return user
 });
@@ -81,7 +99,11 @@ router.post('/register', async function (req, res, next) {
     .withMessage('username already exists');
 
   req.check('g-recaptcha-response', 'Invalid captcha').exists()
-    .custom(value => require('./validators/captchaValidator')(value));
+    .custom(value => require('./validators/captchaValidator')(value)
+      .then(isCaptchaValid => {
+        if (!isCaptchaValid) throw new Error();
+      })
+    );
 
   const validationResult = await req.getValidationResult();
   if (!validationResult.isEmpty()) {
