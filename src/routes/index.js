@@ -51,36 +51,41 @@ router.post('/login', async function (req, res, next) {
 router.post('/register', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists()
     .isLength({min: 6, max: 50});
+
   req.check('password2', 'Passwords do not match').exists()
     .equals(req.body.password);
   
   req.check('email', 'Invalid Email').exists()
     .trim()
     .isLength({max: 255})
-    .isEmail();
+    .isEmail()
+    .custom(value => db.isEmailAlreadyTaken(value)
+      .then(emailExists => {
+        if (emailExists) throw new Error();
+      })
+    )
+    .withMessage('email already exists')
+    .optional({checkFalsy: true});
 
   req.check('username', 'Invalid Username').exists()
     .trim()
     .isLength({min: 2, max: 20})
     .matches(/^[a-z0-9_]+$/i) // name contains invalid characters
     .not()
-    .matches(/^[_]|[_]$/i); // name starts or ends with underscores
+    .matches(/^[_]|[_]$/i) // name starts or ends with underscores
+    .custom(value => db.isUserNameAlreadyTaken(req.body.username)
+      .then(userNameExists => {
+        if (userNameExists) throw new Error();
+      })
+    )
+    .withMessage('username already exists');
 
-  const errors = req.validationErrors();
-  if (errors) {
-    return res.status(400).json({errors});
-  }
+  req.check('g-recaptcha-response', 'Invalid captcha').exists()
+    .custom(value => require('./validators/captchaValidator')(value));
 
-  // TODO can this be a custom express-validator?
-  const emailExists = await db.isEmailAlreadyTaken(req.body.email);
-  if (emailExists) {
-    return res.status(409).json({error: 'email already exists'});
-  }
-
-  // TODO can this be a custom express-validator?
-  const userNameExists = await db.isUserNameAlreadyTaken(req.body.username);
-  if (userNameExists) {
-    return res.status(409).json({error: 'username already exists'});
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
   }
 
   const hash = await bcrypt.hash(req.body.password, 10); 
