@@ -50,8 +50,8 @@ router.post('/login', async function (req, res, next) {
 
   if (!isLoginSuccessful) {
     if (failedAttempts >= 2) {
-      res.cookie('require_captcha', 'yes', {
-        maxAge: 24 * 60 * 60 * 1000,
+      res.cookie('login_captcha', 'yes', {
+        maxAge: 60 * 1000,
         httpOnly: false
       });
     }
@@ -61,7 +61,6 @@ router.post('/login', async function (req, res, next) {
 
   // if require 2fa ask for it, or have it submitted on form?
 
-  res.clearCookie('require_captcha');
   await createSession(res, user.id, req.body.rememberme);
   res.json(user); // TODO don't return user
 });

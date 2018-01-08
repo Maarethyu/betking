@@ -56,17 +56,8 @@ const logLoginAttempt = async (userId, isSuccess) => {
 };
 
 const getConsecutiveFailedLogins = async (userId) => {
-  const result = await db.any('SELECT is_success from login_attempts where user_id = $1 ORDER BY created_at desc limit 5', userId);
-
-  let failedAttempts = 0;
-  for (let i = 0; i < result.length; i++) {
-    if (result[i].is_success) break;
-
-    failedAttempts++;
-  }
-
-  // Max value of failedAttempts is 5 (limit = 5)
-  return failedAttempts;
+  const result = await db.one('select count(*) from login_attempts where created_at > NOW() - interval \'60 seconds\' AND is_success = false AND user_id = $1;', userId);
+  return result.count;
 };
 
 const updateEmail = async (userId, email) => {

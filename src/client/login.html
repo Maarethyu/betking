@@ -115,7 +115,8 @@
           };
         },
         checkForCaptcha() {
-            this.shouldDisplayCaptcha = Cookies.get('require_captcha') === 'yes';
+            this.shouldDisplayCaptcha = Cookies.get('login_captcha') === 'yes';
+
             if (this.shouldDisplayCaptcha && window.hasOwnProperty('grecaptcha')) {
                 if (this.captchaId !== null) {
                     grecaptcha.reset(this.captchaId);
