@@ -30,10 +30,12 @@ app.use(logger(':id :remote-addr :method :url :status :response-time'));
   It also allows us to have register/login code separate from front end while not worrying about different domains
   TODO - is this a bad way to do this?
 */
-app.use(express.static('@/../../client/dist/'));
+const frontendStaticPath = require('path').join(__dirname, '..', 'app/dist/static');
+
+app.use(express.static(frontendStaticPath));
 
 app.get('/', function (req, res) {
-  res.sendFile('index.html'); // from the front end folder
+  res.sendFile(`${frontendStaticPath}/index.html`); // from the front end folder
 });
 
 app.use(bodyParser.json());
@@ -47,7 +49,7 @@ const router = express.Router();
 router.use('', require('./routes/index')); 
 router.use('/account', require('./routes/account'));
 router.use('/client', require('./client'));
-app.use('/', router); 
+app.use('/api', router);
 
 app.listen(config.get('PORT'));
 console.log(`server listenging on port ${config.get('PORT')}`);
