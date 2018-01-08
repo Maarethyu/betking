@@ -58,7 +58,7 @@
       },
       methods: {
         fetchMe() {
-          axios.get('/account/me')
+          axios.get('/api/account/me')
             .then(response => {
               this.isPageReady = true;
               this.isLoggedIn = true;
@@ -74,7 +74,7 @@
             });
         },
         logout() {
-          axios.post('/account/logout')
+          axios.post('/api/account/logout')
             .then(() => {
               this.fetchMe();
             })

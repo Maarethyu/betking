@@ -57,7 +57,7 @@
             password: e.target.elements.password.value,
             password2: e.target.elements.password2.value
           }
-          axios.post('/register', data)
+          axios.post('/api/register', data)
             .then(res => {
               window.location.href = 'index';
             })
