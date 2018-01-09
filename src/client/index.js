@@ -7,6 +7,7 @@ const routes = {
   login: 'login.html',
   register: 'register.html',
   'forgot-password': 'forgot-password.html',
+  'reset-password': 'reset-password.html',
   settings: 'settings.html',
   sessions: 'sessions.html'
 };

@@ -1,5 +1,5 @@
 const config = require('config');
-const promise = require('bluebird'); 
+const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
 
 const initOptions = {
@@ -29,6 +29,11 @@ const getUserByName = async (username) => {
 
 const getUserBySessionId = async (sessionId) => {
   const user = await db.oneOrNone('SELECT users.* FROM users JOIN active_sessions ON users.id = active_sessions.user_id WHERE active_sessions.id = $1 GROUP BY users.id', sessionId);
+  return user;
+};
+
+const getUserByEmail = async (email) => {
+  const user = await db.oneOrNone('SELECT * FROM users WHERE lower(email) = lower($1)', email);
   return user;
 };
 
@@ -68,11 +73,26 @@ const getActiveSessions = async (userId) => {
   return result;
 };
 
-module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken; 
-module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken; 
+const findLatestActiveResetToken = async (userId) => {
+  const result = await db.oneOrNone('SELECT * from reset_tokens WHERE user_id = $1 AND expired_at > NOW() ORDER BY created_at DESC LIMIT 1', userId);
+  return result;
+};
+
+const createResetToken = async (userId) => {
+  const result = await db.one('INSERT INTO reset_tokens (id, user_id) VALUES ($1, $2) RETURNING *', [uuidV4(), userId]);
+  return result;
+};
+
+const resetUserPasswordByToken = async (token, newPassword) => {
+// TODO: Use db.tx
+};
+
+module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
+module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
 module.exports.createSession = createSession;
 module.exports.getUserByName = getUserByName;
+module.exports.getUserByEmail = getUserByEmail;
 module.exports.logLoginAttempt = logLoginAttempt;
 module.exports.getUserBySessionId = getUserBySessionId;
 module.exports.logoutSession = logoutSession;
@@ -80,3 +100,6 @@ module.exports.updateEmail = updateEmail;
 module.exports.updatePassword = updatePassword;
 module.exports.getActiveSessions = getActiveSessions;
 module.exports.logoutAllSessions = logoutAllSessions;
+module.exports.createResetToken = createResetToken;
+module.exports.findLatestActiveResetToken = findLatestActiveResetToken;
+module.exports.resetUserPasswordByToken = resetUserPasswordByToken;

@@ -65,7 +65,7 @@ router.post('/change-password', async function (req, res, next) {
   if (!isPasswordCorrect) {
     return res.status(401).json({error: 'Invalid existing password'});
   }
-  
+
   const newPasswordHash = await bcrypt.hash(req.body.password2, 10);
 
   await db.updatePassword(req.currentUser.id, newPasswordHash);
@@ -86,11 +86,9 @@ router.get('/active-sessions', async function (req, res, next) {
 });
 
 router.post('/logout-session', async function (req, res, next) {
-  const uuidV4Regex = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-
   req.check('id', 'Invalid session id').exists()
     .trim()
-    .custom(value => uuidV4Regex.test(value));
+    .isUUID(4);
 
   const errors = req.validationErrors();
   if (errors) {
