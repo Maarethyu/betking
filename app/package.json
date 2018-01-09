@@ -10,7 +10,11 @@
     "lint": "eslint --ext .js,.vue src"
   },
   "dependencies": {
-    "vue": "^2.1.0"
+    "axios": "^0.17.1",
+    "vue": "^2.1.0",
+    "vue-router": "^3.0.1",
+    "vuex": "^3.0.1",
+    "vuex-router-sync": "^5.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.4.0",
