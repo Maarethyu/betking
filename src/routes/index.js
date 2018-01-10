@@ -32,7 +32,7 @@ router.post('/login', async function (req, res, next) {
 
   const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
 
-  await db.logLoginAttempt(user.id, isPasswordCorrect, helpers.getIp(req), helpers.getFp(req));
+  await db.logLoginAttempt(user.id, isPasswordCorrect, helpers.getIp(req), helpers.getFp(req), helpers.getUa(req));
 
   if (user.locked_at) {
     return res.status(401).json({error: 'Account locked'});

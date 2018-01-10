@@ -29,6 +29,7 @@ CREATE TABLE login_attempts (
   is_success boolean NOT NULL,
   ip_address inet NOT NULL,
   fingerprint text NOT NULL,
+  user_agent text NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT NOW()
 );
 
