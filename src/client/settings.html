@@ -117,7 +117,7 @@
           }
           axios.post('/account/change-email', data)
             .then(res => {
-              window.location.href = 'index';
+              this.fetchMe();
             })
             .catch(error => {
               this.showErrors(error.response);
@@ -131,7 +131,8 @@
           }
           axios.post('/account/change-password', data)
             .then(res => {
-              window.location.href = 'index';
+              alert('Password changed successfully. You\'ll need to login again!');
+              this.fetchMe();
             })
             .catch(error => {
               this.showErrors(error.response);
