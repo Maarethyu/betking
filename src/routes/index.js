@@ -27,20 +27,37 @@ router.post('/login', async function (req, res, next) {
   const user = await db.getUserByName(req.body.username);
   if (!user) {
     return res.status(401).json({error: 'Login failed'});
-  } 
-  
-  const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
-  
-  await db.logLoginAttempt(user.id, isPasswordCorrect);
+  }
 
+  /* Handle captcha validation for failedAttempts > 3 */
+  const failedAttempts = await db.getConsecutiveFailedLogins(user.id);
+
+  const isCaptchaOk = failedAttempts < 3 ||
+    await require('./validators/captchaValidator')(req.body['g-recaptcha-response']);
+
+  /* If user locked out, return */
   if (user.locked_at) {
     return res.status(401).json({error: 'Account locked'});
   }
 
-  if (!isPasswordCorrect) {
+  /* Check for password, log login attempt */
+  const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+
+  const isLoginSuccessful = isPasswordCorrect && isCaptchaOk;
+  
+  await db.logLoginAttempt(user.id, isLoginSuccessful);
+
+  if (!isLoginSuccessful) {
+    if (failedAttempts >= 2) {
+      res.cookie('login_captcha', 'yes', {
+        maxAge: 60 * 1000,
+        httpOnly: false
+      });
+    }
+
     return res.status(401).json({error: 'Login failed'});
   }
-  
+
   // if require 2fa ask for it, or have it submitted on form?
 
   await createSession(res, user.id, req.body.rememberme);
@@ -50,36 +67,45 @@ router.post('/login', async function (req, res, next) {
 router.post('/register', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists()
     .isLength({min: 6, max: 50});
+
   req.check('password2', 'Passwords do not match').exists()
     .equals(req.body.password);
   
   req.check('email', 'Invalid Email').exists()
     .trim()
     .isLength({max: 255})
-    .isEmail();
+    .isEmail()
+    .custom(value => db.isEmailAlreadyTaken(value)
+      .then(emailExists => {
+        if (emailExists) throw new Error();
+      })
+    )
+    .withMessage('email already exists')
+    .optional({checkFalsy: true});
 
   req.check('username', 'Invalid Username').exists()
     .trim()
     .isLength({min: 2, max: 20})
     .matches(/^[a-z0-9_]+$/i) // name contains invalid characters
     .not()
-    .matches(/^[_]|[_]$/i); // name starts or ends with underscores
+    .matches(/^[_]|[_]$/i) // name starts or ends with underscores
+    .custom(value => db.isUserNameAlreadyTaken(req.body.username)
+      .then(userNameExists => {
+        if (userNameExists) throw new Error();
+      })
+    )
+    .withMessage('username already exists');
 
-  const errors = req.validationErrors();
-  if (errors) {
-    return res.status(400).json({errors});
-  }
+  req.check('g-recaptcha-response', 'Invalid captcha').exists()
+    .custom(value => require('./validators/captchaValidator')(value)
+      .then(isCaptchaValid => {
+        if (!isCaptchaValid) throw new Error();
+      })
+    );
 
-  // TODO can this be a custom express-validator?
-  const emailExists = await db.isEmailAlreadyTaken(req.body.email);
-  if (emailExists) {
-    return res.status(409).json({error: 'email already exists'});
-  }
-
-  // TODO can this be a custom express-validator?
-  const userNameExists = await db.isUserNameAlreadyTaken(req.body.username);
-  if (userNameExists) {
-    return res.status(409).json({error: 'username already exists'});
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
   }
 
   const hash = await bcrypt.hash(req.body.password, 10); 
