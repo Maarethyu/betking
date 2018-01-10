@@ -37,8 +37,8 @@ const createUser = async (username, password, email, affiliateId) => {
   return result;
 };
 
-const createSession = async (userId, expires) => {
-  const result = await db.one('INSERT INTO sessions (id, user_id, expired_at) VALUES ($1, $2, NOW() + $3::interval) RETURNING *', [uuidV4(), userId, expires]);
+const createSession = async (userId, expires, ip, fingerprint) => {
+  const result = await db.one('INSERT INTO sessions (id, user_id, expired_at, ip_address, fingerprint) VALUES ($1, $2, NOW() + $3::interval, $4, $5) RETURNING *', [uuidV4(), userId, expires, ip, fingerprint]);
   return result;
 };
 
@@ -50,8 +50,8 @@ const logoutAllSessions = async (userId) => {
   await db.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1', userId);
 };
 
-const logLoginAttempt = async (userId, isSuccess) => {
-  const result = await db.one('INSERT INTO login_attempts (id, user_id, is_success) VALUES ($1, $2, $3) RETURNING *', [uuidV4(), userId, isSuccess]);
+const logLoginAttempt = async (userId, isSuccess, ip, fingerprint) => {
+  const result = await db.one('INSERT INTO login_attempts (id, user_id, is_success, ip_address, fingerprint) VALUES ($1, $2, $3, $4, $5) RETURNING *', [uuidV4(), userId, isSuccess, ip, fingerprint]);
   return result;
 };
 

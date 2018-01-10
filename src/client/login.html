@@ -4,6 +4,7 @@
   <title>Login</title>
   <script src="https://unpkg.com/vue"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.min.js"></script>
+  <script type="text/javascript" src="//cdn.jsdelivr.net/fingerprintjs2/1.5.1/fingerprint2.min.js"></script>
   <style>
     .error {
         color: red;
@@ -56,6 +57,7 @@
       },
       mounted() {
         this.fetchMe();
+        this.setFingerPrint();
       },
       methods: {
         fetchMe() {
@@ -72,11 +74,15 @@
               }
             });
         },
+        setFingerPrint() {
+          new Fingerprint2().get((fingerprint) => this.fingerprint = fingerprint);
+        },
         onLogin(e) {
           const data = {
             username: e.target.elements.username.value,
             password: e.target.elements.password.value,
-            rememberme: e.target.elements.rememberme.checked
+            rememberme: e.target.elements.rememberme.checked,
+            fingerprint: this.fingerprint
           };
 
           axios.post('/login', data)

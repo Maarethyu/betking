@@ -5,6 +5,7 @@
   <script src="https://unpkg.com/vue"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js"></script>
+  <script type="text/javascript" src="//cdn.jsdelivr.net/fingerprintjs2/1.5.1/fingerprint2.min.js"></script>
   <style>
     .error {
         color: red;
@@ -48,10 +49,12 @@
     var app = new Vue({
       el: '#app',
       data: {
-          errors: {}
+          errors: {},
+          fingerprint: null
       },
       mounted() {
         this.setAffiliateId();
+        this.setFingerPrint();
       },
       methods: {
         setAffiliateId() {
@@ -73,12 +76,16 @@
             Cookies.set('aff_id', query.ref, { expires: 1 });
           }
         },
+        setFingerPrint() {
+          new Fingerprint2().get((fingerprint) => this.fingerprint = fingerprint);
+        },
         onRegister(e) {
           const data = {
             username: e.target.elements.username.value,
             email: e.target.elements.email.value,
             password: e.target.elements.password.value,
-            password2: e.target.elements.password2.value
+            password2: e.target.elements.password2.value,
+            fingerprint: this.fingerprint
           }
           axios.post('/register', data)
             .then(res => {

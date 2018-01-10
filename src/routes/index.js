@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const db = require('../db');
+const helpers = require('../helpers');
 
-const createSession = async function (res, userId, rememberMe) {
-  const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks');
-  
-  res.cookie('session', session.id, 
+const createSession = async function (res, userId, rememberMe, ip, fingerprint) {
+  const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks', ip, fingerprint);
+
+  res.cookie('session', session.id,
     {
       maxAge: rememberMe ? 365 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000, 
       secure: false, // TODO -- have cookie.secure as config variable
@@ -27,11 +28,11 @@ router.post('/login', async function (req, res, next) {
   const user = await db.getUserByName(req.body.username);
   if (!user) {
     return res.status(401).json({error: 'Login failed'});
-  } 
-  
+  }
+
   const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
-  
-  await db.logLoginAttempt(user.id, isPasswordCorrect);
+
+  await db.logLoginAttempt(user.id, isPasswordCorrect, helpers.getIp(req), helpers.getFp(req));
 
   if (user.locked_at) {
     return res.status(401).json({error: 'Account locked'});
@@ -43,7 +44,7 @@ router.post('/login', async function (req, res, next) {
 
   // if require 2fa ask for it, or have it submitted on form?
 
-  await createSession(res, user.id, req.body.rememberme);
+  await createSession(res, user.id, req.body.rememberme, helpers.getIp(req), helpers.getFp(req));
 
   res.json({
     id: user.id,
@@ -95,7 +96,7 @@ router.post('/register', async function (req, res, next) {
 
   const user = await db.createUser(req.body.username, hash, req.body.email, affiliateId);
   if (user) {
-    await createSession(res, user.id, false);
+    await createSession(res, user.id, false, helpers.getIp(req), helpers.getFp(req));
 
     res.json({
       id: user.id,
