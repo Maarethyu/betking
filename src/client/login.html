@@ -71,7 +71,7 @@
       },
       methods: {
         fetchMe() {
-          axios.get('/account/me')
+          axios.get('/api/account/me')
             .then(response => {
               this.isPageReady = true;
               window.location.href="index";
@@ -93,7 +93,7 @@
                 e.target.elements['g-recaptcha-response'].value
           };
 
-          axios.post('/login', data)
+          axios.post('/api/login', data)
             .then(res => {
               window.location.href = 'index';
             })

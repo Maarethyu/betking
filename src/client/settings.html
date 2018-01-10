@@ -97,7 +97,7 @@
       },
       methods: {
         fetchMe() {
-          axios.get('/account/me')
+          axios.get('/api/account/me')
             .then(response => {
               this.isLoggedIn = true;
               this.profile = response.data;
@@ -115,7 +115,7 @@
           const data = {
             email: e.target.elements.email.value,
           }
-          axios.post('/account/change-email', data)
+          axios.post('/api/account/change-email', data)
             .then(res => {
               window.location.href = 'index';
             })
@@ -129,7 +129,7 @@
             password: e.target.elements.password.value,
             password2: e.target.elements.password2.value
           }
-          axios.post('/account/change-password', data)
+          axios.post('/api/account/change-password', data)
             .then(res => {
               window.location.href = 'index';
             })
@@ -166,7 +166,7 @@
 
         },
         logout() {
-          axios.post('/account/logout')
+          axios.post('/api/account/logout')
             .then(() => {
               this.fetchMe();
             })
