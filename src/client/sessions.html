@@ -65,7 +65,7 @@
       },
       methods: {
         getSessions() {
-          axios.get('/account/active-sessions')
+          axios.get('/api/account/active-sessions')
             .then(response => {
               this.isLoggedIn = true;
               this.sessions = response.data.sessions;
@@ -81,7 +81,7 @@
         logoutOne(id) {
           const data = { id };
 
-          axios.post('/account/logout-session', data)
+          axios.post('/api/account/logout-session', data)
             .then(response => {
               this.message = 'Successfully logged out one session';
               this.error = '';
@@ -92,13 +92,13 @@
             })
         },
         logoutCurrent() {
-          axios.post('/account/logout')
+          axios.post('/api/account/logout')
             .then(() => {
                 this.getSessions();
             })
         },
         logoutAll() {
-          axios.post('/account/logout-all-sessions')
+          axios.post('/api/account/logout-all-sessions')
             .then(() => {
                 this.getSessions();
             })

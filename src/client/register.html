@@ -4,6 +4,7 @@
   <title>Register</title>
   <script src="https://unpkg.com/vue"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.min.js"></script>
+  <script src='https://www.google.com/recaptcha/api.js'></script>
   <style>
     .error {
         color: red;
@@ -36,6 +37,10 @@
       <input id="password2" type="password" placeholder="Confirm Password" name="password2">
       <div class="error">{{errors.password2}}</div>
 
+      <br>
+      <div class="g-recaptcha" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
+      <div class="error">{{errors['g-recaptcha-response']}}</div>
+
       <button type="submit">Register</button>
     </form>
 
@@ -51,13 +56,15 @@
       },
       methods: {
         onRegister(e) {
+          console.log();
           const data = {
             username: e.target.elements.username.value,
             email: e.target.elements.email.value,
             password: e.target.elements.password.value,
-            password2: e.target.elements.password2.value
+            password2: e.target.elements.password2.value,
+            'g-recaptcha-response': e.target.elements['g-recaptcha-response'].value
           }
-          axios.post('/register', data)
+          axios.post('/api/register', data)
             .then(res => {
               window.location.href = 'index';
             })

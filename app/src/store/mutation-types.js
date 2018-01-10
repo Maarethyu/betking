@@ -1,0 +1,6 @@
+/* Account Module */
+export const UPDATE_AUTHSTATE = 'UPDATE_AUTHSTATE';
+export const SET_USER = 'SET_USER';
+export const UNSET_USER = 'UNSET_USER';
+
+/* Module 2 */

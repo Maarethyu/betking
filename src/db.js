@@ -60,6 +60,11 @@ const logLoginAttempt = async (userId, isSuccess) => {
   return result;
 };
 
+const getConsecutiveFailedLogins = async (userId) => {
+  const result = await db.one('select count(*) from login_attempts where created_at > NOW() - interval \'60 seconds\' AND is_success = false AND user_id = $1;', userId);
+  return result.count;
+};
+
 const updateEmail = async (userId, email) => {
   await db.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]);
 };
@@ -104,6 +109,7 @@ module.exports.createSession = createSession;
 module.exports.getUserByName = getUserByName;
 module.exports.getUserByEmail = getUserByEmail;
 module.exports.logLoginAttempt = logLoginAttempt;
+module.exports.getConsecutiveFailedLogins = getConsecutiveFailedLogins;
 module.exports.getUserBySessionId = getUserBySessionId;
 module.exports.logoutSession = logoutSession;
 module.exports.updateEmail = updateEmail;
