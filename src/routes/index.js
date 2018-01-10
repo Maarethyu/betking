@@ -40,11 +40,18 @@ router.post('/login', async function (req, res, next) {
   if (!isPasswordCorrect) {
     return res.status(401).json({error: 'Login failed'});
   }
-  
+
   // if require 2fa ask for it, or have it submitted on form?
 
   await createSession(res, user.id, req.body.rememberme);
-  res.json(user); // TODO don't return user
+
+  res.json({
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    isEmailVerified: user.email_verified,
+    dateJoined: user.date_joined
+  });
 });
 
 router.post('/register', async function (req, res, next) {
@@ -87,7 +94,14 @@ router.post('/register', async function (req, res, next) {
   const user = await db.createUser(req.body.username, hash, req.body.email); 
   if (user) {
     await createSession(res, user.id, false);
-    res.json(user); // TODO this shouldn't return user
+
+    res.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      isEmailVerified: user.email_verified,
+      dateJoined: user.date_joined
+    });
   } else {
     res.status(500)
       .end();
