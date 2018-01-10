@@ -83,8 +83,18 @@ const createResetToken = async (userId) => {
   return result;
 };
 
-const resetUserPasswordByToken = async (token, newPassword) => {
-// TODO: Use db.tx
+const resetUserPasswordByToken = async (token, newPasswordHash) => {
+  await db.tx(t => {
+    // Set current reset token as used and expired. If token not found, exit
+    return t.one('UPDATE reset_tokens SET used = true, expired_at = NOW() where id = $1 AND used = false AND expired_at > NOW() RETURNING user_id', token)
+      // Change Password, return user
+      .then(result => t.one('UPDATE users SET password = $1 WHERE id = $2 RETURNING *', [newPasswordHash, result.user_id]))
+      // Password changed now. Expire all other reset password requests and logout all sessions
+      .then(user => t.batch([
+        t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', user.id),
+        t.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1', user.id)
+      ]));
+  });
 };
 
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;

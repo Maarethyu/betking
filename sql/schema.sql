@@ -48,4 +48,5 @@ CREATE TABLE reset_tokens (
   created_at timestamp with time zone NOT NULL  DEFAULT NOW(),
   expired_at timestamp with time zone NOT NULL  DEFAULT NOW() + INTERVAL '15 minutes'
 );
+
 CREATE INDEX reset_tokens_user_id_idx ON reset_tokens(user_id, expired_at);

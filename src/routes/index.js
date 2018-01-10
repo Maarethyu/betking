@@ -113,22 +113,20 @@ router.post('/forgot-password', async function (req, res, next) {
   const user = await db.getUserByEmail(req.body.email.trim());
 
   if (!user) {
-    return res.status(200).send(successMessage);
+    return res.status(200).json({message: successMessage});
   }
 
   /* If user has an active reset token, do not send email */
   const activeToken = await db.findLatestActiveResetToken(user.id);
-  console.log(activeToken);
   if (activeToken) {
-    // return res.status(200).send(successMessage);
+    return res.status(200).json({message: successMessage});
   }
 
   const resetToken = await db.createResetToken(user.id);
-  console.log(resetToken);
 
   mailer.sendResetPasswordEmail(user.username, user.email, resetToken.id);
 
-  res.status(200).send(successMessage);
+  res.status(200).json({message: successMessage});
 });
 
 router.post('/reset-password', async function (req, res, next) {
@@ -146,9 +144,15 @@ router.post('/reset-password', async function (req, res, next) {
     return res.status(400).json({errors: validationResult.array()});
   }
 
-  // TODO db.resetUserPasswordByToken
+  const hash = await bcrypt.hash(req.body.password2, 10);
 
-  res.end();
+  try {
+    await db.resetUserPasswordByToken(req.body.token, hash);
+
+    res.status(200).json({message: 'Password changed successfully'});
+  } catch (e) {
+    res.status(409).json({error: 'Invalid token'});
+  }
 });
 
 module.exports = router;
