@@ -89,9 +89,11 @@ router.post('/register', async function (req, res, next) {
     return res.status(409).json({error: 'username already exists'});
   }
 
-  const hash = await bcrypt.hash(req.body.password, 10); 
-  
-  const user = await db.createUser(req.body.username, hash, req.body.email); 
+  const affiliateId = parseInt(req.cookies.aff_id, 10) || null;
+
+  const hash = await bcrypt.hash(req.body.password, 10);
+
+  const user = await db.createUser(req.body.username, hash, req.body.email, affiliateId);
   if (user) {
     await createSession(res, user.id, false);
 

@@ -4,6 +4,7 @@
   <title>Welcome!</title>
   <script src="https://unpkg.com/vue"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js"></script>
 </head>
 <body>
   <div id="app">
@@ -55,8 +56,28 @@
       },
       mounted() {
         this.fetchMe();
+        this.setAffiliateId();
       },
       methods: {
+        setAffiliateId() {
+          const search = window.location.search.substring(1);
+
+          const queryStringArray = search.split('&');
+
+          const query = {};
+
+          queryStringArray.forEach(q => {
+            const keyVal = q.split('=');
+
+            if (keyVal.length === 2) {
+              query[keyVal[0]] = keyVal[1];
+            }
+          });
+
+          if (query.ref) {
+            Cookies.set('aff_id', query.ref, { expires: 1 });
+          }
+        },
         fetchMe() {
           axios.get('/account/me')
             .then(response => {

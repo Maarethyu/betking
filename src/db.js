@@ -32,8 +32,8 @@ const getUserBySessionId = async (sessionId) => {
   return user;
 };
 
-const createUser = async (username, password, email) => {
-  const result = await db.one('INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING *', [username, password, email]);
+const createUser = async (username, password, email, affiliateId) => {
+  const result = await db.one('INSERT INTO users (username, password, email, affiliate_id) VALUES ($1, $2, $3, $4) RETURNING *', [username, password, email, affiliateId]);
   return result;
 };
 
