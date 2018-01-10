@@ -2,9 +2,10 @@ const db = require('./db');
 
 const attachCurrentUserToRequest = async (req, res, next) => {
   const sessionId = req.cookies.session;
-  // validate sessionid is uuid
-  
-  if (sessionId) {
+
+  const uuidV4Regex = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+
+  if (sessionId && uuidV4Regex.test(sessionId)) {
     const user = await db.getUserBySessionId(sessionId);
     if (user) {
       req.currentUser = user; // TODO don't show exact one
