@@ -35,3 +35,11 @@ CREATE VIEW active_sessions AS
   FROM sessions
   WHERE expired_at >= NOW()
   AND logged_out_at IS NULL;
+
+CREATE TABLE temp_mfa_secrets (
+  id uuid PRIMARY KEY,
+  user_id bigint REFERENCES users(id),
+  mfa_secret  text,
+);
+
+CREATE UNIQUE INDEX unique_userid ON temp_mfa_secrets USING btree(user_id);

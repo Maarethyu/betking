@@ -14,7 +14,7 @@ const state = {
 };
 
 // getters
-const getters = {  
+const getters = {
   isLoggedOut: state => state.isReady && !state.isAuthenticated,
   isAuthenticated: state => state.isReady && state.isAuthenticated,
   profile: state => ({

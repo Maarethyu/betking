@@ -22,9 +22,13 @@
     "cookie-parser": "^1.4.3",
     "express": "^4.16.2",
     "express-validator": "^4.3.0",
+    "install": "^0.10.2",
     "morgan": "^1.9.0",
+    "npm": "^5.6.0",
     "pg-promise": "^7.3.2",
+    "qrcode": "^1.2.0",
     "request-promise": "^4.2.2",
+    "speakeasy": "^2.0.0",
     "uuid": "^3.1.0"
   },
   "devDependencies": {

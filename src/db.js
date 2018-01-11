@@ -1,5 +1,5 @@
 const config = require('config');
-const promise = require('bluebird'); 
+const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
 
 const initOptions = {
@@ -73,8 +73,13 @@ const getActiveSessions = async (userId) => {
   return result;
 };
 
-module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken; 
-module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken; 
+const findTempMfaSecret = async (userId) => {
+  const result = await db.oneOrNone('SELECT * from temp_mfa_secrets WHERE user_id = $1', userId);
+  return result;
+};
+
+module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
+module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
 module.exports.createSession = createSession;
 module.exports.getUserByName = getUserByName;

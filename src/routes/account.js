@@ -19,6 +19,7 @@ router.get('/me', async function (req, res, next) {
     username: req.currentUser.username,
     email: req.currentUser.email,
     isEmailVerified: req.currentUser.email_verified,
+    isMfaEnabled: !!req.currentUser.mfa_key,
     dateJoined: req.currentUser.date_joined
   });
 });
@@ -65,7 +66,7 @@ router.post('/change-password', async function (req, res, next) {
   if (!isPasswordCorrect) {
     return res.status(401).json({error: 'Invalid existing password'});
   }
-  
+
   const newPasswordHash = await bcrypt.hash(req.body.password2, 10);
 
   await db.updatePassword(req.currentUser.id, newPasswordHash);
@@ -106,6 +107,14 @@ router.post('/logout-all-sessions', async function (req, res, next) {
   await db.logoutAllSessions(req.currentUser.id);
 
   res.end();
+});
+
+router.get('/2fa-secret', async function (req, res, next) {
+  if (req.currentUser.mfa_key) {
+    return res.status(400).send({error: 'Two factor authentication already enabled'});
+  }
+
+  const tempKey = await db.findTempMfaSecret(req.currentUser.id);
 });
 
 module.exports = router;

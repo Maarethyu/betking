@@ -3,6 +3,7 @@ import Register from 'pages/Register';
 import Index from 'pages/Index';
 import Settings from 'pages/Settings';
 import Sessions from 'pages/Sessions';
+import Set2fa from 'pages/Set2fa';
 import Stats from 'pages/Stats';
 
 import PageNotFound from 'pages/PageNotFound';
@@ -31,7 +32,8 @@ const routes = [
 
       /* Pages which need user authentication */
       {path: 'settings', component: Settings, meta: {requiresAuth: true}},
-      {path: 'sessions', component: Sessions, meta: {requiresAuth: true}}
+      {path: 'sessions', component: Sessions, meta: {requiresAuth: true}},
+      {path: 'two-factor', component: SetTwoFactorAuth, meta: {requiresAuth: true}}
     ]
   },
   /* Pages which do not need user session to be fetched */
