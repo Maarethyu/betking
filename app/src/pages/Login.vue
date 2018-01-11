@@ -44,7 +44,9 @@ export default {
       const data = {
         username: e.target.elements.username.value,
         password: e.target.elements.password.value,
-        rememberme: e.target.elements.rememberme.checked
+        rememberme: e.target.elements.rememberme.checked,
+        'g-recaptcha-response': e.target.elements['g-recaptcha-response'] &&
+          e.target.elements['g-recaptcha-response'].value
       };
 
       api.login(data)

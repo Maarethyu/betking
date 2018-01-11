@@ -23,5 +23,23 @@ export default {
   },
   resetPassword (data) {
     return post('/api/reset-password', data);
+  },
+  register (data) {
+    return post('/api/register', data);
+  },
+  getSessions () {
+    return get('/api/account/active-sessions');
+  },
+  logoutOne (data) {
+    return post('/api/account/logout-session', data);
+  },
+  logoutAll () {
+    return post('/api/account/logout-all-sessions');
+  },
+  changeEmail (data) {
+    return post('/api/account/change-email', data);
+  },
+  changePassword (data) {
+    return post('/api/account/change-password', data);
   }
 };
