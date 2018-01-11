@@ -30,10 +30,6 @@ router.post('/login', async function (req, res, next) {
     return res.status(401).json({error: 'Login failed'});
   }
 
-  const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
-
-  await db.logLoginAttempt(user.id, isPasswordCorrect);
-
   /* Handle captcha validation for failedAttempts > 3 */
   const failedAttempts = await db.getConsecutiveFailedLogins(user.id);
 

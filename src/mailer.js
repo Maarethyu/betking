@@ -5,7 +5,7 @@ const config = {
     serverToken: '52b660d0-d549-4277-81b7-aba0be92257a',
     from: 'admin@betking.io'
   },
-  host: 'http://localhost:3002'
+  host: 'http://localhost:8080'
 };
 
 const sendMail = function (To, Subject, HtmlBody) {
@@ -31,8 +31,8 @@ const templates = {
 
     <p>Click on the link below to reset your password</p>
     <br>
-    <a href="${config.host}/client/reset-password?token=${token}">
-      ${config.host}/client/reset-password?token=${token}
+    <a href="${config.host}/reset-password?token=${token}">
+      ${config.host}/reset-password?token=${token}
     </a>
   `
 };

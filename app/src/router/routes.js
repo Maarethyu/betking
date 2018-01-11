@@ -1,9 +1,10 @@
 import Login from 'pages/Login';
+import ForgotPassword from 'pages/ForgotPassword';
+import ResetPassword from 'pages/ResetPassword';
 import Register from 'pages/Register';
 import Index from 'pages/Index';
 import Settings from 'pages/Settings';
 import Sessions from 'pages/Sessions';
-import Stats from 'pages/Stats';
 
 import PageNotFound from 'pages/PageNotFound';
 
@@ -27,6 +28,7 @@ const routes = [
 
       /* Pages which need user to be logged out */
       {path: '/login', component: Login, meta: {requiresLoggedOut: true}},
+      {path: '/forgot-password', component: ForgotPassword, meta: {requiresLoggedOut: true}},
       {path: '/register', component: Register, meta: {requiresLoggedOut: true}},
 
       /* Pages which need user authentication */
@@ -35,7 +37,7 @@ const routes = [
     ]
   },
   /* Pages which do not need user session to be fetched */
-  {path: '/stats', component: Stats},
+  {path: '/reset-password', component: ResetPassword},
 
   /* Dummy logout route so that GET /logout also works */
   {path: '/logout', beforeEnter: hooks.logout},

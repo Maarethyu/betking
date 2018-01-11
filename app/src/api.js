@@ -17,5 +17,11 @@ export default {
   },
   logout () {
     return post('/api/account/logout');
+  },
+  forgotPassword (data) {
+    return post('/api/forgot-password', data);
+  },
+  resetPassword (data) {
+    return post('/api/reset-password', data);
   }
 };
