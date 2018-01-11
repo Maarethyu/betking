@@ -8,8 +8,11 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "nodemon src/server.js",
-    "lint": "eslint --ext .js src"
+    "start": "nodemon src/server.js & npm run app:dev",
+    "install-all": "npm install && cd app && npm install && cd ..",
+    "lint": "eslint --ext .js src && cd app && npm run lint && cd ..",
+    "app:dev": "cd app && npm run dev",
+    "app:build": "cd app && npm run build"
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
@@ -21,6 +24,7 @@
     "express-validator": "^4.3.0",
     "morgan": "^1.9.0",
     "pg-promise": "^7.3.2",
+    "request-promise": "^4.2.2",
     "uuid": "^3.1.0"
   },
   "devDependencies": {

@@ -87,11 +87,9 @@ router.get('/active-sessions', async function (req, res, next) {
 });
 
 router.post('/logout-session', async function (req, res, next) {
-  const uuidV4Regex = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-
   req.check('id', 'Invalid session id').exists()
     .trim()
-    .custom(value => uuidV4Regex.test(value));
+    .isUUID(4);
 
   const errors = req.validationErrors();
   if (errors) {

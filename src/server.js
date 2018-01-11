@@ -23,19 +23,6 @@ logger.token('id', function getId (req) {
 
 app.use(logger(':id :remote-addr :method :url :status :response-time'));
 
-/* the front end code is in another repository and developed independantly 
-  we serve the built front end code from here
-  this allows developers to work on front end code without the security risk of them having access to how
-  the backend works.
-  It also allows us to have register/login code separate from front end while not worrying about different domains
-  TODO - is this a bad way to do this?
-*/
-app.use(express.static('@/../../client/dist/'));
-
-app.get('/', function (req, res) {
-  res.sendFile('index.html'); // from the front end folder
-});
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
@@ -44,10 +31,38 @@ app.use(expressValidator());
 app.use(mw.attachCurrentUserToRequest);
 
 const router = express.Router();
-router.use('', require('./routes/index')); 
+router.use('', require('./routes/index'));
 router.use('/account', require('./routes/account'));
-router.use('/client', require('./client'));
-app.use('/', router); 
+app.use('/api', router);
+
+/* the front end code is in another repository and developed independantly
+  we serve the built front end code from here
+  this allows developers to work on front end code without the security risk of them having access to how
+  the backend works.
+  It also allows us to have register/login code separate from front end while not worrying about different domains
+  TODO - is this a bad way to do this?
+*/
+
+/*
+  TODO:
+  * Fetch frontend routes array from (app/src/router/routes)
+  and create route map for valid routes based on frontend.
+  * For all other routes send 404 status code
+
+  Is it necessary or the current system would work?
+*/
+
+const frontendStaticPath = require('path').join(__dirname, '..', 'app/dist/static');
+
+app.use(express.static(frontendStaticPath));
+
+app.get('/404', function (req, res) {
+  res.status(404).send('Not found');
+});
+
+app.get('*', function (req, res) {
+  res.sendFile(`${frontendStaticPath}/index.html`); // from the front end folder
+});
 
 app.listen(config.get('PORT'));
 console.log(`server listenging on port ${config.get('PORT')}`);
