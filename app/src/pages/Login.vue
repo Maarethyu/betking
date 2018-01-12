@@ -13,6 +13,10 @@
       <input id="password" type="password" placeholder="Password" name="password">
       <div class="error">{{errors.password}}</div>
 
+      <label for="otp">Two factor code (if enabled)</label>
+      <input id="otp" placeholder="OTP" name="otp">
+      <div class="error">{{errors.otp}}</div>
+
       <label for="rememberme">Remember me</label>
       <input id="rememberme" type="checkbox" name="rememberme">
       <div class="error">{{errors.rememberme}}</div>
@@ -44,6 +48,7 @@ export default {
       const data = {
         username: e.target.elements.username.value,
         password: e.target.elements.password.value,
+        otp: e.target.elements.otp.value,
         rememberme: e.target.elements.rememberme.checked,
         'g-recaptcha-response': e.target.elements['g-recaptcha-response'] &&
           e.target.elements['g-recaptcha-response'].value
@@ -52,6 +57,7 @@ export default {
       api.login(data)
         .then(res => {
           this.$store.dispatch('onLogin', res.data);
+          this.$store.dispatch('fetchUser');
         })
         .catch(error => {
           this.checkForCaptcha();

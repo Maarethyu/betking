@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const db = require('../db');
 const mailer = require('../mailer');
+const helpers = require('../helpers');
 
 const createSession = async function (res, userId, rememberMe) {
   const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks');
@@ -19,6 +20,9 @@ router.post('/login', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists();
   req.check('username', 'Invalid Username').exists();
   req.check('rememberme', 'Invalid remember me option').isBoolean();
+  req.check('otp', 'Invalid two factor code').exists()
+    .isInt().isLength({min: 6, max: 6})
+    .optional({checkFalsy: true});
 
   const errors = req.validationErrors();
   if (errors) {
@@ -44,7 +48,12 @@ router.post('/login', async function (req, res, next) {
   /* Check for password, log login attempt */
   const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
 
-  const isLoginSuccessful = isPasswordCorrect && isCaptchaOk;
+  /* Check for 2fa if enabled */
+  let isTwoFactorOk = user.mfa_key
+    ? helpers.isOtpValid(user.mfa_key, req.body.otp)
+    : true;
+
+  const isLoginSuccessful = isPasswordCorrect && isCaptchaOk && isTwoFactorOk;
 
   await db.logLoginAttempt(user.id, isLoginSuccessful);
 
@@ -58,8 +67,6 @@ router.post('/login', async function (req, res, next) {
 
     return res.status(401).json({error: 'Login failed'});
   }
-
-  // if require 2fa ask for it, or have it submitted on form?
 
   await createSession(res, user.id, req.body.rememberme);
   res.json(user); // TODO don't return user

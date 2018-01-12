@@ -55,6 +55,7 @@ export default {
       api.register(data)
         .then(res => {
           this.$store.dispatch('onLogin', res.data);
+          this.$store.dispatch('fetchUser');
         })
         .catch(error => {
           this.showErrors(error.response);
