@@ -7,6 +7,7 @@
 
 <script>
 import Cookies from 'js-cookie';
+import {getUrlParams} from './helpers';
 
 export default {
   name: 'app',
@@ -15,22 +16,11 @@ export default {
   },
   methods: {
     scanForAffiliateId () {
-      const ref = this.searchObj().ref;
+      const ref = getUrlParams().ref;
 
       if (ref) {
         Cookies.set('aff_id', ref, {expires: 1});
       }
-    },
-    searchObj () {
-      const search = location.search.substring(1);
-      return search
-        ? JSON.parse(`{"${search.replace(/&/g, '","').replace(/=/g, '":"')}"}`,
-          function (key, value) {
-            return key === ''
-              ? value
-              : decodeURIComponent(value);
-          })
-        : {};
     }
   }
 };

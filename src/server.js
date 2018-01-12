@@ -35,14 +35,6 @@ router.use('', require('./routes/index'));
 router.use('/account', require('./routes/account'));
 app.use('/api', router);
 
-/* the front end code is in another repository and developed independantly
-  we serve the built front end code from here
-  this allows developers to work on front end code without the security risk of them having access to how
-  the backend works.
-  It also allows us to have register/login code separate from front end while not worrying about different domains
-  TODO - is this a bad way to do this?
-*/
-
 /*
   TODO:
   * Fetch frontend routes array from (app/src/router/routes)

@@ -47,7 +47,7 @@ router.post('/login', async function (req, res, next) {
 
   const isLoginSuccessful = isPasswordCorrect && isCaptchaOk;
 
-  await db.logLoginAttempt(user.id, isLoginSuccessful, helpers.getIp(req), helpers.getFp(req), helpers.getUa(req));
+  await db.logLoginAttempt(user.id, isLoginSuccessful, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
 
   if (!isLoginSuccessful) {
     if (failedAttempts >= 2) {
@@ -62,7 +62,7 @@ router.post('/login', async function (req, res, next) {
 
   // if require 2fa ask for it, or have it submitted on form?
 
-  await createSession(res, user.id, req.body.rememberme, helpers.getIp(req), helpers.getFp(req));
+  await createSession(res, user.id, req.body.rememberme, helpers.getIp(req), helpers.getFingerPrint(req));
 
   res.json({
     id: user.id,
@@ -124,7 +124,7 @@ router.post('/register', async function (req, res, next) {
   const user = await db.createUser(req.body.username, hash, req.body.email, affiliateId);
 
   if (user) {
-    await createSession(res, user.id, false, helpers.getIp(req), helpers.getFp(req));
+    await createSession(res, user.id, false, helpers.getIp(req), helpers.getFingerPrint(req));
 
     res.json({
       id: user.id,

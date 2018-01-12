@@ -32,6 +32,8 @@
 
 <script>
 import api from 'src/api';
+import Fingerprint2 from 'fingerprintjs2';
+import {loadRecaptcha} from 'src/helpers';
 
 export default {
   name: 'Register',
@@ -40,7 +42,8 @@ export default {
     fingerprint: null
   }),
   mounted () {
-    this.loadScripts();
+    this.showCaptcha();
+    this.setFingerPrint();
   },
   methods: {
     onRegister (e) {
@@ -63,7 +66,7 @@ export default {
         });
     },
     setFingerPrint () {
-      new window.Fingerprint2().get(fingerprint => { this.fingerprint = fingerprint; });
+      new Fingerprint2().get(fingerprint => { this.fingerprint = fingerprint; });
     },
     showErrors (response) {
       if (response && response.status === 400) {
@@ -89,23 +92,10 @@ export default {
         global: 'An unexpected error occured'
       };
     },
-    loadScripts () {
-      /* Script tags for recaptcha */
-      window.onRecaptchaLoad = () => {
+    showCaptcha () {
+      loadRecaptcha(() => {
         window.grecaptcha.render('g-recaptcha');
-      };
-
-      const recaptchaScript = document.createElement('script');
-      recaptchaScript.setAttribute('src', 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit');
-      document.head.appendChild(recaptchaScript);
-
-      /* Script tags for fingerprint */
-      const fpScript = document.createElement('script');
-      fpScript.setAttribute('src', '//cdn.jsdelivr.net/fingerprintjs2/1.5.1/fingerprint2.min.js');
-      fpScript.onload = () => {
-        this.setFingerPrint();
-      };
-      document.head.appendChild(fpScript);
+      });
     }
   }
 };

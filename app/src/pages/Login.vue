@@ -29,6 +29,8 @@
 <script>
 import Cookies from 'js-cookie';
 import api from 'src/api';
+import Fingerprint2 from 'fingerprintjs2';
+import {loadRecaptcha} from 'src/helpers';
 
 export default {
   name: 'Login',
@@ -38,7 +40,8 @@ export default {
     fingerprint: null
   }),
   created () {
-    this.loadScripts();
+    loadRecaptcha(this.checkForCaptcha.bind(this));
+    this.setFingerPrint();
   },
   methods: {
     onLogin (e) {
@@ -61,7 +64,7 @@ export default {
         });
     },
     setFingerPrint () {
-      new window.Fingerprint2().get(fingerprint => { this.fingerprint = fingerprint; });
+      new Fingerprint2().get(fingerprint => { this.fingerprint = fingerprint; });
     },
     showErrors (response) {
       if (response && (response.status === 409 || response.status === 401)) {
@@ -74,22 +77,6 @@ export default {
       this.errors = {
         global: 'An unexpected error occured'
       };
-    },
-    loadScripts () {
-      /* Load script for recaptcha */
-      window.onRecaptchaLoad = this.checkForCaptcha.bind(this);
-
-      const recaptchaScript = document.createElement('script');
-      recaptchaScript.setAttribute('src', 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit');
-      document.head.appendChild(recaptchaScript);
-
-      /* Load scripts for fingerprint */
-      const fpScript = document.createElement('script');
-      fpScript.setAttribute('src', '//cdn.jsdelivr.net/fingerprintjs2/1.5.1/fingerprint2.min.js');
-      fpScript.onload = () => {
-        this.setFingerPrint();
-      };
-      document.head.appendChild(fpScript);
     },
     checkForCaptcha () {
       const shouldDisplayCaptcha = Cookies.get('login_captcha') === 'yes';
