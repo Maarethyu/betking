@@ -11,6 +11,7 @@
     <template v-if="isAuthenticated">
       <router-link :to="'settings'">Settings</router-link>
       <router-link :to="'sessions'">Sessions</router-link>
+      <router-link :to="'two-factor'">2fa</router-link>
       <router-link :to="'logout'">Logout</router-link>
     </template>
   </nav>

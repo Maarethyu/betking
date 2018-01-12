@@ -73,10 +73,18 @@ const getActiveSessions = async (userId) => {
   return result;
 };
 
-const findTempMfaSecret = async (userId) => {
-  const result = await db.oneOrNone('SELECT * from temp_mfa_secrets WHERE user_id = $1', userId);
+const addTemp2faSecret = async (userId, tempSecret) => {
+  const result = await db.one('UPDATE users set temp_mfa_key = $1 where id = $2 returning temp_mfa_key', [tempSecret, userId]);
   return result;
 };
+
+const enableTwofactor = async (userId) => {
+  await db.none('UPDATE users set mfa_key = temp_mfa_key, temp_mfa_key = NULL where id = $1', userId);
+};
+
+const disableTwoFactor = async (userId) => {
+  await db.none('UPDATE users set mfa_key = NULL, temp_mfa_key = NULL where id = $1', userId);
+}
 
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
@@ -91,3 +99,6 @@ module.exports.updateEmail = updateEmail;
 module.exports.updatePassword = updatePassword;
 module.exports.getActiveSessions = getActiveSessions;
 module.exports.logoutAllSessions = logoutAllSessions;
+module.exports.addTemp2faSecret = addTemp2faSecret;
+module.exports.enableTwofactor = enableTwofactor;
+module.exports.disableTwoFactor = disableTwoFactor;

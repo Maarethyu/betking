@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const helpers = require('../helpers');
 const mw = require('../middleware');
 const bcrypt = require('bcrypt');
 
@@ -19,7 +20,7 @@ router.get('/me', async function (req, res, next) {
     username: req.currentUser.username,
     email: req.currentUser.email,
     isEmailVerified: req.currentUser.email_verified,
-    isMfaEnabled: !!req.currentUser.mfa_key,
+    is2faEnabled: !!req.currentUser.mfa_key,
     dateJoined: req.currentUser.date_joined
   });
 });
@@ -109,12 +110,81 @@ router.post('/logout-all-sessions', async function (req, res, next) {
   res.end();
 });
 
-router.get('/2fa-secret', async function (req, res, next) {
+router.get('/2fa-key', async function (req, res, next) {
+  /* If user has 2fa enabled, do not generate or send key */
   if (req.currentUser.mfa_key) {
-    return res.status(400).send({error: 'Two factor authentication already enabled'});
+    return res.status(400).send({error: 'Two factor authentication is already enabled'});
   }
 
-  const tempKey = await db.findTempMfaSecret(req.currentUser.id);
+  /* Check if user already has a temp mfa secret, if yes return with secret */
+  if (req.currentUser.temp_mfa_key) {
+    return res.json({
+      key: req.currentUser.temp_mfa_key,
+      qr: await helpers.get2faQR(req.currentUser.temp_mfa_key)
+    });
+  }
+
+  /* User does not have temp secret: Generate new mfa_secret, write to temp field and send */
+  const newKey = await db.addTemp2faSecret(req.currentUser.id, helpers.getNew2faSecret());
+
+  return res.json({
+    key: newKey.temp_mfa_key,
+    qr: await helpers.get2faQR(newKey.temp_mfa_key)
+  });
+});
+
+router.post('/enable-2fa', async function (req, res, next) {
+  /* Check if user has it already enabled, if yes return */
+  if (req.currentUser.mfa_key) {
+    return res.status(400).json({error: 'Two factor authentication is already enabled'});
+  }
+
+  /* Check if two factor code is valid, if not return with error */
+  req.check('otp').exists()
+    .isInt()
+    .isLength({min: 6, max: 6});
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({error: 'Invalid two factor code'});
+  }
+
+  /* Check if two factor code is correct, if not return with error */
+  if (!helpers.isOtpValid(req.currentUser.temp_mfa_key, req.body.otp)) {
+    return res.status(400).json({error: 'Invalid two factor code'});
+  }
+
+  /* Two factor code is valid and correct, enable 2fa for user */
+  await db.enableTwofactor(req.currentUser.id);
+
+  res.end();
+});
+
+router.post('/disable-2fa', async function (req, res, next) {
+  /* Check if user has it enabled, if no - return */
+  if (!req.currentUser.mfa_key) {
+    return res.status(400).json({error: 'Two factor authentication is not enabled for this account'});
+  }
+
+  /* Check if two factor code is valid, if not return with error */
+  req.check('otp').exists()
+    .isInt()
+    .isLength({min: 6, max: 6});
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({error: 'Invalid two factor code'});
+  }
+
+  /* Check if two factor code is correct, if not return with error */
+  if (!helpers.isOtpValid(req.currentUser.mfa_key, req.body.otp)) {
+    return res.status(400).json({error: 'Invalid two factor code'});
+  }
+
+  /* Two factor code is valid and correct, disable 2fa for user */
+  await db.disableTwoFactor(req.currentUser.id);
+
+  res.end();
 });
 
 module.exports = router;

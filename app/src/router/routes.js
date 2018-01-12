@@ -33,7 +33,7 @@ const routes = [
       /* Pages which need user authentication */
       {path: 'settings', component: Settings, meta: {requiresAuth: true}},
       {path: 'sessions', component: Sessions, meta: {requiresAuth: true}},
-      {path: 'two-factor', component: SetTwoFactorAuth, meta: {requiresAuth: true}}
+      {path: 'two-factor', component: Set2fa, meta: {requiresAuth: true}}
     ]
   },
   /* Pages which do not need user session to be fetched */

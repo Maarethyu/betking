@@ -5,6 +5,7 @@ CREATE TABLE users (
   email text NULL,
   email_verified boolean NOT NULL DEFAULT false,
   mfa_key text NULL,
+  temp_mfa_key text NULL,
   affiliate_id bigint NULL,
   app_id int NOT NULL DEFAULT 0,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW()
@@ -35,11 +36,3 @@ CREATE VIEW active_sessions AS
   FROM sessions
   WHERE expired_at >= NOW()
   AND logged_out_at IS NULL;
-
-CREATE TABLE temp_mfa_secrets (
-  id uuid PRIMARY KEY,
-  user_id bigint REFERENCES users(id),
-  mfa_secret  text,
-);
-
-CREATE UNIQUE INDEX unique_userid ON temp_mfa_secrets USING btree(user_id);
