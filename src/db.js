@@ -32,6 +32,11 @@ const getUserBySessionId = async (sessionId) => {
   return user;
 };
 
+const getUserByEmail = async (email) => {
+  const user = await db.oneOrNone('SELECT * FROM users WHERE lower(email) = lower($1)', email);
+  return user;
+};
+
 const createUser = async (username, password, email) => {
   const result = await db.one('INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING *', [username, password, email]);
   return result;
@@ -86,11 +91,36 @@ const disableTwoFactor = async (userId) => {
   await db.none('UPDATE users set mfa_key = NULL, temp_mfa_key = NULL where id = $1', userId);
 }
 
+const findLatestActiveResetToken = async (userId) => {
+  const result = await db.oneOrNone('SELECT * from reset_tokens WHERE user_id = $1 AND expired_at > NOW() ORDER BY created_at DESC LIMIT 1', userId);
+  return result;
+};
+
+const createResetToken = async (userId) => {
+  const result = await db.one('INSERT INTO reset_tokens (id, user_id) VALUES ($1, $2) RETURNING *', [uuidV4(), userId]);
+  return result;
+};
+
+const resetUserPasswordByToken = async (token, newPasswordHash) => {
+  await db.tx(t => {
+    // Set current reset token as used and expired. If token not found, exit
+    return t.one('UPDATE reset_tokens SET used = true, expired_at = NOW() where id = $1 AND used = false AND expired_at > NOW() RETURNING user_id', token)
+      // Change Password, return user
+      .then(result => t.one('UPDATE users SET password = $1 WHERE id = $2 RETURNING *', [newPasswordHash, result.user_id]))
+      // Password changed now. Expire all other reset password requests and logout all sessions
+      .then(user => t.batch([
+        t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', user.id),
+        t.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1', user.id)
+      ]));
+  });
+};
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
 module.exports.createSession = createSession;
 module.exports.getUserByName = getUserByName;
+module.exports.getUserByEmail = getUserByEmail;
 module.exports.logLoginAttempt = logLoginAttempt;
 module.exports.getConsecutiveFailedLogins = getConsecutiveFailedLogins;
 module.exports.getUserBySessionId = getUserBySessionId;
@@ -102,3 +132,6 @@ module.exports.logoutAllSessions = logoutAllSessions;
 module.exports.addTemp2faSecret = addTemp2faSecret;
 module.exports.enableTwofactor = enableTwofactor;
 module.exports.disableTwoFactor = disableTwoFactor;
+module.exports.createResetToken = createResetToken;
+module.exports.findLatestActiveResetToken = findLatestActiveResetToken;
+module.exports.resetUserPasswordByToken = resetUserPasswordByToken;

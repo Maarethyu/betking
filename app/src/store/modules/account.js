@@ -57,7 +57,6 @@ const actions = {
     return api.logout()
       .then(() => {
         commit(types.UPDATE_AUTHSTATE, false);
-        commit(types.UNSET_USER);
 
         router.replace('/');
       })
@@ -65,7 +64,24 @@ const actions = {
         if (error.response && error.response.status === 401) {
           // User is already logged out
           commit(types.UPDATE_AUTHSTATE, false);
-          commit(types.UNSET_USER);
+
+          router.replace('/');
+        } else {
+          throw error;
+        }
+      });
+  },
+
+  logoutAll ({commit}) {
+    return api.logoutAll()
+      .then(() => {
+        commit(types.UPDATE_AUTHSTATE, false);
+
+        router.replace('/');
+      })
+      .catch(error => {
+        if (error.response && error.response.status === 401) {
+          commit(types.UPDATE_AUTHSTATE, false);
 
           router.replace('/');
         } else {
@@ -98,14 +114,6 @@ const mutations = {
     state.dateJoined = user.dateJoined;
     state.isEmailVerified = user.isEmailVerified;
     state.is2faEnabled = user.is2faEnabled;
-  },
-
-  [types.UNSET_USER] (state) {
-    state.id = null;
-    state.username = '';
-    state.email = null;
-    state.dateJoined = null;
-    state.isEmailVerified = null;
   }
 };
 

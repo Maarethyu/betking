@@ -17,26 +17,36 @@
       <input id="rememberme" type="checkbox" name="rememberme">
       <div class="error">{{errors.rememberme}}</div>
 
+      <br>
+      <div id="g-recaptcha" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
+      <div class="error">{{errors['g-recaptcha-response']}}</div>
+
       <button type="submit">Login</button>
     </form>
   </div>
 </template>
 
 <script>
+import Cookies from 'js-cookie';
 import api from 'src/api';
 
 export default {
   name: 'Login',
   data: () => ({
-    isPageReady: false,
+    captchaId: null,
     errors: {}
   }),
+  created () {
+    this.loadCaptcha();
+  },
   methods: {
     onLogin (e) {
       const data = {
         username: e.target.elements.username.value,
         password: e.target.elements.password.value,
-        rememberme: e.target.elements.rememberme.checked
+        rememberme: e.target.elements.rememberme.checked,
+        'g-recaptcha-response': e.target.elements['g-recaptcha-response'] &&
+          e.target.elements['g-recaptcha-response'].value
       };
 
       api.login(data)
@@ -44,10 +54,11 @@ export default {
           this.$store.dispatch('onLogin', res.data);
         })
         .catch(error => {
+          this.checkForCaptcha();
           this.showErrors(error.response);
         });
     },
-    showErrors (response) {          
+    showErrors (response) {
       if (response && (response.status === 409 || response.status === 401)) {
         this.errors = {
           global: response.data.error
@@ -58,6 +69,24 @@ export default {
       this.errors = {
         global: 'An unexpected error occured'
       };
+    },
+    loadCaptcha () {
+      window.onRecaptchaLoad = this.checkForCaptcha.bind(this);
+
+      const recaptchaScript = document.createElement('script');
+      recaptchaScript.setAttribute('src', 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit');
+      document.head.appendChild(recaptchaScript);
+    },
+    checkForCaptcha () {
+      const shouldDisplayCaptcha = Cookies.get('login_captcha') === 'yes';
+
+      if (shouldDisplayCaptcha) {
+        if (this.captchaId !== null) {
+          window.grecaptcha.reset(this.captchaId);
+        } else {
+          this.captchaId = window.grecaptcha.render('g-recaptcha');
+        }
+      }
     }
   }
 };

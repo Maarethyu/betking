@@ -1,10 +1,10 @@
 <template>
   <nav>
     <router-link :to="'/'">Index</router-link>
-    <router-link :to="'/stats'">Stats</router-link>
 
     <template v-if="isLoggedOut">
       <router-link :to="'login'">Login</router-link>
+      <router-link :to="'forgot-password'">Forgot Password</router-link>
       <router-link :to="'register'">Register</router-link>
     </template>
 

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h1>Index</h1>
     <table v-if="isAuthenticated">
       <tbody>
         <tr>

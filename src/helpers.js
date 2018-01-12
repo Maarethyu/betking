@@ -3,7 +3,6 @@ const qrcode = require('qrcode');
 
 const getNew2faSecret = function () {
   const secret = speakeasy.generateSecret({length: 32, name: 'BetKing'});
-  console.log(secret);
   return secret.base32;
 }
 
