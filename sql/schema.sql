@@ -51,3 +51,12 @@ CREATE TABLE reset_tokens (
 );
 
 CREATE INDEX reset_tokens_user_id_idx ON reset_tokens(user_id, expired_at);
+
+-- mfa passcodes
+CREATE TABLE mfa_passcodes (
+  user_id     bigint                    NOT NULL,
+  passcode    text                      NOT NULL,
+  created_at  timestamp with time zone  NOT NULL  DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX unique_mfa_user_passcodes_day ON mfa_passcodes(user_id, passcode, date_trunc('day', created_at AT TIME ZONE 'Etc/UTC'));

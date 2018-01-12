@@ -155,6 +155,9 @@ router.post('/enable-2fa', async function (req, res, next) {
   /* Two factor code is valid and correct, enable 2fa for user */
   await db.enableTwofactor(req.currentUser.id);
 
+  /* Insert this code as a used code */
+  await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
+
   res.end();
 });
 
@@ -179,7 +182,18 @@ router.post('/disable-2fa', async function (req, res, next) {
     return res.status(400).json({error: 'Invalid two factor code'});
   }
 
-  /* Two factor code is valid and correct, disable 2fa for user */
+  /* Two factor code is valid and correct, check if this code has not been used before */
+  try {
+    await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
+  } catch (e) {
+    if (e.message === 'CODE_ALREADY_USED') {
+      return res.status(400).json({error: 'You have used this code recently. Wait until it refreshes (30 seconds usually)'});
+    } else {
+      throw e;
+    }
+  }
+
+  /* Two factor code was not used before. We can disable two factor auth now */
   await db.disableTwoFactor(req.currentUser.id);
 
   res.end();

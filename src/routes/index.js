@@ -21,7 +21,8 @@ router.post('/login', async function (req, res, next) {
   req.check('username', 'Invalid Username').exists();
   req.check('rememberme', 'Invalid remember me option').isBoolean();
   req.check('otp', 'Invalid two factor code').exists()
-    .isInt().isLength({min: 6, max: 6})
+    .isInt()
+    .isLength({min: 6, max: 6})
     .optional({checkFalsy: true});
 
   const errors = req.validationErrors();
@@ -48,10 +49,30 @@ router.post('/login', async function (req, res, next) {
   /* Check for password, log login attempt */
   const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
 
-  /* Check for 2fa if enabled */
-  let isTwoFactorOk = user.mfa_key
-    ? helpers.isOtpValid(user.mfa_key, req.body.otp)
-    : true;
+  /* Check for Two factor authentication */
+  let isTwoFactorOk = false;
+  if (user.mfa_key) {
+    /* If user has 2fa enabled, check if req.body.otp is valid */
+    const isOtpValid = helpers.isOtpValid(user.mfa_key, req.body.otp);
+
+    if (isOtpValid) {
+      /* Otp is valid, check if it hasn't been used before */
+      try {
+        await db.insertTwoFactorCode(user.id, req.body.otp);
+        isTwoFactorOk = true;
+      } catch (e) {
+        if (e.message === 'CODE_ALREADY_USED') {
+          // TODO: Should we let the user know that his OTP has just expired??
+          isTwoFactorOk = false;
+        } else {
+          throw e;
+        }
+      }
+    }
+  } else {
+    /* If user has 2fa not enabled, isTwoFactorOk = true */
+    isTwoFactorOk = true;
+  }
 
   const isLoginSuccessful = isPasswordCorrect && isCaptchaOk && isTwoFactorOk;
 

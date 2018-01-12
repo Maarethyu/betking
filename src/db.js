@@ -89,7 +89,18 @@ const enableTwofactor = async (userId) => {
 
 const disableTwoFactor = async (userId) => {
   await db.none('UPDATE users set mfa_key = NULL, temp_mfa_key = NULL where id = $1', userId);
-}
+};
+
+const insertTwoFactorCode = async (userId, code) => {
+  await db.none('INSERT INTO mfa_passcodes (user_id, passcode) values ($1, $2)', [userId, code])
+    .catch(e => {
+      if (e.code === '23505') {
+        throw new Error('CODE_ALREADY_USED');
+      }
+
+      throw e;
+    });
+};
 
 const findLatestActiveResetToken = async (userId) => {
   const result = await db.oneOrNone('SELECT * from reset_tokens WHERE user_id = $1 AND expired_at > NOW() ORDER BY created_at DESC LIMIT 1', userId);
@@ -135,3 +146,4 @@ module.exports.disableTwoFactor = disableTwoFactor;
 module.exports.createResetToken = createResetToken;
 module.exports.findLatestActiveResetToken = findLatestActiveResetToken;
 module.exports.resetUserPasswordByToken = resetUserPasswordByToken;
+module.exports.insertTwoFactorCode = insertTwoFactorCode;
