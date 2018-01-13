@@ -200,4 +200,45 @@ router.post('/disable-2fa', async function (req, res, next) {
   res.end();
 });
 
+router.post('/add-whitelisted-ip', async function (req, res, next) {
+  /* Requires req.body.ip to be a valid ip, if not provided, set current ip as whitelisted */
+  req.check('ip', 'Invalid ip')
+    .exists()
+    .trim()
+    .isIP()
+    .optional({checkFalsy: true});
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
+  const ip = req.body.ip || helpers.getIp(req);
+
+  await db.addIpInWhitelist(ip, req.currentUser.id);
+
+  res.end();
+});
+
+router.post('/remove-whitelisted-ip', async function (req, res, next) {
+  req.check('ip', 'Invalid ip').exists()
+    .trim()
+    .isIP();
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
+  await db.removeIpFromWhitelist(req.body.ip, req.currentUser.id);
+
+  res.end();
+});
+
+router.get('/get-whitelisted-ips', async function (req, res, next) {
+  const ips = await db.getWhitelistedIps(req.currentUser.id);
+
+  res.json({ips});
+});
+
 module.exports = router;

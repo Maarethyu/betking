@@ -52,6 +52,19 @@ const require2fa = async (req, res, next) => {
   next();
 };
 
+const requireWhitelistedIp = async (req, res, next) => {
+ // check if not a whitelisted Ip
+  const ip = helpers.getIp(req);
+
+  const isIpWhitelisted = await db.isIpWhitelisted(ip, req.currentUser.id);
+  if (!isIpWhitelisted) {
+    return res.status(401).json({error: 'IP not whitelisted'});
+  }
+
+  next();
+};
+
 module.exports.attachCurrentUserToRequest = attachCurrentUserToRequest;
 module.exports.requireLoggedIn = requireLoggedIn;
 module.exports.require2fa = require2fa;
+module.exports.requireWhitelistedIp = requireWhitelistedIp;

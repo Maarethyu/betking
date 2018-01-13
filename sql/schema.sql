@@ -66,6 +66,16 @@ CREATE TABLE mfa_passcodes (
 
 CREATE UNIQUE INDEX unique_mfa_user_passcodes_day ON mfa_passcodes(user_id, passcode, date_trunc('day', created_at AT TIME ZONE 'Etc/UTC'));
 
+-- ip_whitelist table
+CREATE TABLE whitelisted_ips (
+  id bigserial PRIMARY KEY,
+  ip_address inet NOT NULL,
+  user_id bigint NOT NULL REFERENCES users(id),
+  unique (ip_address, user_id)
+);
+
+CREATE INDEX whitelisted_ips_user_id_idx ON whitelisted_ips USING btree(user_id);
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO bk;
