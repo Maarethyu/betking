@@ -1,8 +1,6 @@
 import Menu from 'components/Menu';
 import AppShell from 'components/AppShell';
 
-import * as hooks from './router-hooks';
-
 const routes = [
   /* Pages which need user session to be fetched */
   {
@@ -29,9 +27,6 @@ const routes = [
   },
   /* Pages which do not need user session to be fetched */
   {path: '/reset-password', component: () => import('pages/ResetPassword')},
-
-  /* Dummy logout route so that GET /logout also works */
-  {path: '/logout', beforeEnter: hooks.logout},
 
   /* Shows PageNotFound component in dev mode, redirects to /404 route in prod */
   {path: '*', component: () => import('pages/PageNotFound')}
