@@ -32,14 +32,18 @@
 
 <script>
 import api from 'src/api';
+import Fingerprint2 from 'fingerprintjs2';
+import {loadRecaptcha} from 'src/helpers';
 
 export default {
   name: 'Register',
   data: () => ({
-    errors: {}
+    errors: {},
+    fingerprint: null
   }),
   mounted () {
-    this.loadCaptcha();
+    this.showCaptcha();
+    this.setFingerPrint();
   },
   methods: {
     onRegister (e) {
@@ -48,6 +52,7 @@ export default {
         email: e.target.elements.email.value,
         password: e.target.elements.password.value,
         password2: e.target.elements.password2.value,
+        fingerprint: this.fingerprint,
         'g-recaptcha-response': e.target.elements['g-recaptcha-response'] &&
           e.target.elements['g-recaptcha-response'].value
       };
@@ -60,6 +65,9 @@ export default {
         .catch(error => {
           this.showErrors(error.response);
         });
+    },
+    setFingerPrint () {
+      new Fingerprint2().get(fingerprint => { this.fingerprint = fingerprint; });
     },
     showErrors (response) {
       if (response && response.status === 400) {
@@ -85,14 +93,10 @@ export default {
         global: 'An unexpected error occured'
       };
     },
-    loadCaptcha () {
-      window.onRecaptchaLoad = () => {
+    showCaptcha () {
+      loadRecaptcha(() => {
         window.grecaptcha.render('g-recaptcha');
-      };
-
-      const recaptchaScript = document.createElement('script');
-      recaptchaScript.setAttribute('src', 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit');
-      document.head.appendChild(recaptchaScript);
+      });
     }
   }
 };

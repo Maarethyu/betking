@@ -33,15 +33,19 @@
 <script>
 import Cookies from 'js-cookie';
 import api from 'src/api';
+import Fingerprint2 from 'fingerprintjs2';
+import {loadRecaptcha} from 'src/helpers';
 
 export default {
   name: 'Login',
   data: () => ({
     captchaId: null,
-    errors: {}
+    errors: {},
+    fingerprint: null
   }),
   created () {
-    this.loadCaptcha();
+    loadRecaptcha(this.checkForCaptcha.bind(this));
+    this.setFingerPrint();
   },
   methods: {
     onLogin (e) {
@@ -50,6 +54,7 @@ export default {
         password: e.target.elements.password.value,
         otp: e.target.elements.otp.value,
         rememberme: e.target.elements.rememberme.checked,
+        fingerprint: this.fingerprint,
         'g-recaptcha-response': e.target.elements['g-recaptcha-response'] &&
           e.target.elements['g-recaptcha-response'].value
       };
@@ -64,6 +69,9 @@ export default {
           this.showErrors(error.response);
         });
     },
+    setFingerPrint () {
+      new Fingerprint2().get(fingerprint => { this.fingerprint = fingerprint; });
+    },
     showErrors (response) {
       if (response && (response.status === 409 || response.status === 401)) {
         this.errors = {
@@ -75,13 +83,6 @@ export default {
       this.errors = {
         global: 'An unexpected error occured'
       };
-    },
-    loadCaptcha () {
-      window.onRecaptchaLoad = this.checkForCaptcha.bind(this);
-
-      const recaptchaScript = document.createElement('script');
-      recaptchaScript.setAttribute('src', 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit');
-      document.head.appendChild(recaptchaScript);
     },
     checkForCaptcha () {
       const shouldDisplayCaptcha = Cookies.get('login_captcha') === 'yes';

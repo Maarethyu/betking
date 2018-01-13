@@ -71,6 +71,7 @@ router.post('/change-password', async function (req, res, next) {
   const newPasswordHash = await bcrypt.hash(req.body.password2, 10);
 
   await db.updatePassword(req.currentUser.id, newPasswordHash);
+  await db.logoutAllSessions(req.currentUser.id);
 
   res.end();
 });

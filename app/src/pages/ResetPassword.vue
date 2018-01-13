@@ -25,6 +25,7 @@
 
 <script>
 import api from 'src/api';
+import {getUrlParams} from 'src/helpers';
 
 export default {
   name: 'ResetPassword',
@@ -38,20 +39,9 @@ export default {
     }
   }),
   mounted () {
-    this.token = this.searchObj().token;
+    this.token = getUrlParams().token;
   },
   methods: {
-    searchObj () {
-      const search = location.search.substring(1);
-      return search
-        ? JSON.parse(`{"${search.replace(/&/g, '","').replace(/=/g, '":"')}"}`,
-          function (key, value) {
-            return key === ''
-              ? value
-              : decodeURIComponent(value);
-          })
-        : {};
-    },
     resetPassword () {
       const data = {
         token: this.token,
