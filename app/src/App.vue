@@ -6,8 +6,23 @@
 </template>
 
 <script>
+import Cookies from 'js-cookie';
+import {getUrlParams} from './helpers';
+
 export default {
-  name: 'app'
+  name: 'app',
+  mounted () {
+    this.scanForAffiliateId();
+  },
+  methods: {
+    scanForAffiliateId () {
+      const ref = getUrlParams().ref;
+
+      if (ref) {
+        Cookies.set('aff_id', ref, {expires: 1});
+      }
+    }
+  }
 };
 </script>
 

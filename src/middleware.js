@@ -1,10 +1,9 @@
 const db = require('./db');
+const {isValidUuid} = require('./helpers');
 
 const attachCurrentUserToRequest = async (req, res, next) => {
   const sessionId = req.cookies.session;
-  // validate sessionid is uuid
-  
-  if (sessionId) {
+  if (sessionId && isValidUuid(sessionId)) {
     const user = await db.getUserBySessionId(sessionId);
     if (user) {
       req.currentUser = user; // TODO don't show exact one

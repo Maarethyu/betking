@@ -18,6 +18,8 @@ CREATE INDEX users_lower_email_idx ON users USING btree(lower(email));
 CREATE TABLE sessions (
   id uuid PRIMARY KEY,
   user_id bigint REFERENCES users(id),
+  ip_address inet NOT NULL,
+  fingerprint text NOT NULL,
   logged_out_at  timestamp with time zone  NULL,
   expired_at timestamp with time zone  NOT NULL DEFAULT NOW() + INTERVAL '15 minutes',
   created_at timestamp with time zone  NOT NULL DEFAULT NOW()
@@ -28,6 +30,9 @@ CREATE TABLE login_attempts (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
   is_success boolean NOT NULL,
+  ip_address inet NOT NULL,
+  fingerprint text NOT NULL,
+  user_agent text NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT NOW()
 );
 

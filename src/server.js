@@ -31,22 +31,12 @@ app.use(expressValidator());
 app.use(mw.attachCurrentUserToRequest);
 
 const router = express.Router();
-router.use('', require('./routes/index')); 
+router.use('', require('./routes/index'));
 router.use('/account', require('./routes/account'));
 app.use('/api', router);
 
-app.use('/client', require('./client'));
-
-/* the front end code is in another repository and developed independantly 
-  we serve the built front end code from here
-  this allows developers to work on front end code without the security risk of them having access to how
-  the backend works.
-  It also allows us to have register/login code separate from front end while not worrying about different domains
-  TODO - is this a bad way to do this?
-*/
-
 /*
-  TODO: 
+  TODO:
   * Fetch frontend routes array from (app/src/router/routes)
   and create route map for valid routes based on frontend.
   * For all other routes send 404 status code

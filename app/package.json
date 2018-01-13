@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "fingerprintjs2": "^1.5.1",
     "js-cookie": "^2.2.0",
     "moment": "^2.20.1",
     "vue": "^2.1.0",

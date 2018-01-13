@@ -3,9 +3,10 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const db = require('../db');
 const mailer = require('../mailer');
+const helpers = require('../helpers');
 
-const createSession = async function (res, userId, rememberMe) {
-  const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks');
+const createSession = async function (res, userId, rememberMe, ip, fingerprint) {
+  const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks', ip, fingerprint);
 
   res.cookie('session', session.id,
     {
@@ -46,7 +47,7 @@ router.post('/login', async function (req, res, next) {
 
   const isLoginSuccessful = isPasswordCorrect && isCaptchaOk;
 
-  await db.logLoginAttempt(user.id, isLoginSuccessful);
+  await db.logLoginAttempt(user.id, isLoginSuccessful, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
 
   if (!isLoginSuccessful) {
     if (failedAttempts >= 2) {
@@ -61,8 +62,15 @@ router.post('/login', async function (req, res, next) {
 
   // if require 2fa ask for it, or have it submitted on form?
 
-  await createSession(res, user.id, req.body.rememberme);
-  res.json(user); // TODO don't return user
+  await createSession(res, user.id, req.body.rememberme, helpers.getIp(req), helpers.getFingerPrint(req));
+
+  res.json({
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    isEmailVerified: user.email_verified,
+    dateJoined: user.date_joined
+  });
 });
 
 router.post('/register', async function (req, res, next) {
@@ -109,12 +117,22 @@ router.post('/register', async function (req, res, next) {
     return res.status(400).json({errors: validationResult.array()});
   }
 
+  const affiliateId = parseInt(req.cookies.aff_id, 10) || null;
+
   const hash = await bcrypt.hash(req.body.password, 10);
 
-  const user = await db.createUser(req.body.username, hash, req.body.email);
+  const user = await db.createUser(req.body.username, hash, req.body.email, affiliateId);
+
   if (user) {
-    await createSession(res, user.id, false);
-    res.json(user); // TODO this shouldn't return user
+    await createSession(res, user.id, false, helpers.getIp(req), helpers.getFingerPrint(req));
+
+    res.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      isEmailVerified: user.email_verified,
+      dateJoined: user.date_joined
+    });
   } else {
     res.status(500)
       .end();
