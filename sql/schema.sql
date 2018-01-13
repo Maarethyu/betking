@@ -50,3 +50,7 @@ CREATE TABLE reset_tokens (
 );
 
 CREATE INDEX reset_tokens_user_id_idx ON reset_tokens(user_id, expired_at);
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO bk;
