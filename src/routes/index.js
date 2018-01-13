@@ -20,6 +20,10 @@ router.post('/login', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists();
   req.check('username', 'Invalid Username').exists();
   req.check('rememberme', 'Invalid remember me option').isBoolean();
+  req.check('otp', 'Invalid two factor code').exists()
+    .isInt()
+    .isLength({min: 6, max: 6})
+    .optional({checkFalsy: true});
 
   const errors = req.validationErrors();
   if (errors) {
@@ -45,7 +49,32 @@ router.post('/login', async function (req, res, next) {
   /* Check for password, log login attempt */
   const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
 
-  const isLoginSuccessful = isPasswordCorrect && isCaptchaOk;
+  /* Check for Two factor authentication */
+  let isTwoFactorOk = false;
+  if (user.mfa_key) {
+    /* If user has 2fa enabled, check if req.body.otp is valid */
+    const isOtpValid = helpers.isOtpValid(user.mfa_key, req.body.otp);
+
+    if (isOtpValid) {
+      /* Otp is valid, check if it hasn't been used before */
+      try {
+        await db.insertTwoFactorCode(user.id, req.body.otp);
+        isTwoFactorOk = true;
+      } catch (e) {
+        if (e.message === 'CODE_ALREADY_USED') {
+          // TODO: Should we let the user know that his OTP has just expired??
+          isTwoFactorOk = false;
+        } else {
+          throw e;
+        }
+      }
+    }
+  } else {
+    /* If user has 2fa not enabled, isTwoFactorOk = true */
+    isTwoFactorOk = true;
+  }
+
+  const isLoginSuccessful = isPasswordCorrect && isCaptchaOk && isTwoFactorOk;
 
   await db.logLoginAttempt(user.id, isLoginSuccessful, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
 
@@ -60,8 +89,6 @@ router.post('/login', async function (req, res, next) {
     return res.status(401).json({error: 'Login failed'});
   }
 
-  // if require 2fa ask for it, or have it submitted on form?
-
   await createSession(res, user.id, req.body.rememberme, helpers.getIp(req), helpers.getFingerPrint(req));
 
   res.json({
@@ -69,7 +96,8 @@ router.post('/login', async function (req, res, next) {
     username: user.username,
     email: user.email,
     isEmailVerified: user.email_verified,
-    dateJoined: user.date_joined
+    dateJoined: user.date_joined,
+    is2faEnabled: !!user.mfa_key
   });
 });
 
@@ -131,7 +159,8 @@ router.post('/register', async function (req, res, next) {
       username: user.username,
       email: user.email,
       isEmailVerified: user.email_verified,
-      dateJoined: user.date_joined
+      dateJoined: user.date_joined,
+      is2faEnabled: !!user.mfa_key
     });
   } else {
     res.status(500)

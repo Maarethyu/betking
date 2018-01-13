@@ -10,7 +10,8 @@ const state = {
   username: '',
   email: null,
   isEmailVerified: null,
-  dateJoined: null
+  dateJoined: null,
+  is2faEnabled: null
 };
 
 // getters
@@ -25,7 +26,8 @@ const getters = {
     dateJoined: state.dateJoined
   }),
   username: state => state.username,
-  userId: state => state.id
+  userId: state => state.id,
+  is2faEnabled: state => state.is2faEnabled
 };
 
 // actions
@@ -101,6 +103,7 @@ const mutations = {
       state.email = null;
       state.isEmailVerified = null;
       state.dateJoined = null;
+      state.is2faEnabled = null;
     }
   },
 
@@ -110,6 +113,7 @@ const mutations = {
     state.email = user.email;
     state.dateJoined = user.dateJoined;
     state.isEmailVerified = user.isEmailVerified;
+    state.is2faEnabled = user.is2faEnabled;
   }
 };
 

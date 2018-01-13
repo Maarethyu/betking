@@ -6,6 +6,7 @@ CREATE TABLE users (
   email text NULL,
   email_verified boolean NOT NULL DEFAULT false,
   mfa_key text NULL,
+  temp_mfa_key text NULL,
   affiliate_id bigint NULL,
   app_id int NOT NULL DEFAULT 0,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW()
@@ -55,6 +56,15 @@ CREATE TABLE reset_tokens (
 );
 
 CREATE INDEX reset_tokens_user_id_idx ON reset_tokens(user_id, expired_at);
+
+-- mfa passcodes
+CREATE TABLE mfa_passcodes (
+  user_id     bigint                    NOT NULL,
+  passcode    text                      NOT NULL,
+  created_at  timestamp with time zone  NOT NULL  DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX unique_mfa_user_passcodes_day ON mfa_passcodes(user_id, passcode, date_trunc('day', created_at AT TIME ZONE 'Etc/UTC'));
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;

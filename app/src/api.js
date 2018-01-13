@@ -18,6 +18,15 @@ export default {
   logout () {
     return post('/api/account/logout');
   },
+  fetchNew2faKey () {
+    return get('/api/account/2fa-key');
+  },
+  enable2fa (otp) {
+    return post('/api/account/enable-2fa', {otp});
+  },
+  disable2fa (otp) {
+    return post('/api/account/disable-2fa', {otp});
+  },
   forgotPassword (data) {
     return post('/api/forgot-password', data);
   },
