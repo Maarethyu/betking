@@ -9,7 +9,8 @@ CREATE TABLE users (
   temp_mfa_key text NULL,
   affiliate_id bigint NULL,
   app_id int NOT NULL DEFAULT 0,
-  date_joined timestamp with time zone NOT NULL DEFAULT NOW()
+  date_joined timestamp with time zone NOT NULL DEFAULT NOW(),
+  locked_at timestamp with time zone NULL
 );
 
 CREATE UNIQUE INDEX unique_username ON users USING btree (lower(username) text_pattern_ops);

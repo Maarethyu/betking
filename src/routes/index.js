@@ -90,8 +90,15 @@ router.post('/login', async function (req, res, next) {
       });
     }
 
+    // Lock Account after 5 failed attempts in last 1 minute
+    if (failedAttempts >= 4) {
+      await db.lockUserAccount(user.id);
+    }
+
     return res.status(401).json({error: 'Login failed'});
   }
+
+  mailer.sendNewLoginEmail(user.username, helpers.getIp(req), helpers.getUserAgentString(req), user.email);
 
   await createSession(res, user.id, req.body.rememberme, helpers.getIp(req), helpers.getFingerPrint(req));
 
@@ -157,6 +164,11 @@ router.post('/register', async function (req, res, next) {
 
   if (user) {
     await createSession(res, user.id, false, helpers.getIp(req), helpers.getFingerPrint(req));
+
+    // Send welcome email if user added email to profile
+    if (user.email) {
+      mailer.sendWelcomeEmail(user.username, user.email);
+    }
 
     res.json({
       id: user.id,

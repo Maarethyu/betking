@@ -65,6 +65,10 @@ const getConsecutiveFailedLogins = async (userId) => {
   return result.count;
 };
 
+const lockUserAccount = async (userId) => {
+    await db.none('UPDATE users SET locked_at = NOW() WHERE id = $1', userId);
+};
+
 const updateEmail = async (userId, email) => {
   await db.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]);
 };
@@ -180,3 +184,4 @@ module.exports.addIpInWhitelist = addIpInWhitelist;
 module.exports.removeIpFromWhitelist = removeIpFromWhitelist;
 module.exports.getWhitelistedIps = getWhitelistedIps;
 module.exports.isIpWhitelisted = isIpWhitelisted;
+module.exports.lockUserAccount = lockUserAccount;
