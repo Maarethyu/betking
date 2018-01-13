@@ -220,7 +220,7 @@ router.post('/add-whitelisted-ip', async function (req, res, next) {
   res.end();
 });
 
-router.post('/remove-whitelisted-ip', async function (req, res, next) {
+router.post('/remove-whitelisted-ip', mw.require2fa, async function (req, res, next) {
   req.check('ip', 'Invalid ip').exists()
     .trim()
     .isIP();

@@ -36,6 +36,7 @@
 
 <script>
 import api from 'src/api';
+import {mapGetters} from 'vuex';
 
 export default {
   name: 'WhitelistedIps',
@@ -43,14 +44,18 @@ export default {
     ips: [],
     message: '',
     errors: '',
-    newIp: ''
+    newIp: '',
+    otp: '',
   }),
   mounted () {
-    this.getIps();
+    this.getWhitelistedIpAddresses();
   },
+  computed: mapGetters({
+    is2faEnabled: 'is2faEnabled'
+  }),
   methods: {
-    getIps () {
-      api.getIps()
+    getWhitelistedIpAddresses () {
+      api.getWhitelistedIpAddresses()
         .then(response => {
           this.ips = response.data.ips;
         })
@@ -59,9 +64,13 @@ export default {
         });
     },
     deleteIp (ip) {
-      api.deleteIp(ip)
+      if (this.is2faEnabled) {
+        // TODO: Write a proper vue component for modal
+        this.otp = prompt('Enter the otp');
+      }
+      api.deleteIp(ip, this.otp)
         .then(response => {
-          this.getIps();
+          this.getWhitelistedIpAddresses();
           this.message = 'Ip deleted successfully';
           this.errors = '';
         })
@@ -72,7 +81,7 @@ export default {
     addIp (ip) {
       api.addIp(ip)
         .then(response => {
-          this.getIps();
+          this.getWhitelistedIpAddresses();
           this.message = 'Ip added successfully';
           this.errors = '';
           this.newIp = '';
@@ -85,10 +94,14 @@ export default {
       if (response && response.status === 400) {
         const newErrors = {};
 
-        response.data.errors.forEach(error => {
+        response.data.errors && response.data.errors.forEach(error => {
           newErrors[error.param] = newErrors[error.param]
             ? `${newErrors[error.param]} / ${error.msg}` : error.msg;
         });
+
+        if (response.data.error) {
+          newErrors.ip = response.data.error;
+        }
 
         this.errors = newErrors;
         this.message = '';
