@@ -12,6 +12,7 @@
       <router-link :to="'settings'">Settings</router-link>
       <router-link :to="'sessions'">Sessions</router-link>
       <router-link :to="'two-factor'">2fa</router-link>
+      <router-link :to="'whitelisted-ips'">Whitelisted Ips</router-link>
       <a href="javascript:void(0)" @click="logout">Logout</a>
     </template>
   </nav>

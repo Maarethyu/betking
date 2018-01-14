@@ -50,5 +50,14 @@ export default {
   },
   changePassword (data) {
     return post('/api/account/change-password', data);
+  },
+  getWhitelistedIpAddresses () {
+    return get('/api/account/get-whitelisted-ips');
+  },
+  deleteIp (ip, otp) {
+    return post('/api/account/remove-whitelisted-ip', {ip, otp});
+  },
+  addIp (ip) {
+    return post('/api/account/add-whitelisted-ip', {ip});
   }
 };

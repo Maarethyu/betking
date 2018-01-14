@@ -9,7 +9,8 @@ CREATE TABLE users (
   temp_mfa_key text NULL,
   affiliate_id bigint NULL,
   app_id int NOT NULL DEFAULT 0,
-  date_joined timestamp with time zone NOT NULL DEFAULT NOW()
+  date_joined timestamp with time zone NOT NULL DEFAULT NOW(),
+  locked_at timestamp with time zone NULL
 );
 
 CREATE UNIQUE INDEX unique_username ON users USING btree (lower(username) text_pattern_ops);
@@ -65,6 +66,16 @@ CREATE TABLE mfa_passcodes (
 );
 
 CREATE UNIQUE INDEX unique_mfa_user_passcodes_day ON mfa_passcodes(user_id, passcode, date_trunc('day', created_at AT TIME ZONE 'Etc/UTC'));
+
+-- ip_whitelist table
+CREATE TABLE whitelisted_ips (
+  id bigserial PRIMARY KEY,
+  ip_address inet NOT NULL,
+  user_id bigint NOT NULL REFERENCES users(id),
+  unique (ip_address, user_id)
+);
+
+CREATE INDEX whitelisted_ips_user_id_idx ON whitelisted_ips USING btree(user_id);
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
