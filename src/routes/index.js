@@ -98,7 +98,9 @@ router.post('/login', async function (req, res, next) {
     return res.status(401).json({error: 'Login failed'});
   }
 
-  mailer.sendNewLoginEmail(user.username, helpers.getIp(req), helpers.getUserAgentString(req), user.email);
+  if (user.email) {
+    mailer.sendNewLoginEmail(user.username, helpers.getIp(req), helpers.getUserAgentString(req), user.email);
+  }
 
   await createSession(res, user.id, req.body.rememberme, helpers.getIp(req), helpers.getFingerPrint(req));
 
