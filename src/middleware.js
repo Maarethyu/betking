@@ -33,17 +33,17 @@ const require2fa = async (req, res, next) => {
 
     if (isOtpValid) {
       try {
-        await db.insertTwoFactorCode(req.body.otp);
+        await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
         next();
       } catch (e) {
         if (e.message === 'CODE_ALREADY_USED') {
-          res.status(400).send('You have used this two factor code recently. Wait until it refreshes (30 seconds usually)');
+          res.status(400).json({error: 'You have used this two factor code recently. Wait until it refreshes (30 seconds usually)'});
         } else {
           throw e;
         }
       }
     } else {
-      res.status(400).send('Invalid two factor code');
+      res.status(400).json({error: 'Invalid two factor code'});
     }
 
     return;
@@ -52,6 +52,19 @@ const require2fa = async (req, res, next) => {
   next();
 };
 
+const requireWhitelistedIp = async (req, res, next) => {
+  // check if not a whitelisted Ip
+  const ip = helpers.getIp(req);
+
+  const isIpWhitelisted = await db.isIpWhitelisted(ip, req.currentUser.id);
+  if (!isIpWhitelisted) {
+    return res.status(401).json({error: 'IP not whitelisted'});
+  }
+
+  next();
+};
+
 module.exports.attachCurrentUserToRequest = attachCurrentUserToRequest;
 module.exports.requireLoggedIn = requireLoggedIn;
 module.exports.require2fa = require2fa;
+module.exports.requireWhitelistedIp = requireWhitelistedIp;

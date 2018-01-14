@@ -65,6 +65,10 @@ const getConsecutiveFailedLogins = async (userId) => {
   return result.count;
 };
 
+const lockUserAccount = async (userId) => {
+    await db.none('UPDATE users SET locked_at = NOW() WHERE id = $1', userId);
+};
+
 const updateEmail = async (userId, email) => {
   await db.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]);
 };
@@ -126,6 +130,35 @@ const resetUserPasswordByToken = async (token, newPasswordHash) => {
   });
 };
 
+const addIpInWhitelist = async (ipAddress, userId) => {
+  await db.none('INSERT INTO whitelisted_ips (ip_address, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [ipAddress, userId]);
+};
+
+const removeIpFromWhitelist = async (ipAddress, userId) => {
+  await db.none('DELETE FROM whitelisted_ips WHERE ip_address = $1 AND user_id = $2', [ipAddress, userId]);
+};
+
+const getWhitelistedIps = async (userId) => {
+  const result = await db.any('SELECT * FROM whitelisted_ips WHERE user_id = $1', userId);
+  return result;
+};
+
+const isIpWhitelisted = async (ip, userId) => {
+  return db.task('check-whitelisted-ip', t => {
+    // Check if there are any whitelisted ip Addresses added for user
+    return t.one('SELECT COUNT(*) FROM whitelisted_ips WHERE user_id = $1', userId)
+      .then(row => {
+        // If user hasn't added any ips to whitelist, return true
+        if (parseInt(row.count, 10) === 0) {
+          return true;
+        };
+        // If count > 0, check if current ip is in whitelist
+        return t.oneOrNone('SELECT ip_address FROM whitelisted_ips WHERE ip_address = $1 AND user_id = $2', [ip, userId]);
+      })
+      .then(result => !!result);
+  });
+};
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
@@ -147,3 +180,8 @@ module.exports.createResetToken = createResetToken;
 module.exports.findLatestActiveResetToken = findLatestActiveResetToken;
 module.exports.resetUserPasswordByToken = resetUserPasswordByToken;
 module.exports.insertTwoFactorCode = insertTwoFactorCode;
+module.exports.addIpInWhitelist = addIpInWhitelist;
+module.exports.removeIpFromWhitelist = removeIpFromWhitelist;
+module.exports.getWhitelistedIps = getWhitelistedIps;
+module.exports.isIpWhitelisted = isIpWhitelisted;
+module.exports.lockUserAccount = lockUserAccount;
