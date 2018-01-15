@@ -83,9 +83,13 @@ CREATE TABLE error_logs (
   created_at timestamp with time zone  NOT NULL DEFAULT NOW(),
   msg text NULL,
   stack text NULL,
+  db_query text NULL,
+  db_code text NULL,
   source text NOT NULL,
   req_id uuid NULL,
-  user_id bigint NULL
+  user_id bigint NULL,
+  mail_info text NULL,
+  to_email text NULL
 );
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;

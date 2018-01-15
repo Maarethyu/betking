@@ -8,6 +8,21 @@ const expressValidator = require('express-validator');
 const app = express();
 const mw = require('./middleware');
 
+/* We should ideally never land up having uncaught exceptions / rejections. */
+process.on('unhandledRejection', (reason, p) => {
+  require('./db').logError(reason, p, null, null, 'unhandledRejection');
+  console.log('Unhandled Rejection at:', p, 'reason:', reason);
+
+  // TODO: process.exit(); ?
+});
+
+process.on('uncaughtException', (err) => {
+  require('./db').logError(err.message, err.stack, null, null, 'uncaughtException');
+  console.log('Uncaught Exception', err);
+
+  // TODO: process.exit(); ?
+});
+
 // add uuid to each request
 const assignId = function (req, res, next) {
   req.id = uuid.v4();
@@ -57,10 +72,11 @@ app.get('*', function (req, res) {
 });
 
 app.use(function (error, req, res, next) {
-  if (!error.DB_ERROR) { // Because errors at db level are logged separately
-    require('./db').logError(error.message, error.stack, 'API_ERROR', req.id, req.currentUser && req.currentUser.id);
-    console.log('API_ERROR', error);
-  }
+  const query = error.query ? error.query.toString() : null;
+  const code = error.code || null;
+  const source = error.DB_ERROR ? 'DB_ERROR' : 'API_ERROR';
+
+  require('./db').logError(error.message, error.stack, req.id, req.currentUser && req.currentUser.id, source, query, code);
 
   res.status(500).send('An error occured');
 });

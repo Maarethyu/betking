@@ -1,4 +1,5 @@
 const request = require('request-promise');
+const db = require('./db');
 
 const config = {
   postmark: {
@@ -22,7 +23,8 @@ const sendMail = function (To, Subject, HtmlBody) {
 };
 
 const logEmailErrors = (toEmail, info) => (e) => {
-  console.log(`Sending ${info} email from ${config.postmark.from} to ${toEmail} failed`, e);
+  db.logEmailError(e.message, e.stack, toEmail, info);
+  console.log('MAIL_ERROR', toEmail, info, e);
 };
 
 const templates = {
