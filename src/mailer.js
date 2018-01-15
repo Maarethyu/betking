@@ -62,7 +62,7 @@ const templates = {
   `,
 };
 
-const sendResetPasswordEmail = function (username, token, email) {
+const sendResetPasswordEmail = function (username, email, token) {
   return sendMail(
     email,
     'BetKing | Reset your password',
