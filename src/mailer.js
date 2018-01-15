@@ -1,12 +1,5 @@
 const request = require('request-promise');
-
-const config = {
-  postmark: {
-    serverToken: '52b660d0-d549-4277-81b7-aba0be92257a',
-    from: 'admin@betking.io'
-  },
-  host: 'http://localhost:8080'
-};
+const config = require('config');
 
 const sendMail = function (To, Subject, HtmlBody) {
   return request({
@@ -15,14 +8,14 @@ const sendMail = function (To, Subject, HtmlBody) {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'X-Postmark-Server-Token': config.postmark.serverToken
+      'X-Postmark-Server-Token': config.get('MAILER_SERVER_TOKEN')
     },
-    body: JSON.stringify({From: config.postmark.from, To, Subject, HtmlBody})
+    body: JSON.stringify({From: config.get('MAILER_SENDER_EMAIL'), To, Subject, HtmlBody})
   });
 };
 
 const logEmailErrors = (toEmail, info) => (e) => {
-  console.log(`Sending ${info} email from ${config.postmark.from} to ${toEmail} failed`, e);
+  console.log(`Sending ${info} email from ${config.get('MAILER_SENDER_EMAIL')} to ${toEmail} failed`, e);
 };
 
 const templates = {
@@ -31,8 +24,8 @@ const templates = {
 
     <p>Click on the link below to reset your password</p>
     <br>
-    <a href="${config.host}/reset-password?token=${token}">
-      ${config.host}/reset-password?token=${token}
+    <a href="${config.get('MAILER_HOST')}/reset-password?token=${token}">
+      ${config.get('MAILER_HOST')}/reset-password?token=${token}
     </a>
   `,
 

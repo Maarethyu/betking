@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const config = require('config');
 const db = require('../db');
 const mailer = require('../mailer');
 const helpers = require('../helpers');
@@ -11,7 +12,7 @@ const createSession = async function (res, userId, rememberMe, ip, fingerprint) 
   res.cookie('session', session.id,
     {
       maxAge: rememberMe ? 365 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000,
-      secure: false, // TODO -- have cookie.secure as config variable
+      secure: config.get('SESSION_COOKIE_SECURE'),
       httpOnly: true
     });
 };
