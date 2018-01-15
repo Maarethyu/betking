@@ -66,7 +66,7 @@ const getConsecutiveFailedLogins = async (userId) => {
 };
 
 const lockUserAccount = async (userId) => {
-    await db.none('UPDATE users SET locked_at = NOW() WHERE id = $1', userId);
+  await db.none('UPDATE users SET locked_at = NOW() WHERE id = $1', userId);
 };
 
 const updateEmail = async (userId, email) => {
@@ -159,6 +159,11 @@ const isIpWhitelisted = async (ip, userId) => {
   });
 };
 
+const getLoginAttempts = async (userId) => {
+  const results = await db.any('SELECT * FROM login_attempts WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10', userId);
+  return results;
+};
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
@@ -185,3 +190,4 @@ module.exports.removeIpFromWhitelist = removeIpFromWhitelist;
 module.exports.getWhitelistedIps = getWhitelistedIps;
 module.exports.isIpWhitelisted = isIpWhitelisted;
 module.exports.lockUserAccount = lockUserAccount;
+module.exports.getLoginAttempts = getLoginAttempts;
