@@ -1,7 +1,8 @@
 const db = require('./db');
 const helpers = require('./helpers');
+const {rejSafe} = require('./errorHandlers');
 
-const attachCurrentUserToRequest = async (req, res, next) => {
+const attachCurrentUserToRequest = rejSafe(async (req, res, next) => {
   const sessionId = req.cookies.session;
   // validate sessionid is uuid
 
@@ -13,20 +14,19 @@ const attachCurrentUserToRequest = async (req, res, next) => {
   }
 
   next();
-};
+});
 
-const requireLoggedIn = async (req, res, next) => {
+const requireLoggedIn = rejSafe(async (req, res, next) => {
   if (!req.currentUser) {
     // this should maybe return login url?
     res.status(401).send('Unauthorized');
     return; // should this be here? do we need   res.end();?
-    // throw new Error('Requires logged in user');
   }
 
   next();
-};
+});
 
-const require2fa = async (req, res, next) => {
+const require2fa = rejSafe(async (req, res, next) => {
   if (req.currentUser.mfa_key) {
     /* If user has 2fa enabled, check if req.body.otp is valid */
     const isOtpValid = helpers.isOtpValid(req.currentUser.mfa_key, req.body.otp);
@@ -50,9 +50,9 @@ const require2fa = async (req, res, next) => {
   }
 
   next();
-};
+});
 
-const requireWhitelistedIp = async (req, res, next) => {
+const requireWhitelistedIp = rejSafe(async (req, res, next) => {
   // check if not a whitelisted Ip
   const ip = helpers.getIp(req);
 
@@ -62,7 +62,7 @@ const requireWhitelistedIp = async (req, res, next) => {
   }
 
   next();
-};
+});
 
 module.exports.attachCurrentUserToRequest = attachCurrentUserToRequest;
 module.exports.requireLoggedIn = requireLoggedIn;

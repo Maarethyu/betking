@@ -66,7 +66,7 @@ const getConsecutiveFailedLogins = async (userId) => {
 };
 
 const lockUserAccount = async (userId) => {
-    await db.none('UPDATE users SET locked_at = NOW() WHERE id = $1', userId);
+  await db.none('UPDATE users SET locked_at = NOW() WHERE id = $1', userId);
 };
 
 const updateEmail = async (userId, email) => {
@@ -159,6 +159,14 @@ const isIpWhitelisted = async (ip, userId) => {
   });
 };
 
+const logError = async (msg, stack, source, reqId, userId) => {
+  await db.none('INSERT INTO error_logs (msg, stack, source, req_id, user_id) VALUES ($1, $2, $3, $4, $5)', [msg, stack, source, reqId, userId])
+    .catch(error => {
+      // Do not throw error from here to prevent infinite loop
+      console.log('Error writing to error logs', error);
+    });
+};
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
@@ -185,3 +193,4 @@ module.exports.removeIpFromWhitelist = removeIpFromWhitelist;
 module.exports.getWhitelistedIps = getWhitelistedIps;
 module.exports.isIpWhitelisted = isIpWhitelisted;
 module.exports.lockUserAccount = lockUserAccount;
+module.exports.logError = logError;

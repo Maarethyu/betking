@@ -56,5 +56,14 @@ app.get('*', function (req, res) {
   res.sendFile(`${frontendStaticPath}/index.html`); // from the front end folder
 });
 
+app.use(function (error, req, res, next) {
+  if (!error.DB_ERROR) { // Because errors at db level are logged separately
+    require('./db').logError(error.message, error.stack, 'API_ERROR', req.id, req.currentUser && req.currentUser.id);
+    console.log('API_ERROR', error);
+  }
+
+  res.status(500).send('An error occured');
+});
+
 app.listen(config.get('PORT'));
 console.log(`server listenging on port ${config.get('PORT')}`);

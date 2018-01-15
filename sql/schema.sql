@@ -77,6 +77,17 @@ CREATE TABLE whitelisted_ips (
 
 CREATE INDEX whitelisted_ips_user_id_idx ON whitelisted_ips USING btree(user_id);
 
+-- error_logs table
+CREATE TABLE error_logs (
+  id bigserial PRIMARY KEY,
+  created_at timestamp with time zone  NOT NULL DEFAULT NOW(),
+  msg text NULL,
+  stack text NULL,
+  source text NOT NULL,
+  req_id uuid NULL,
+  user_id bigint NULL
+);
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO bk;

@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const db = require('../db');
 const mailer = require('../mailer');
 const helpers = require('../helpers');
+const {rejSafe} = require('../errorHandlers');
 
 const createSession = async function (res, userId, rememberMe, ip, fingerprint) {
   const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks', ip, fingerprint);
@@ -16,7 +17,7 @@ const createSession = async function (res, userId, rememberMe, ip, fingerprint) 
     });
 };
 
-router.post('/login', async function (req, res, next) {
+router.post('/login', rejSafe(async function (req, res, next) {
   req.check('password', 'Invalid Password').exists();
   req.check('username', 'Invalid Username').exists();
   req.check('rememberme', 'Invalid remember me option').isBoolean();
@@ -110,9 +111,9 @@ router.post('/login', async function (req, res, next) {
     dateJoined: user.date_joined,
     is2faEnabled: !!user.mfa_key
   });
-});
+}));
 
-router.post('/register', async function (req, res, next) {
+router.post('/register', rejSafe(async function (req, res, next) {
   req.check('password', 'Invalid Password').exists()
     .isLength({min: 6, max: 50});
 
@@ -182,9 +183,9 @@ router.post('/register', async function (req, res, next) {
     res.status(500)
       .end();
   }
-});
+}));
 
-router.post('/forgot-password', async function (req, res, next) {
+router.post('/forgot-password', rejSafe(async function (req, res, next) {
   req.check('email', 'Invalid Email').exists()
     .trim()
     .isLength({max: 255})
@@ -216,9 +217,9 @@ router.post('/forgot-password', async function (req, res, next) {
   mailer.sendResetPasswordEmail(user.username, user.email, resetToken.id);
 
   res.status(200).json({message: successMessage});
-});
+}));
 
-router.post('/reset-password', async function (req, res, next) {
+router.post('/reset-password', rejSafe(async function (req, res, next) {
   req.check('password', 'Invalid Password').exists()
     .isLength({min: 6, max: 50});
 
@@ -242,6 +243,6 @@ router.post('/reset-password', async function (req, res, next) {
   } catch (e) {
     res.status(409).json({error: 'Invalid token'});
   }
-});
+}));
 
 module.exports = router;
