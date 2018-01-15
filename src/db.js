@@ -66,7 +66,7 @@ const getConsecutiveFailedLogins = async (userId) => {
 };
 
 const lockUserAccount = async (userId) => {
-    await db.none('UPDATE users SET locked_at = NOW() WHERE id = $1', userId);
+  await db.none('UPDATE users SET locked_at = NOW() WHERE id = $1', userId);
 };
 
 const updateEmail = async (userId, email) => {

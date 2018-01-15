@@ -1,13 +1,14 @@
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
+const config = require('config');
 
 const getNew2faSecret = function () {
-  const secret = speakeasy.generateSecret({length: 32, name: 'BetKing'});
+  const secret = speakeasy.generateSecret({length: 32, name: config.get('PROJECT_NAME')});
   return secret.base32;
 };
 
 const get2faQR = async function (secret) {
-  const qr = await qrcode.toDataURL(`otpauth://totp/BetKing?secret=${secret}`);
+  const qr = await qrcode.toDataURL(`otpauth://totp/${config.get('PROJECT_NAME')}?secret=${secret}`);
   return qr;
 };
 
