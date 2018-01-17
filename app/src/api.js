@@ -59,5 +59,8 @@ export default {
   },
   addIp (ip) {
     return post('/api/account/add-whitelisted-ip', {ip});
+  },
+  getLoginAttempts () {
+    return get('/api/account/get-login-attempts');
   }
 };
