@@ -5,8 +5,10 @@ const uuid = require('uuid');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const expressValidator = require('express-validator');
+
 const app = express();
 const mw = require('./middleware');
+require('./middleware-wrapper');
 
 /* We should ideally never land up having uncaught exceptions / rejections. */
 process.on('unhandledRejection', (reason, p) => {

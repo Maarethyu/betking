@@ -4,16 +4,15 @@ const db = require('../db');
 const helpers = require('../helpers');
 const mw = require('../middleware');
 const bcrypt = require('bcrypt');
-const {rejSafe} = require('../errorHandlers');
 
 router.use(mw.requireLoggedIn);
 
-router.post('/logout', rejSafe(async function (req, res, next) {
+router.post('/logout', async function (req, res, next) {
   await db.logoutSession(req.currentUser.id, req.cookies.session);
   res.end();
-}));
+});
 
-router.get('/me', rejSafe(async function (req, res, next) {
+router.get('/me', async function (req, res, next) {
   // todo should this header setting be here?
   res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
   res.json({
@@ -24,9 +23,9 @@ router.get('/me', rejSafe(async function (req, res, next) {
     is2faEnabled: !!req.currentUser.mfa_key,
     dateJoined: req.currentUser.date_joined
   });
-}));
+});
 
-router.post('/change-email', rejSafe(async function (req, res, next) {
+router.post('/change-email', async function (req, res, next) {
   req.check('email', 'Invalid Email').exists()
     .trim()
     .isLength({max: 255})
@@ -46,9 +45,9 @@ router.post('/change-email', rejSafe(async function (req, res, next) {
   await db.updateEmail(req.currentUser.id, req.body.email);
 
   res.end();
-}));
+});
 
-router.post('/change-password', rejSafe(async function (req, res, next) {
+router.post('/change-password', async function (req, res, next) {
   req.check('existingPassword', 'Invalid existing password').exists()
     .trim()
     .isLength({min: 6, max: 50});
@@ -75,9 +74,9 @@ router.post('/change-password', rejSafe(async function (req, res, next) {
   await db.logoutAllSessions(req.currentUser.id);
 
   res.end();
-}));
+});
 
-router.get('/active-sessions', rejSafe(async function (req, res, next) {
+router.get('/active-sessions', async function (req, res, next) {
   const result = await db.getActiveSessions(req.currentUser.id);
 
   const sessions = result.map(session => ({
@@ -87,9 +86,9 @@ router.get('/active-sessions', rejSafe(async function (req, res, next) {
   }));
 
   res.json({sessions});
-}));
+});
 
-router.post('/logout-session', rejSafe(async function (req, res, next) {
+router.post('/logout-session', async function (req, res, next) {
   req.check('id', 'Invalid session id').exists()
     .trim()
     .isUUID(4);
@@ -102,15 +101,15 @@ router.post('/logout-session', rejSafe(async function (req, res, next) {
   await db.logoutSession(req.currentUser.id, req.body.id);
 
   res.end();
-}));
+});
 
-router.post('/logout-all-sessions', rejSafe(async function (req, res, next) {
+router.post('/logout-all-sessions', async function (req, res, next) {
   await db.logoutAllSessions(req.currentUser.id);
 
   res.end();
-}));
+});
 
-router.get('/2fa-key', rejSafe(async function (req, res, next) {
+router.get('/2fa-key', async function (req, res, next) {
   /* If user has 2fa enabled, do not generate or send key */
   if (req.currentUser.mfa_key) {
     return res.status(400).send({error: 'Two factor authentication is already enabled'});
@@ -131,9 +130,9 @@ router.get('/2fa-key', rejSafe(async function (req, res, next) {
     key: newKey.temp_mfa_key,
     qr: await helpers.get2faQR(newKey.temp_mfa_key)
   });
-}));
+});
 
-router.post('/enable-2fa', rejSafe(async function (req, res, next) {
+router.post('/enable-2fa', async function (req, res, next) {
   /* Check if user has it already enabled, if yes return */
   if (req.currentUser.mfa_key) {
     return res.status(400).json({error: 'Two factor authentication is already enabled'});
@@ -161,9 +160,9 @@ router.post('/enable-2fa', rejSafe(async function (req, res, next) {
   await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
 
   res.end();
-}));
+});
 
-router.post('/disable-2fa', rejSafe(async function (req, res, next) {
+router.post('/disable-2fa', async function (req, res, next) {
   /* Check if user has it enabled, if no - return */
   if (!req.currentUser.mfa_key) {
     return res.status(400).json({error: 'Two factor authentication is not enabled for this account'});
@@ -199,9 +198,9 @@ router.post('/disable-2fa', rejSafe(async function (req, res, next) {
   await db.disableTwoFactor(req.currentUser.id);
 
   res.end();
-}));
+});
 
-router.post('/add-whitelisted-ip', rejSafe(async function (req, res, next) {
+router.post('/add-whitelisted-ip', async function (req, res, next) {
   /* Requires req.body.ip to be a valid ip, if not provided, set current ip as whitelisted */
   req.check('ip', 'Invalid ip')
     .exists()
@@ -219,9 +218,9 @@ router.post('/add-whitelisted-ip', rejSafe(async function (req, res, next) {
   await db.addIpInWhitelist(ip, req.currentUser.id);
 
   res.end();
-}));
+});
 
-router.post('/remove-whitelisted-ip', mw.require2fa, rejSafe(async function (req, res, next) {
+router.post('/remove-whitelisted-ip', mw.require2fa, async function (req, res, next) {
   req.check('ip', 'Invalid ip').exists()
     .trim()
     .isIP();
@@ -234,12 +233,12 @@ router.post('/remove-whitelisted-ip', mw.require2fa, rejSafe(async function (req
   await db.removeIpFromWhitelist(req.body.ip, req.currentUser.id);
 
   res.end();
-}));
+});
 
-router.get('/get-whitelisted-ips', rejSafe(async function (req, res, next) {
+router.get('/get-whitelisted-ips', async function (req, res, next) {
   const ips = await db.getWhitelistedIps(req.currentUser.id);
 
   res.json({ips});
-}));
+});
 
 module.exports = router;
