@@ -137,6 +137,8 @@ router.post('/register', async function (req, res, next) {
     .matches(/^[a-z0-9_]+$/i) // name contains invalid characters
     .not()
     .matches(/^[_]|[_]$/i) // name starts or ends with underscores
+    .not()
+    .matches(/[_]{2,}/i) // name contains consecutive underscores
     .custom(value => db.isUserNameAlreadyTaken(req.body.username)
       .then(userNameExists => {
         if (userNameExists) throw new Error();
