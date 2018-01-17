@@ -18,7 +18,22 @@ const createSession = async function (res, userId, rememberMe, ip, fingerprint) 
 
 router.post('/login', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists();
-  req.check('username', 'Invalid Username').exists();
+  req.check('loginvia', 'Invalid login via option').exists()
+    .custom(value => value === 'username' || value === 'email')
+    .optional({checkFalsy: true});
+
+  const loginVia = req.body.loginvia || 'username';
+
+  if (loginVia === 'username') {
+    req.check('username', 'Invalid Username').exists();
+  }
+
+  if (loginVia === 'email') {
+    req.check('email', 'Invalid Username').exists()
+      .trim()
+      .isEmail();
+  }
+
   req.check('rememberme', 'Invalid remember me option').isBoolean();
   req.check('otp', 'Invalid two factor code').exists()
     .isInt()
@@ -30,7 +45,13 @@ router.post('/login', async function (req, res, next) {
     return res.status(400).json({errors});
   }
 
-  const user = await db.getUserByName(req.body.username);
+  /* Fetch user on basis of login via option */
+  let user = null;
+  if (loginVia === 'username') {
+    user = await db.getUserByName(req.body.username);
+  } else if (loginVia === 'email') {
+    user = await db.getUserByEmail(req.body.email);
+  }
   if (!user) {
     return res.status(401).json({error: 'Login failed'});
   }
