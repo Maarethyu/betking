@@ -73,8 +73,13 @@ const updateEmail = async (userId, email) => {
   await db.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]);
 };
 
-const updatePassword = async (userId, hash) => {
-  await db.none('UPDATE users set password = $2 WHERE id = $1', [userId, hash]);
+const updatePassword = async (userId, hash, currentSessionId) => {
+  await db.tx(t => {
+    return t.none('UPDATE users set password = $2 WHERE id = $1', [userId, hash])
+      .then(() => {
+        t.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1 AND id != $2', [userId, currentSessionId]);
+      });
+  });
 };
 
 const getActiveSessions = async (userId) => {
