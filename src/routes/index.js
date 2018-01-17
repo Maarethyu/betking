@@ -156,7 +156,7 @@ router.post('/register', async function (req, res, next) {
     return res.status(400).json({errors: validationResult.array()});
   }
 
-  const affiliateId = parseInt(req.cookies.aff_id, 10) || null;
+  const affiliateId = req.cookies.aff_id || null;
 
   const hash = await bcrypt.hash(req.body.password, 10);
 
