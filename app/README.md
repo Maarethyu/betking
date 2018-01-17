@@ -1,6 +1,6 @@
 # app
 
-> BetKingClient
+> Client
 
 ## Build Setup
 

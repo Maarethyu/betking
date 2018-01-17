@@ -1,8 +1,8 @@
 {
   "name": "app",
   "version": "1.0.0",
-  "description": "BetKingClient",
-  "author": "Dean Nolan <admin@betking.io>",
+  "description": "Client",
+  "author": "Dean Nolan",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
