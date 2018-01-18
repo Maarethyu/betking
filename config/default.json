@@ -5,5 +5,6 @@
   "MAILER_SENDER_EMAIL": "admin@betking.io",
   "MAILER_HOST": "http://localhost:8080",
   "SESSION_COOKIE_SECURE": false,
-  "CAPTCHA_SECRET": "6LdWpj8UAAAAAJIfkImnogk7wZhbY8JtQ3fsycW3"
+  "CAPTCHA_SECRET": "6LdWpj8UAAAAAJIfkImnogk7wZhbY8JtQ3fsycW3",
+  "PROJECT_NAME": "PROJECT NAME"
 }

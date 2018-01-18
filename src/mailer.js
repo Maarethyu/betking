@@ -30,7 +30,7 @@ const templates = {
   `,
 
   newLogin: (username, ip, userAgent) => `
-    <h2>BetKing Login</h2>
+    <h2>${config.get('PROJECT_NAME')} Login</h2>
     <br>
     <p>Dear ${username}</p>
 
@@ -45,20 +45,20 @@ const templates = {
     <p>If you are not the one who logged in or this login is suspicious, please change your password.</p>
     <br>
     <p>Best regards,</p>
-    <p>BetKing Team</p>
+    <p>${config.get('PROJECT_NAME')} Team</p>
   `,
 
   welcomeEmail: (username) => `
     <p>Dear ${username}</p>
 
-    <p>Welcome to BetKing!</p>
+    <p>Welcome to ${config.get('PROJECT_NAME')}!</p>
   `,
 };
 
-const sendResetPasswordEmail = function (username, token, email) {
+const sendResetPasswordEmail = function (username, email, token) {
   return sendMail(
     email,
-    'BetKing | Reset your password',
+    `${config.get('PROJECT_NAME')} | Reset your password`,
     templates.resetPassword(username, token)
   )
     .catch(logEmailErrors(email, 'reset password'));
@@ -67,7 +67,7 @@ const sendResetPasswordEmail = function (username, token, email) {
 const sendNewLoginEmail = function (username, ip, userAgent, email) {
   return sendMail(
     email,
-    'BetKing | New Login',
+    `${config.get('PROJECT_NAME')} | New Login`,
     templates.newLogin(username, ip, userAgent)
   )
     .catch(logEmailErrors(email, 'new login'));
@@ -76,7 +76,7 @@ const sendNewLoginEmail = function (username, ip, userAgent, email) {
 const sendWelcomeEmail = function (username, email) {
   return sendMail(
     email,
-    'BetKing | Welcome To BetKing',
+    `${config.get('PROJECT_NAME')} | Welcome To ${config.get('PROJECT_NAME')}`,
     templates.welcomeEmail(username)
   )
     .catch(logEmailErrors(email, 'welcome'));

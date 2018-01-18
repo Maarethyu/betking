@@ -114,7 +114,7 @@ export default {
         .then(res => {
           this.resetPasswordForm();
           this.fetchMe();
-          this.changePasswordMessage = 'Password changed successfully. You\'ll have to login again!';
+          this.changePasswordMessage = 'Password changed successfully.';
         })
         .catch(error => {
           this.showErrors(error.response);

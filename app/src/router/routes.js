@@ -7,6 +7,7 @@ import Settings from 'pages/Settings';
 import Sessions from 'pages/Sessions';
 import Set2fa from 'pages/Set2fa';
 import WhitelistedIps from 'pages/WhitelistedIps';
+import LoginAttempts from 'pages/LoginAttempts';
 
 import PageNotFound from 'pages/PageNotFound';
 
@@ -38,6 +39,7 @@ const routes = [
       {path: 'sessions', component: Sessions, meta: {requiresAuth: true}},
       {path: 'two-factor', component: Set2fa, meta: {requiresAuth: true}},
       {path: 'whitelisted-ips', component: WhitelistedIps, meta: {requiresAuth: true}},
+      {path: 'login-attempts', component: LoginAttempts, meta: {requiresAuth: true}},
     ]
   },
   /* Pages which do not need user session to be fetched */
