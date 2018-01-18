@@ -80,6 +80,8 @@ app.use(function (error, req, res, next) {
 
   require('./db').logError(error.message, error.stack, req.id, req.currentUser && req.currentUser.id, source, query, code);
 
+  console.log(source, error);
+
   res.status(500).send('An error occured');
 });
 
