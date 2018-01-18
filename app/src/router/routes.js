@@ -23,7 +23,8 @@ const routes = [
       {path: 'settings', component: () => import('pages/Settings'), meta: {requiresAuth: true}},
       {path: 'sessions', component: () => import('pages/Sessions'), meta: {requiresAuth: true}},
       {path: 'two-factor', component: () => import('pages/Set2fa'), meta: {requiresAuth: true}},
-      {path: 'whitelisted-ips', component: () => import('pages/WhitelistedIps'), meta: {requiresAuth: true}}
+      {path: 'whitelisted-ips', component: () => import('pages/WhitelistedIps'), meta: {requiresAuth: true}},
+      {path: 'login-attempts', component: () => import('pages/LoginAttempts'), meta: {requiresAuth: true}}
     ]
   },
   /* Pages which do not need user session to be fetched */

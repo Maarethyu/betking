@@ -1,8 +1,8 @@
 {
   "name": "vue-proj",
   "version": "1.0.0",
-  "description": "A Vue.js project",
-  "author": "Naisheel Verdhan <nverdhan@gmail.com>",
+  "description": "Client",
+  "author": "Dean Nolan",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
@@ -16,6 +16,7 @@
     "fingerprintjs2": "^1.5.1",
     "js-cookie": "^2.2.0",
     "moment": "^2.20.1",
+    "ua-parser-js": "^0.7.17",
     "vue": "^2.1.0",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",

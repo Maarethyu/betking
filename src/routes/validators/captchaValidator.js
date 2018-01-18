@@ -1,8 +1,5 @@
 const request = require('request-promise');
-
-const config = {
-  captchaSecret: '6LdWpj8UAAAAAJIfkImnogk7wZhbY8JtQ3fsycW3',
-};
+const config = require('config');
 
 /*
   * Accepts response = g-recaptcha-response from frontend
@@ -15,7 +12,7 @@ const config = {
 module.exports = (response, remoteip) => request({
   uri: 'https://www.google.com/recaptcha/api/siteverify',
   method: 'POST',
-  form: {secret: config.captchaSecret, response, remoteip}
+  form: {secret: config.get('CAPTCHA_SECRET'), response, remoteip}
 })
   .then((res) => {
     const validationResponse = JSON.parse(res);
