@@ -1,10 +1,10 @@
 {
-  "name": "BetKingServer",
+  "name": "Server",
   "version": "0.0.0",
-  "description": "BetKing Server",
+  "description": "Server",
   "author": "Dean Nolan",
-  "homepage": "https://betking.io",
-  "copyright": "Copyright 2017 BetKing",
+  "homepage": "",
+  "copyright": "Copyright 2017",
   "license": "MIT",
   "private": true,
   "scripts": {
