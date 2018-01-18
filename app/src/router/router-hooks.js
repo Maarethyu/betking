@@ -12,7 +12,7 @@ export const beforeEach = async (to, from, next) => {
         next(e);
       }
     }
-    
+
     /* Routes that require user to be logged out */
     if (to.matched.some(record => record.meta.requiresLoggedOut)) {
       if (store.getters.isLoggedOut) {
@@ -42,12 +42,6 @@ export const beforeEach = async (to, from, next) => {
   }
 
   next();
-};
-
-export const logout = async (to, from, next) => {
-  await store.dispatch('logout');
-
-  next('/');
 };
 
 export const onError = (error) => {

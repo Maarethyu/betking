@@ -44,7 +44,7 @@ app.use('/api', router);
   Is it necessary or the current system would work?
 */
 
-const frontendStaticPath = require('path').join(__dirname, '..', 'app/dist/static');
+const frontendStaticPath = require('path').join(__dirname, '..', 'app/dist');
 
 app.use(express.static(frontendStaticPath));
 
