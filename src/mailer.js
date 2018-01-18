@@ -1,4 +1,5 @@
 const request = require('request-promise');
+const db = require('./db');
 const config = require('config');
 
 const sendMail = function (To, Subject, HtmlBody) {
@@ -15,7 +16,8 @@ const sendMail = function (To, Subject, HtmlBody) {
 };
 
 const logEmailErrors = (toEmail, info) => (e) => {
-  console.log(`Sending ${info} email from ${config.get('MAILER_SENDER_EMAIL')} to ${toEmail} failed`, e);
+  db.logEmailError(e.message, e.stack, toEmail, info);
+  console.log('MAIL_ERROR', toEmail, info, e);
 };
 
 const templates = {

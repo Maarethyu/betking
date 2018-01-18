@@ -3,7 +3,10 @@ const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
 
 const initOptions = {
-  promiseLib: promise // overriding the default (ES6 Promise);
+  promiseLib: promise, // overriding the default (ES6 Promise);
+  error (error, e) {
+    error.DB_ERROR = true;
+  }
 };
 
 const pgp = require('pg-promise')(initOptions);
@@ -164,6 +167,22 @@ const isIpWhitelisted = async (ip, userId) => {
   });
 };
 
+const logError = async (msg, stack, reqId, userId, source, query, code) => {
+  await db.none('INSERT INTO error_logs (msg, stack, req_id, user_id, source, db_query, db_code) VALUES ($1, $2, $3, $4, $5, $6, $7)', [msg, stack, reqId, userId, source, query, code])
+    .catch(error => {
+      // Do not throw error from here to prevent infinite loop
+      console.log('Error writing to error logs', error);
+    });
+};
+
+const logEmailError = async (msg, stack, toEmail, info) => {
+  await db.none('INSERT INTO error_logs (msg, stack, to_email, mail_info, source) VALUES ($1, $2, $3, $4, $5)', [msg, stack, toEmail, info, 'MAIL_ERROR'])
+    .catch(error => {
+      // Do not throw error from here to prevent infinite loop
+      console.log('Error writing to error logs', error);
+    });
+};
+
 const getLoginAttempts = async (userId) => {
   const results = await db.any('SELECT * FROM login_attempts WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10', userId);
   return results;
@@ -195,4 +214,6 @@ module.exports.removeIpFromWhitelist = removeIpFromWhitelist;
 module.exports.getWhitelistedIps = getWhitelistedIps;
 module.exports.isIpWhitelisted = isIpWhitelisted;
 module.exports.lockUserAccount = lockUserAccount;
+module.exports.logError = logError;
+module.exports.logEmailError = logEmailError;
 module.exports.getLoginAttempts = getLoginAttempts;
