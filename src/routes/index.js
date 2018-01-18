@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const RateLimit = require('express-rate-limit');
 const config = require('config');
 const db = require('../db');
 const mailer = require('../mailer');
@@ -16,6 +17,14 @@ const createSession = async function (res, userId, rememberMe, ip, fingerprint) 
       httpOnly: true
     });
 };
+
+const apiLimiter = new RateLimit({
+  windowMs: 1000,
+  max: config.get('REGISTER_RATE_LIMIT'),
+  delayAfter: 1,
+  delayMs: 200,
+  keyGenerator: helpers.getIp
+});
 
 router.post('/login', async function (req, res, next) {
   req.check('password', 'Invalid Password').exists();
@@ -134,7 +143,7 @@ router.post('/login', async function (req, res, next) {
   });
 });
 
-router.post('/register', async function (req, res, next) {
+router.post('/register', apiLimiter, async function (req, res, next) {
   req.check('password', 'Invalid Password').exists()
     .isLength({min: 6, max: 50});
 
