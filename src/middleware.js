@@ -28,20 +28,32 @@ const requireLoggedIn = async (req, res, next) => {
 const require2fa = async (req, res, next) => {
   if (req.currentUser.mfa_key) {
     /* If user has 2fa enabled, check if req.body.otp is valid */
+    req.check('otp').exists()
+      .isInt()
+      .isLength({min: 6, max: 6});
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({error: 'Invalid two factor code'});
+    }
+
     const isOtpValid = helpers.isOtpValid(req.currentUser.mfa_key, req.body.otp);
 
     if (isOtpValid) {
       try {
         await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
+        await db.log2faAttempt(req.currentUser.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
         next();
       } catch (e) {
         if (e.message === 'CODE_ALREADY_USED') {
+          await db.log2faAttempt(req.currentUser.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
           res.status(400).json({error: 'You have used this two factor code recently. Wait until it refreshes (30 seconds usually)'});
         } else {
           throw e;
         }
       }
     } else {
+      await db.log2faAttempt(req.currentUser.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
       res.status(400).json({error: 'Invalid two factor code'});
     }
 
