@@ -2,6 +2,7 @@ const config = require('config');
 const express = require('express');
 const logger = require('morgan');
 const uuid = require('uuid');
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const expressValidator = require('express-validator');
@@ -40,6 +41,7 @@ logger.token('id', function getId (req) {
 
 app.use(logger(':id :remote-addr :method :url :status :response-time'));
 
+app.use(helmet({frameguard: {action: 'deny'}}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
