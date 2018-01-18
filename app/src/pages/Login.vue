@@ -5,9 +5,17 @@
     <div class="error">{{errors.global}}</div>
 
     <form v-on:submit.prevent="onLogin">
-      <label for="username">Username</label>
-      <input id="username" placeholder="username" name="username">
+      <label for="loginvia">Login via</label>
+      <select name="loginvia" id="loginvia" v-model="usernameOrEmail">
+        <option value="Username">Username</option>
+        <option value="Email">Email</option>
+      </select>
+      <div class="error">{{errors.loginvia}}</div>
+
+      <label for="username">{{usernameOrEmail}}</label>
+      <input id="username" :placeholder="usernameOrEmail" name="username">
       <div class="error">{{errors.username}}</div>
+      <div class="error">{{errors.email}}</div>
 
       <label for="password">Password</label>
       <input id="password" type="password" placeholder="Password" name="password">
@@ -41,7 +49,8 @@ export default {
   data: () => ({
     captchaId: null,
     errors: {},
-    fingerprint: null
+    fingerprint: null,
+    usernameOrEmail: 'Username'
   }),
   created () {
     loadRecaptcha(this.checkForCaptcha.bind(this));
@@ -50,7 +59,7 @@ export default {
   methods: {
     onLogin (e) {
       const data = {
-        username: e.target.elements.username.value,
+        loginvia: this.usernameOrEmail.toLowerCase(),
         password: e.target.elements.password.value,
         otp: e.target.elements.otp.value,
         rememberme: e.target.elements.rememberme.checked,
@@ -58,6 +67,8 @@ export default {
         'g-recaptcha-response': e.target.elements['g-recaptcha-response'] &&
           e.target.elements['g-recaptcha-response'].value
       };
+
+      data[data.loginvia] = e.target.elements.username.value;
 
       api.login(data)
         .then(res => {
@@ -77,6 +88,18 @@ export default {
         this.errors = {
           global: response.data.error
         };
+        return;
+      }
+
+      if (response && response.status === 400) {
+        const newErrors = {};
+
+        response.data.errors.forEach(error => {
+          newErrors[error.param] = newErrors[error.param]
+            ? `${newErrors[error.param]} / ${error.msg}` : error.msg;
+        });
+
+        this.errors = newErrors;
         return;
       }
 

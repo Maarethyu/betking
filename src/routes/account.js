@@ -70,8 +70,7 @@ router.post('/change-password', async function (req, res, next) {
 
   const newPasswordHash = await bcrypt.hash(req.body.password2, 10);
 
-  await db.updatePassword(req.currentUser.id, newPasswordHash);
-  await db.logoutAllSessions(req.currentUser.id);
+  await db.updatePassword(req.currentUser.id, newPasswordHash, req.cookies.session);
 
   res.end();
 });
@@ -239,6 +238,12 @@ router.get('/get-whitelisted-ips', async function (req, res, next) {
   const ips = await db.getWhitelistedIps(req.currentUser.id);
 
   res.json({ips});
+});
+
+router.get('/get-login-attempts', async function (req, res, next) {
+  const loginAttempts = await db.getLoginAttempts(req.currentUser.id);
+
+  res.json({loginAttempts});
 });
 
 module.exports = router;
