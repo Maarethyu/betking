@@ -42,18 +42,15 @@ const require2fa = async (req, res, next) => {
     if (isOtpValid) {
       try {
         await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
-        await db.log2faAttempt(req.currentUser.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
         next();
       } catch (e) {
         if (e.message === 'CODE_ALREADY_USED') {
-          await db.log2faAttempt(req.currentUser.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
           res.status(400).json({error: 'You have used this two factor code recently. Wait until it refreshes (30 seconds usually)'});
         } else {
           throw e;
         }
       }
     } else {
-      await db.log2faAttempt(req.currentUser.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
       res.status(400).json({error: 'Invalid two factor code'});
     }
 
