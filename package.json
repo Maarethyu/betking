@@ -8,12 +8,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "concurrently --kill-others --names \"NODE,WEBPACK\" -c \"green,magenta\" \"npm run server:dev\" \"npm run app:dev\"",
+    "start": "nodemon src/server.js",
     "install-all": "npm install && cd app && npm install && cd ..",
     "lint": "eslint --ext .js src && cd app && npm run lint && cd ..",
     "app:dev": "cd app && npm run dev",
     "app:build": "cd app && npm run build",
-    "server:dev": "nodemon src/server.js"
+    "server:prod": "cross-env NODE_ENV=production nodemon src/server.js"
   },
   "dependencies": {
     "bcrypt": "^1.0.3",

@@ -5,7 +5,7 @@
   "author": "Dean Nolan",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --inline --progress --config build/dev-server.js",
     "start": "npm run dev",
     "test": "npm run unit",
     "lint": "eslint --ext .js,.vue src test/unit/specs",
@@ -67,6 +67,7 @@
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-server": "^2.9.1",
+    "webpack-hot-middleware": "^2.21.0",
     "webpack-merge": "^4.1.0"
   },
   "engines": {

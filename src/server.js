@@ -71,9 +71,19 @@ app.get('/404', function (req, res) {
   res.status(404).send('Not found');
 });
 
-app.get('*', function (req, res) {
-  res.sendFile(`${frontendStaticPath}/index.html`); // from the front end folder
-});
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+  /** Development mode
+   * Start webpack-dev-middleware
+   * Mount app at *
+   * Add csrf protection
+   */
+  require(require('path').join(__dirname, '..', 'app/build/express-server'))(app);
+} else {
+  /* Production Mode */
+  app.get('*', function (req, res) {
+    res.sendFile(`${frontendStaticPath}/index.html`); // from the front end folder
+  });
+}
 
 app.use(function (error, req, res, next) {
   const query = error.query ? error.query.toString() : null;
@@ -88,4 +98,4 @@ app.use(function (error, req, res, next) {
 });
 
 app.listen(config.get('PORT'));
-console.log(`server listenging on port ${config.get('PORT')}`);
+console.log(`server listening on port ${config.get('PORT')}`);
