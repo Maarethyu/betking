@@ -4,7 +4,7 @@
   "REGISTER_RATE_LIMIT": 10,
   "MAILER_SERVER_TOKEN": "52b660d0-d549-4277-81b7-aba0be92257a",
   "MAILER_SENDER_EMAIL": "admin@betking.io",
-  "MAILER_HOST": "http://localhost:8080",
+  "MAILER_HOST": "http://localhost:3002",
   "SESSION_COOKIE_SECURE": false,
   "CAPTCHA_SECRET": "6LdWpj8UAAAAAJIfkImnogk7wZhbY8JtQ3fsycW3",
   "PROJECT_NAME": "PROJECT NAME"
