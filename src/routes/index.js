@@ -94,15 +94,20 @@ router.post('/login', async function (req, res, next) {
       /* Otp is valid, check if it hasn't been used before */
       try {
         await db.insertTwoFactorCode(user.id, req.body.otp);
+        await db.log2faAttempt(user.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
         isTwoFactorOk = true;
       } catch (e) {
         if (e.message === 'CODE_ALREADY_USED') {
           // TODO: Should we let the user know that his OTP has just expired??
+          await db.log2faAttempt(user.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
           isTwoFactorOk = false;
         } else {
           throw e;
         }
       }
+    } else {
+      await db.log2faAttempt(user.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
+      isTwoFactorOk = false;
     }
   } else {
     /* If user has 2fa not enabled, isTwoFactorOk = true */

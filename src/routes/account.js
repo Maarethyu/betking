@@ -161,36 +161,10 @@ router.post('/enable-2fa', async function (req, res, next) {
   res.end();
 });
 
-router.post('/disable-2fa', async function (req, res, next) {
+router.post('/disable-2fa', mw.require2fa, async function (req, res, next) {
   /* Check if user has it enabled, if no - return */
   if (!req.currentUser.mfa_key) {
     return res.status(400).json({error: 'Two factor authentication is not enabled for this account'});
-  }
-
-  /* Check if two factor code is valid, if not return with error */
-  req.check('otp').exists()
-    .isInt()
-    .isLength({min: 6, max: 6});
-
-  const validationResult = await req.getValidationResult();
-  if (!validationResult.isEmpty()) {
-    return res.status(400).json({error: 'Invalid two factor code'});
-  }
-
-  /* Check if two factor code is correct, if not return with error */
-  if (!helpers.isOtpValid(req.currentUser.mfa_key, req.body.otp)) {
-    return res.status(400).json({error: 'Invalid two factor code'});
-  }
-
-  /* Two factor code is valid and correct, check if this code has not been used before */
-  try {
-    await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
-  } catch (e) {
-    if (e.message === 'CODE_ALREADY_USED') {
-      return res.status(400).json({error: 'You have used this code recently. Wait until it refreshes (30 seconds usually)'});
-    } else {
-      throw e;
-    }
   }
 
   /* Two factor code was not used before. We can disable two factor auth now */

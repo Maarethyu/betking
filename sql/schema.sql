@@ -40,6 +40,19 @@ CREATE TABLE login_attempts (
 
 CREATE INDEX login_attempts_user_id_idx ON login_attempts USING btree(user_id);
 
+-- mfa_attempts table
+CREATE TABLE mfa_attempts (
+  id bigserial PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  is_success boolean NOT NULL,
+  ip_address inet NOT NULL,
+  fingerprint text NOT NULL,
+  user_agent text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX mfa_attempts_user_id_idx ON mfa_attempts USING btree(user_id);
+
 -- active_sessions view
 CREATE VIEW active_sessions AS
   SELECT *

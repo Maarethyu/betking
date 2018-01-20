@@ -28,6 +28,15 @@ const requireLoggedIn = async (req, res, next) => {
 const require2fa = async (req, res, next) => {
   if (req.currentUser.mfa_key) {
     /* If user has 2fa enabled, check if req.body.otp is valid */
+    req.check('otp').exists()
+      .isInt()
+      .isLength({min: 6, max: 6});
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({error: 'Invalid two factor code'});
+    }
+
     const isOtpValid = helpers.isOtpValid(req.currentUser.mfa_key, req.body.otp);
 
     if (isOtpValid) {
