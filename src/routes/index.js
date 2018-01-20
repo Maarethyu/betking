@@ -203,6 +203,9 @@ router.post('/register', apiLimiter, async function (req, res, next) {
     // Send welcome email if user added email to profile
     if (user.email) {
       mailer.sendWelcomeEmail(user.username, user.email);
+      /* Send mail for email id verification */
+      const verifyEmailToken = await db.createVerifyEmailToken(user.id, user.email);
+      mailer.sendVerificationEmail(user.username, user.email, verifyEmailToken.id);
     }
 
     res.json({
@@ -275,6 +278,25 @@ router.post('/reset-password', async function (req, res, next) {
 
     res.status(200).json({message: 'Password changed successfully'});
   } catch (e) {
+    res.status(409).json({error: 'Invalid token'});
+  }
+});
+
+router.post('/verify-email', async function (req, res, next) {
+  req.check('token', 'Invalid token').exists()
+    .isUUID(4);
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({error: 'Invalid token'});
+  }
+
+  try {
+    await db.markEmailAsVerified(req.body.token);
+
+    res.status(200).json({message: 'Email successfully verified.'});
+  } catch (e) {
+    console.log(e);
     res.status(409).json({error: 'Invalid token'});
   }
 });

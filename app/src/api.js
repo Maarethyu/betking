@@ -62,5 +62,8 @@ export default {
   },
   getLoginAttempts () {
     return get('/api/account/get-login-attempts');
+  },
+  verifyEmail (data) {
+    return post('/api/verify-email', data);
   }
 };
