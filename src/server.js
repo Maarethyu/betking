@@ -6,8 +6,11 @@ const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const expressValidator = require('express-validator');
+const fs = require('fs');
+const csrfProtection = require('csurf')({cookie: true});
 
 const app = express();
+const helpers = require('./helpers');
 const mw = require('./middleware');
 require('./middleware-wrapper');
 
@@ -52,7 +55,7 @@ app.use(mw.attachCurrentUserToRequest);
 const router = express.Router();
 router.use('', require('./routes/index'));
 router.use('/account', require('./routes/account'));
-app.use('/api', router);
+app.use('/api', csrfProtection, router);
 
 /*
   TODO:
@@ -65,7 +68,7 @@ app.use('/api', router);
 
 const frontendStaticPath = require('path').join(__dirname, '..', 'app/dist');
 
-app.use(express.static(frontendStaticPath));
+app.use('/static', express.static(`${frontendStaticPath}/static`));
 
 app.get('/404', function (req, res) {
   res.status(404).send('Not found');
@@ -80,12 +83,21 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
   require(require('path').join(__dirname, '..', 'app/build/express-server'))(app);
 } else {
   /* Production Mode */
-  app.get('*', function (req, res) {
-    res.sendFile(`${frontendStaticPath}/index.html`); // from the front end folder
+  app.get('*', csrfProtection, function (req, res) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+
+    fs.createReadStream(`${frontendStaticPath}/index.html`)
+      .pipe(helpers.addCsrfToken(req.csrfToken()))
+      .pipe(res);
   });
 }
 
 app.use(function (error, req, res, next) {
+  /* KNOWN ERRORS */
+  /* 1. Check if error due to csrf token */
+  if (error.code === 'EBADCSRFTOKEN') {
+    return res.status(403).send('csrf protection failed');
+  }
   const query = error.query ? error.query.toString() : null;
   const code = error.code || null;
   const source = error.DB_ERROR ? 'DB_ERROR' : 'API_ERROR';

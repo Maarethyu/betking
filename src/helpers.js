@@ -1,6 +1,7 @@
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const config = require('config');
+const Transform = require('stream').Transform;
 
 const getNew2faSecret = function () {
   const secret = speakeasy.generateSecret({length: 32, name: config.get('PROJECT_NAME')});
@@ -34,6 +35,20 @@ const isValidUuid = function (sessionId) {
   return uuidV4Regex.test(sessionId);
 };
 
+const addCsrfToken = function (csrfToken) {
+  const parser = new Transform();
+
+  parser._transform = function (data, encoding, done) { // eslint-disable-line no-underscore-dangle
+    const str = data.toString().replace(
+      '</body>',
+      `<input type="hidden" id="csrfToken" value="${csrfToken}"/></body>`
+    );
+    done(null, str);
+  };
+
+  return parser;
+};
+
 module.exports = {
   getIp,
   getFingerPrint,
@@ -41,5 +56,6 @@ module.exports = {
   isValidUuid,
   get2faQR,
   getNew2faSecret,
-  isOtpValid
+  isOtpValid,
+  addCsrfToken
 };
