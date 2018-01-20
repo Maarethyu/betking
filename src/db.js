@@ -81,7 +81,7 @@ const updateEmail = async (userId, email) => {
   await db.tx(t => {
     return t.batch([
       /* Change email */
-      t.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]),
+      t.none('UPDATE users set email = $2, email_verified = false WHERE id = $1', [userId, email]),
       /* Mark all previous reset password tokens as expired */
       t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', userId)
     ])
@@ -211,10 +211,15 @@ const markEmailAsVerified = async (token) => {
     return t.one('SELECT u.email, e.user_id FROM users AS u INNER JOIN verify_email_tokens AS e ON u.id = e.user_id WHERE e.id = $1', token)
       // Set current verify-email token as used and expired. If token not found, exit
       .then(res => t.batch([
+        // Expire the current token, mark it as used
         t.one('UPDATE verify_email_tokens SET used = $1, expired_at = NOW() where id = $2 AND used = false AND expired_at > NOW() AND email = $3 RETURNING email', [true, token, res.email]),
+
+        // Verify user's email id
         t.none('UPDATE users SET email_verified = $1 WHERE id = $2', [true, res.user_id]),
-        t.none('UPDATE verify_email_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', res.user_id)
-      ]));
+
+        // Expire all other verify email tokens
+        t.none('UPDATE verify_email_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW() AND id != $2', [res.user_id, token])
+      ]))
   });
 };
 
