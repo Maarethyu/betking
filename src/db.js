@@ -63,6 +63,11 @@ const logLoginAttempt = async (userId, isSuccess, ip, fingerprint, userAgent) =>
   return result;
 };
 
+const log2faAttempt = async (userId, isSuccess, ip, fingerprint, userAgent) => {
+  const result = await db.one('INSERT INTO mfa_attempts (user_id, is_success, ip_address, fingerprint, user_agent) VALUES ($1, $2, $3, $4, $5) RETURNING *', [userId, isSuccess, ip, fingerprint, userAgent]);
+  return result;
+};
+
 const getConsecutiveFailedLogins = async (userId) => {
   const result = await db.one('select count(*) from login_attempts where created_at > NOW() - interval \'60 seconds\' AND is_success = false AND user_id = $1;', userId);
   return result.count;
@@ -73,7 +78,14 @@ const lockUserAccount = async (userId) => {
 };
 
 const updateEmail = async (userId, email) => {
-  await db.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]);
+  await db.tx(t => {
+    return t.batch([
+      /* Change email */
+      t.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]),
+      /* Mark all previous reset password tokens as expired */
+      t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', userId)
+    ])
+  });
 };
 
 const updatePassword = async (userId, hash, currentSessionId) => {
@@ -213,6 +225,7 @@ module.exports.createSession = createSession;
 module.exports.getUserByName = getUserByName;
 module.exports.getUserByEmail = getUserByEmail;
 module.exports.logLoginAttempt = logLoginAttempt;
+module.exports.log2faAttempt = log2faAttempt;
 module.exports.getConsecutiveFailedLogins = getConsecutiveFailedLogins;
 module.exports.getUserBySessionId = getUserBySessionId;
 module.exports.logoutSession = logoutSession;
