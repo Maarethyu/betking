@@ -78,7 +78,14 @@ const lockUserAccount = async (userId) => {
 };
 
 const updateEmail = async (userId, email) => {
-  await db.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]);
+  await db.tx(t => {
+    return t.batch([
+      /* Change email */
+      t.none('UPDATE users set email = $2 WHERE id = $1', [userId, email]),
+      /* Mark all previous reset password tokens as expired */
+      t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', userId)
+    ])
+  });
 };
 
 const updatePassword = async (userId, hash, currentSessionId) => {
