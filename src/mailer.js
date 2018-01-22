@@ -55,6 +55,16 @@ const templates = {
 
     <p>Welcome to ${config.get('PROJECT_NAME')}!</p>
   `,
+
+  verificationEmail: (username, token) => `
+    <p>Dear ${username}</p>
+
+    <p>Click on the link below to verify your email</p>
+    <br>
+    <a href="${config.get('MAILER_HOST')}/verify-email?token=${token}">
+      ${config.get('MAILER_HOST')}/verify-email?token=${token}
+    </a>
+  `
 };
 
 const sendResetPasswordEmail = function (username, email, token) {
@@ -84,8 +94,18 @@ const sendWelcomeEmail = function (username, email) {
     .catch(logEmailErrors(email, 'welcome'));
 };
 
+const sendVerificationEmail = function (username, email, token) {
+  return sendMail(
+    email,
+    `${config.get('PROJECT_NAME')} | Verify your email`,
+    templates.verificationEmail(username, token)
+  )
+    .catch(logEmailErrors(email, 'verify email'));
+};
+
 module.exports = {
   sendResetPasswordEmail,
   sendNewLoginEmail,
   sendWelcomeEmail,
+  sendVerificationEmail
 };

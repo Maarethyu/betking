@@ -1,9 +1,10 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const router = express.Router();
 const db = require('../db');
 const helpers = require('../helpers');
 const mw = require('../middleware');
-const bcrypt = require('bcrypt');
+const mailer = require('../mailer');
 
 router.use(mw.requireLoggedIn);
 
@@ -43,6 +44,10 @@ router.post('/change-email', async function (req, res, next) {
   }
 
   await db.updateEmail(req.currentUser.id, req.body.email);
+
+  /* Send mail for email id verification */
+  const verifyEmailToken = await db.createVerifyEmailToken(req.currentUser.id, req.body.email);
+  mailer.sendVerificationEmail(req.currentUser.username, req.body.email, verifyEmailToken.id);
 
   res.end();
 });

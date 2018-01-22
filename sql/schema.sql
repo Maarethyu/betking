@@ -71,6 +71,18 @@ CREATE TABLE reset_tokens (
 
 CREATE INDEX reset_tokens_user_id_idx ON reset_tokens(user_id, expired_at);
 
+-- verify_emails_tokens table
+CREATE TABLE verify_email_tokens (
+  id   uuid NOT NULL PRIMARY KEY,
+  user_id bigint  NOT NULL  REFERENCES users(id),
+  email text NOT NULL,
+  used    boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone NOT NULL  DEFAULT NOW(),
+  expired_at timestamp with time zone NOT NULL  DEFAULT NOW() + INTERVAL '15 minutes'
+);
+
+CREATE INDEX verify_email_tokens_user_id_idx ON verify_email_tokens(user_id, expired_at);
+
 -- mfa passcodes
 CREATE TABLE mfa_passcodes (
   user_id     bigint                    NOT NULL,
