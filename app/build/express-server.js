@@ -51,7 +51,14 @@ module.exports = (app) => {
           return next(err);
         }
         res.set('content-type','text/html');
-        res.send(result);
+
+        // Add csrf token
+        const str = result.toString().replace(
+          '</body>',
+          `<input type="hidden" id="csrfToken" value="${req.csrfToken()}"/></body>`
+        );
+
+        res.send(str);
         res.end();
       });
     });

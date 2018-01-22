@@ -1,10 +1,21 @@
 import axios from 'axios';
 
+const csrfToken = () => {
+  const el = document.getElementById('csrfToken');
+  return el && el.value;
+};
+
 const get = function (uri, headers = {}) {
   return axios.get(uri, headers);
 };
 
-const post = function (uri, data = {}, headers = {}) {
+const post = function (uri, data = {}, newHeaders = {}) {
+  const headers = {
+    headers: Object.assign({}, {
+      'csrf-token': csrfToken()
+    }, newHeaders)
+  };
+
   return axios.post(uri, data, headers);
 };
 
