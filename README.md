@@ -1,4 +1,4 @@
-# bk-server
+# Crypto-boilerplate
 
 ### Create Database
 1. Create Role = bk and database = bk2
