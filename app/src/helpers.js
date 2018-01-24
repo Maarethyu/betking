@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 export const loadRecaptcha = function (onload) {
   window.onRecaptchaLoad = onload;
 
@@ -16,4 +18,17 @@ export const getUrlParams = function () {
           : decodeURIComponent(value);
       })
     : {};
+};
+
+export const formatAmount = function (amount, scale) {
+  return new BigNumber(amount).toFixed(scale, BigNumber.ROUND_DOWN);
+};
+
+export const addCommas = (x) => {
+  if (parseFloat(x) === 0) {
+    return 0;
+  }
+
+  const parts = x.toString().split('.');
+  return `${parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')}.${parts[1]}`;
 };

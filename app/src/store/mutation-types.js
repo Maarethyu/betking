@@ -2,4 +2,7 @@
 export const UPDATE_AUTHSTATE = 'UPDATE_AUTHSTATE';
 export const SET_USER = 'SET_USER';
 
-/* Module 2 */
+/* Funds Module */
+export const SET_CURRENCIES = 'SET_CURRENCIES';
+export const SET_ALL_BALANCES = 'SET_ALL_BALANCES';
+export const SET_BALANCE = 'SET_BALANCE';
