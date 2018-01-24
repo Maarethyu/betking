@@ -1,6 +1,15 @@
 import store from 'src/store';
 
 export const beforeEach = async (to, from, next) => {
+  /* Check if config fetched from server */
+  if (!store.state.funds.isReady) {
+    try {
+      await store.dispatch('fetchCurrencies');
+    } catch (e) {
+      next(e);
+    }
+  }
+
   /* Check if route requiresUser, requiresAuth or requiresLoggedOut */
 
   if (to.matched.some(record => record.meta.requiresUser)) {

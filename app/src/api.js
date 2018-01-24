@@ -76,5 +76,11 @@ export default {
   },
   verifyEmail (data) {
     return post('/api/verify-email', data);
+  },
+  fetchCurrencies () {
+    return get('/api/config/currencies');
+  },
+  fetchAllBalances () {
+    return get('/api/account/balances');
   }
 };

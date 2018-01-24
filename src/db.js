@@ -12,6 +12,8 @@ const initOptions = {
 const pgp = require('pg-promise')(initOptions);
 const db = pgp(config.get('DB_CONNECTION_STRING'));
 
+/* USER ACCOUNT */
+
 // Case-insensitive
 const isEmailAlreadyTaken = async (email) => {
   const existingEmail = await db.oneOrNone('SELECT email FROM users WHERE lower(email) = lower($1)', email);
@@ -223,6 +225,12 @@ const markEmailAsVerified = async (token) => {
   });
 };
 
+/* CRYPTO */
+const getAllBalancesForUser = async (userId) => {
+  const result = await db.any('SELECT balance, currency from user_balances where user_id = $1', userId);
+  return result;
+};
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
@@ -255,3 +263,5 @@ module.exports.logEmailError = logEmailError;
 module.exports.getLoginAttempts = getLoginAttempts;
 module.exports.createVerifyEmailToken = createVerifyEmailToken;
 module.exports.markEmailAsVerified = markEmailAsVerified;
+/* CRYPTO */
+module.exports.getAllBalancesForUser = getAllBalancesForUser;

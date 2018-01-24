@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "bignumber.js": "^5.0.0",
     "fingerprintjs2": "^1.5.1",
     "js-cookie": "^2.2.0",
     "moment": "^2.20.1",

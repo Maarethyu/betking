@@ -117,6 +117,17 @@ CREATE TABLE error_logs (
   to_email text NULL
 );
 
+-- user_balances table
+CREATE TABLE user_balances (
+  id bigserial PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  currency integer NOT NULL,
+  balance bigint NOT NULL
+);
+
+CREATE UNIQUE INDEX unique_user_id_currency ON user_balances(user_id, currency);
+CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO bk;

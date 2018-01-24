@@ -14,6 +14,7 @@
       <router-link :to="'two-factor'">2fa</router-link>
       <router-link :to="'whitelisted-ips'">Whitelisted Ips</router-link>
       <router-link :to="'login-attempts'">Login Attempts</router-link>
+      <router-link :to="'wallet'">Wallet</router-link>
       <a href="javascript:void(0)" @click="logout">Logout</a>
     </template>
   </nav>
