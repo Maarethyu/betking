@@ -306,4 +306,10 @@ router.post('/verify-email', async function (req, res, next) {
   }
 });
 
+router.get('/config/currencies', async function (req, res, next) {
+  const currencies = require('../currencies');
+
+  res.json({currencies});
+});
+
 module.exports = router;

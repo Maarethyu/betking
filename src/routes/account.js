@@ -225,4 +225,11 @@ router.get('/get-login-attempts', async function (req, res, next) {
   res.json({loginAttempts});
 });
 
+router.get('/balances', async function (req, res, next) {
+  // TODO: Do we need pagination for this api? It is always going to send limited amount of data
+  const balances = await db.getAllBalancesForUser(req.currentUser.id);
+
+  res.json({balances});
+});
+
 module.exports = router;
