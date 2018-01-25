@@ -1,6 +1,7 @@
 const config = require('config');
 const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
+const currencies = require('./currencies');
 
 const initOptions = {
   promiseLib: promise, // overriding the default (ES6 Promise);
@@ -231,6 +232,52 @@ const getAllBalancesForUser = async (userId) => {
   return result;
 };
 
+const getDepositAddress = async (userId, currency) => {
+  /* Check if currency is an eth token, if yes, get ethereum address */
+  let currencyToAssign = currency;
+
+  const currencyConfig = currencies.find(c => c.value === currency);
+  if (currencyConfig.addressType === 'ethereum') {
+    const ethInConfig = currencies.find(c => c.code === 'ETH');
+
+    if (ethInConfig) {
+      currencyToAssign = ethInConfig.value;
+    }
+  }
+
+  const result = await db.tx(t => {
+    /* Check if user has an address already assigned. If yes, return */
+    return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currencyToAssign])
+      .then(res => {
+        if (res) {
+          return res.address;
+        }
+
+        /* Address not found in db. Find an available address */
+        return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currencyToAssign)
+          .then(res => {
+            if (!res) {
+              /* No address is free in db for the currency. Log this ? */
+              return null;
+            }
+
+            /* Assign the available address to current user (revalidate that the address is free) and return address */
+            return t.oneOrNone('UPDATE user_addresses SET user_id = $1 WHERE id = $2 AND user_id IS NULL RETURNING address', [userId, res.id]);
+          })
+          .then(res => {
+            if (!res) {
+              /* TODO: Race condition? No address was updated */
+              return null;
+            }
+
+            return res.address;
+          });
+      });
+  });
+
+  return result;
+};
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
@@ -265,3 +312,4 @@ module.exports.createVerifyEmailToken = createVerifyEmailToken;
 module.exports.markEmailAsVerified = markEmailAsVerified;
 /* CRYPTO */
 module.exports.getAllBalancesForUser = getAllBalancesForUser;
+module.exports.getDepositAddress = getDepositAddress;
