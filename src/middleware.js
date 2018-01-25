@@ -1,3 +1,4 @@
+const config = require('config');
 const db = require('./db');
 const helpers = require('./helpers');
 
@@ -72,7 +73,16 @@ const requireWhitelistedIp = async (req, res, next) => {
   next();
 };
 
+const requireAdminSecret = async (req, res, next) => {
+  if (req.body.secret !== config.get('ADMIN_ACCESS_SECRET')) {
+    return res.status(403).json({error: 'Unauthorized'});
+  }
+
+  next();
+};
+
 module.exports.attachCurrentUserToRequest = attachCurrentUserToRequest;
 module.exports.requireLoggedIn = requireLoggedIn;
 module.exports.require2fa = require2fa;
 module.exports.requireWhitelistedIp = requireWhitelistedIp;
+module.exports.requireAdminSecret = requireAdminSecret;

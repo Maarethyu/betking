@@ -128,6 +128,19 @@ CREATE TABLE user_balances (
 CREATE UNIQUE INDEX unique_user_id_currency ON user_balances(user_id, currency);
 CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
 
+-- user_deposits table
+CREATE TABLE user_deposits (
+  id uuid PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  currency integer NOT NULL,
+  amount bigint NOT NULL,
+  address text NOT NULL,
+  txid text NOT NULL,
+  created_at timestamp with time zone NOT NULL  DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX unique_user_id_txid ON user_deposits(user_id, txid);
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO bk;

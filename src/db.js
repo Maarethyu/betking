@@ -231,6 +231,23 @@ const getAllBalancesForUser = async (userId) => {
   return result;
 };
 
+const addDeposit = async (currency, amount, address, txid) => {
+  await db.tx(t => {
+    /* If tx already added, return */
+    t.oneOrNone('SELECT COUNT(*) FROM user_deposits WHERE txid = $1 AND user_id = $2', [txid, userId])
+      .then(row => {
+        if (parseInt(row.count, 10) > 0) {
+          return;
+        }
+
+        /* Add tx. Find user id by address */
+        // TODO: SELECT user_id from user_addresses WHERE currency = $1 AND address = $2. Throw error if row not found
+
+        return t.none('INSERT INTO user_deposits (id, user_id, currency, amount, address, txid) VALUES ($1, $2, $3, $4, $5, $6)', [uuidV4(), userId, currency, amount, address, txid]);
+      });
+  });
+}
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
@@ -265,3 +282,4 @@ module.exports.createVerifyEmailToken = createVerifyEmailToken;
 module.exports.markEmailAsVerified = markEmailAsVerified;
 /* CRYPTO */
 module.exports.getAllBalancesForUser = getAllBalancesForUser;
+module.exports.addDeposit = addDeposit;
