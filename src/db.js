@@ -233,28 +233,27 @@ const getAllBalancesForUser = async (userId) => {
 };
 
 const getDepositAddress = async (userId, currency) => {
+  /* Check if currency is an eth token, if yes, get ethereum address */
+  let currencyToAssign = currency;
+
+  const currencyConfig = currencies.find(c => c.value === currency);
+  if (currencyConfig.addressType === 'ethereum') {
+    const ethInConfig = currencies.find(c => c.code === 'ETH');
+
+    if (ethInConfig) {
+      currencyToAssign = ethInConfig.value;
+    }
+  }
+
   const result = await db.tx(t => {
     /* Check if user has an address already assigned. If yes, return */
-    return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currency])
+    return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currencyToAssign])
       .then(res => {
         if (res) {
           return res.address;
         }
 
         /* Address not found in db. Find an available address */
-
-        /* Check if currency is an eth token, if yes, get ethereum address */
-        let currencyToAssign = currency;
-
-        const currencyConfig = currencies.find(c => c.value === currency);
-        if (currencyConfig.addressType === 'ethereum') {
-          const ethInConfig = currencies.find(c => c.code === 'ETH');
-
-          if (ethInConfig) {
-            currencyToAssign = ethInConfig.value;
-          }
-        }
-
         return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currencyToAssign)
           .then(res => {
             if (!res) {
@@ -263,15 +262,7 @@ const getDepositAddress = async (userId, currency) => {
             }
 
             /* Assign the available address to current user (revalidate that the address is free) and return address */
-            /**
-             * TODO: Re-assigning currency = currency in the following query. This will ensure
-             * that users have different address for eth-tokens (currency = 6) and ETH (currency = 1)
-             *
-             * So a row would initially be created with currency = 1 (ETH ADDRESS)
-             * and be reassigned with currency = 6 (BKB ADDRESS)
-             */
-
-            return t.oneOrNone('UPDATE user_addresses SET user_id = $1, currency = $2 WHERE id = $3 AND user_id IS NULL RETURNING address', [userId, currency, res.id]);
+            return t.oneOrNone('UPDATE user_addresses SET user_id = $1 WHERE id = $2 AND user_id IS NULL RETURNING address', [userId, res.id]);
           })
           .then(res => {
             if (!res) {
