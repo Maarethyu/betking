@@ -39,8 +39,19 @@ const actions = {
 // mutations
 const mutations = {
   [types.SET_CURRENCIES] (state, currencies) {
-    state.currencies = currencies.map(c => ({
-      ...c,
+    state.currencies = currencies.map(c => Object.assign({}, c, {
+      maxWdLimit: new BigNumber(c.maxWdLimit)
+        .div(new BigNumber(10).pow(c.scale))
+        .toNumber(),
+      minWdLimit: new BigNumber(c.minWdLimit)
+        .div(new BigNumber(10).pow(c.scale))
+        .toNumber(),
+      wdFee: new BigNumber(c.wdFee)
+        .div(new BigNumber(10).pow(c.scale))
+        .toNumber(),
+      minTip: new BigNumber(c.minTip)
+        .div(new BigNumber(10).pow(c.scale))
+        .toNumber(),
       balance: 0
     }));
     state.isReady = true;
