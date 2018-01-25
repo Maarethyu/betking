@@ -10,19 +10,19 @@
         <tr>
           <th>+</th>
           <th v-on:click="setSortBy('name')">Currency Name</th>
-          <th v-on:click="setSortBy('code')">Code</th>
+          <th v-on:click="setSortBy('symbol')">Symbol</th>
           <th class="numeric" v-on:click="setSortBy('balance')">Available Balance</th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="currency in balances" :key="currency.code">
+        <tr v-for="currency in balances" :key="currency.symbol">
           <td>
             <button>+</button>
             <button>-</button>
           </td>
           <td>{{ currency.name }}</td>
-          <td>{{ currency.code }}</td>
+          <td>{{ currency.symbol }}</td>
           <td class="numeric">{{ addCommas(formatAmount(currency.balance, currency.scale)) }}</td>
         </tr>
       </tbody>
@@ -61,7 +61,7 @@ export default {
 
       return currencies
         .sort((a, b) => {
-          const stringFields = ['name', 'code'];
+          const stringFields = ['name', 'symbol'];
 
           if (stringFields.indexOf(this.sortBy) > -1) {
             return a[this.sortBy].localeCompare(b[this.sortBy]) * this.sortDir;

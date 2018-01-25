@@ -17,9 +17,9 @@
 // TODO: Do we need to add priority based wd fee (slow / medium / priority)?
 
 const currencies = [
-  {value: 0, code: 'BTC', name: 'Bitcoin', scale: 8, maxWdLimit: 5, minWdLimit: 0.001, wdFee: 0.0009, addressType: 'bitcoin'},
-  {value: 1, code: 'ETH', name: 'Ethereum', scale: 8, maxWdLimit: 100, minWdLimit: 0.001, wdFee: 0.0005, addressType: 'ethereum'},
-  {value: 6, code: 'BKB', name: 'BKB', scale: 18, maxWdLimit: 300000, minWdLimit: 100, wdFee: 10, addressType: 'ethereum'},
+  {value: 0, symbol: 'BTC', name: 'Bitcoin', scale: 8, maxWdLimit: '5e+8', minWdLimit: '0.001e+8', wdFee: '0.0009e+8', minTip: '0.001e+8', addressType: 'bitcoin'},
+  {value: 1, symbol: 'ETH', name: 'Ethereum', scale: 8, maxWdLimit: '100e+8', minWdLimit: '0.001e+8', wdFee: '0.0005e+8', minTip: '0.001e+8', addressType: 'ethereum'},
+  {value: 6, symbol: 'BKB', name: 'BKB', scale: 18, maxWdLimit: '300000e+18', minWdLimit: '100e+18', wdFee: '10e+18', minTip: '100e+18', addressType: 'ethereum'},
 ];
 
 module.exports = currencies;
