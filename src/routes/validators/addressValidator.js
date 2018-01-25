@@ -52,18 +52,26 @@ const ADDRESS_VALIDATORS = {
 
 /**
  * Accepts address: string as argument
- * Accepts currency: int as argument
+ * Accepts currency: int / string as argument
  * Returns true if currency supported
  * Returns false if not
  */
 module.exports = function (address, currency) {
-  const currencyConfig = currencies.find(c => c.value === currency);
+  if (!address || !currency) {
+    return false;
+  }
+
+  let value = currency;
+  if (typeof currency !== 'number') {
+    value = parseInt(currency, 10);
+  }
+
+  const currencyConfig = currencies.find(c => c.value === value);
 
   if (!currencyConfig) {
     return false;
   }
 
   const {addressType} = currencyConfig;
-
   return ADDRESS_VALIDATORS[addressType] && ADDRESS_VALIDATORS[addressType](address);
 };

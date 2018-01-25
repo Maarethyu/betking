@@ -12,8 +12,11 @@ router.post('/deposit-confirmed', async function (req, res, next) {
 
   req.checkBody('amount', 'Invalid amount').exists()
     .custom(amount => {
-      const amt = new BigNumber(amount);
+      if (!amount || !(typeof amount === 'number' || typeof amount === 'string')) {
+        return false;
+      }
 
+      const amt = new BigNumber(amount);
       return amt.isInteger() && amt.gt(0);
     });
 
@@ -24,7 +27,7 @@ router.post('/deposit-confirmed', async function (req, res, next) {
 
   req.checkBody('address', 'Invalid address')
     .exists()
-    .custom((address, {req}) => require('./validators/addressValidator')(address, req.body.currency));
+    .custom(address => require('./validators/addressValidator')(address, req.body.currency));
 
   const validationResult = await req.getValidationResult();
   if (!validationResult.isEmpty()) {
@@ -41,7 +44,11 @@ router.post('/deposit-confirmed', async function (req, res, next) {
 
     res.end();
   } catch (e) {
-    // Check for e.message = 'ADDRESS_NOT_FOUND' and send response.
+    if (e.message === 'USER_NOT_FOUND_FOR_ADDRESS' || e.message === 'TRANSACTION_EXISTS') {
+      return res.status(400).json({error: e.message});
+    }
+
+    throw e;
   }
 });
 
