@@ -18,7 +18,7 @@
       <tbody>
         <tr v-for="currency in balances" :key="currency.code">
           <td>
-            <button>+</button>
+            <button @click="getDepositAddress(currency.value)">+</button>
             <button>-</button>
           </td>
           <td>{{ currency.name }}</td>
@@ -27,6 +27,10 @@
         </tr>
       </tbody>
     </table>
+
+    <div>
+      Deposit Address: {{ address }}
+    </div>
 
     <div>
       <button v-if="offset !== 0" @click='prev'>Previous</button>
@@ -38,6 +42,7 @@
 <script>
 import {mapGetters} from 'vuex';
 import {addCommas, formatAmount} from 'src/helpers';
+import api from 'src/api';
 
 export default {
   name: 'Balances',
@@ -46,7 +51,8 @@ export default {
     sortBy: 'balance',
     sortDir: -1,
     limit: 10,
-    offset: 0
+    offset: 0,
+    address: '' // TODO: Temp field. Remove this once we have deposit modal
   }),
   computed: {
     ...mapGetters({
@@ -99,6 +105,12 @@ export default {
     },
     next () {
       this.offset += this.balances.length;
+    },
+    getDepositAddress (currency) {
+      api.getDepositAddress(currency)
+        .then(res => {
+          this.address = res.data.address;
+        });
     }
   }
 };
