@@ -82,5 +82,8 @@ export default {
   },
   fetchAllBalances () {
     return get('/api/account/balances');
+  },
+  getDepositAddress (currency) {
+    return get(`/api/account/deposit-address?currency=${currency}`);
   }
 };

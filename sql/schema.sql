@@ -128,6 +128,16 @@ CREATE TABLE user_balances (
 CREATE UNIQUE INDEX unique_user_id_currency ON user_balances(user_id, currency);
 CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
 
+-- deposit_addresses table
+CREATE TABLE user_addresses (
+  id bigserial PRIMARY KEY,
+  user_id bigint NULL REFERENCES users(id),
+  currency integer NOT NULL,
+  address text NOT NULL
+);
+
+CREATE INDEX user_addresses_user_id_currency_idx ON user_addresses(user_id, currency);
+
 -- user_deposits table
 CREATE TABLE user_deposits (
   id uuid PRIMARY KEY,
