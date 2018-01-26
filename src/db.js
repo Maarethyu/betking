@@ -2,6 +2,7 @@ const config = require('config');
 const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
 const helpers = require('./helpers');
+const BigNumber = require('bignumber.js');
 
 const initOptions = {
   promiseLib: promise, // overriding the default (ES6 Promise);
@@ -232,18 +233,19 @@ const getAllBalancesForUser = async (userId) => {
   return result;
 };
 
-const createWithdrawalEntry = async (userId, currency, wdFee, amount, address, totalFee) => {
+const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) => {
+  // TODO: totalFee should be calculated inside the query.
+  const totalFee = new BigNumber(wdFee).plus(new BigNumber(amount))
+    .toString();
   await db.tx(t => {
     /* Check if user has sufficient balance in the account */
-    return t.oneOrNone('SELECT balance from user_balances where user_id = $1 AND currency = $2', [userId, currency])
+    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [totalFee, userId, currency])
       .then(res => {
-        if (!res || wdFee.plus(amount).gt(res.balance)) {
+        console.log(res);
+        if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
-        return t.batch([
-          t.none('INSERT INTO user_withdrawal (id, user_id, currency, amount, status, address) VALUES ($1, $2, $3, $4, $5, $6)', [uuidV4(), userId, currency, amount, 'pending', address]), 
-          t.none('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3', [totalFee, userId, currency])
-        ]);
+        return t.none('INSERT INTO user_withdrawal (id, user_id, currency, amount, status, address) VALUES ($1, $2, $3, $4, $5, $6)', [uuidV4(), userId, currency, amount, 'pending', address]);
       });
   });
 };
@@ -364,4 +366,3 @@ module.exports.getAllBalancesForUser = getAllBalancesForUser;
 module.exports.createWithdrawalEntry = createWithdrawalEntry;
 module.exports.addDeposit = addDeposit;
 module.exports.getDepositAddress = getDepositAddress;
-

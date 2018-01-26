@@ -5,7 +5,11 @@
         <div class="modal-container text-center">
           <div class="modal-header">
             <div class="success" v-if="message">{{ message }}</div>
-            <div class="error">{{ errors }}</div>
+            <div class="error" v-if="errors && errors.global">{{ errors.global }}</div>
+            <div class="error" v-if="errors && errors.amount">{{ errors.amount }}</div>
+            <div class="error" v-if="errors && errors.address">{{ errors.address }}</div>
+            <div class="error" v-if="errors && errors.currency">{{ errors.currency }}</div>
+            <div class="error" v-if="errors && errors.otp">{{ errors.otp }}</div>
             <h3 class="">Withdraw {{currency.name}}</h3>
             <div>Available balance: {{currency.balance}}</div>
             <div>Withdrawal Fee: {{currency.wdFee}}</div>
@@ -26,6 +30,7 @@
 <script>
 import api from 'src/api';
 import BigNumber from 'bignumber.js';
+import {mapGetters} from 'vuex';
 
 export default {
   name: 'Withdrawal',
@@ -33,34 +38,55 @@ export default {
     amount: 0,
     address: '',
     errors: null,
-    message: ''
+    message: '',
+    otp: ''
   }),
   props: ['currency'],
-  mounted () {
-  },
+  computed: mapGetters({
+    is2faEnabled: 'is2faEnabled'
+  }),
   methods: {
     onSubmit () {
-      const bigAmount = new BigNumber(this.amount).times(new BigNumber(10).pow(this.currency.scale));
-      api.withdrawCurrency({currency: this.currency.value, amount: bigAmount, address: this.address})
+      if (this.is2faEnabled) {
+        // TODO: Write a proper vue component for modal
+        this.otp = prompt('Enter the otp');
+      }
+      const bigAmount = new BigNumber(this.amount).times(new BigNumber(10).pow(this.currency.scale)
+        .toString());
+      api.withdrawCurrency({currency: this.currency.value, amount: bigAmount, address: this.address, otp: this.otp})
       .then(res => {
         this.$emit('close');
         this.$emit('withdrawalComplete');
       })
       .catch(error => {
-        if (error.response && error.response.status === 400 && Array.isArray(error.response.data.errors)) {
+        if (error.response) {
+          this.buildErrors(error.response);
+          return;
+        }
+
+        throw error;
+      });
+    },
+    buildErrors (response) {
+      if (response && response.status === 400) {
+        if (response.data.errors) {
           const newErrors = {};
-          error.response.data.errors.forEach(error => {
+
+          response.data.errors.forEach(error => {
             newErrors[error.param] = newErrors[error.param]
-              ? `${newErrors[error.param]} / ${error.msg}`
-              : error.msg;
+              ? `${newErrors[error.param]} / ${error.msg}` : error.msg;
           });
 
           this.errors = newErrors;
-        } else {
-          this.errors = error.response.data.error;
+          return;
         }
-        this.message = '';
-      });
+
+        if (response.data.error) {
+          this.errors = {
+            global: response.data.error
+          };
+        }
+      }
     }
   }
 };

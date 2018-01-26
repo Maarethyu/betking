@@ -234,7 +234,6 @@ router.get('/balances', async function (req, res, next) {
   res.json({balances});
 });
 
-
 router.get('/deposit-address', async function (req, res, next) {
   /* Check if currency is valid and supported */
   req.checkQuery('currency', 'Invalid currency')
@@ -276,19 +275,26 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
 
   const currency = currencies.find(c => c.value === req.body.currency);
 
-  const wdFee = new BigNumber(currency.wdFee)
-    .times(new BigNumber(10).pow(currency.scale));
+  /* Check if withdrawal amount is in permissible limit */
+  if (new BigNumber(currency.minWdLimit).gt(new BigNumber(req.body.amount))) {
+    return res.status(400).json({error: 'Requested amount is less than minimum withdrawal limit'});
+  }
 
-  const totalFee = wdFee.plus(req.body.amount);
+  if (new BigNumber(currency.maxWdLimit).lt(new BigNumber(req.body.amount))) {
+    return res.status(400).json({error: 'Requested amount is more than maximum withdrawal limit'});
+  }
+
+  const wdFee = new BigNumber(currency.wdFee).toString();
+
   /* Create a withdrwal entry in db and reduce user balance */
   try {
     await db.createWithdrawalEntry(
       req.currentUser.id,
       req.body.currency,
       wdFee,
-      parseInt(req.body.amount, 10),
-      req.body.address,
-      parseInt(totalFee, 10));
+      req.body.amount,
+      req.body.address
+    );
   } catch (e) {
     if (e.message === 'INSUFFICIENT_BALANCE') {
       return res.status(400).json({error: 'Insufficient balance'});
