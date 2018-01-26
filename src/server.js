@@ -53,9 +53,10 @@ app.use(expressValidator());
 app.use(mw.attachCurrentUserToRequest);
 
 const router = express.Router();
-router.use('', require('./routes/index'));
-router.use('/account', require('./routes/account'));
-app.use('/api', csrfProtection, router);
+router.use('/account', csrfProtection, require('./routes/account'));
+router.use('/admin', require('./routes/admin'));
+router.use('', csrfProtection, require('./routes/index'));
+app.use('/api', router);
 
 /*
   TODO:

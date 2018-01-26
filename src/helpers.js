@@ -2,6 +2,7 @@ const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const config = require('config');
 const Transform = require('stream').Transform;
+const currencies = require('./currencies');
 
 const getNew2faSecret = function () {
   const secret = speakeasy.generateSecret({length: 32, name: config.get('PROJECT_NAME')});
@@ -49,6 +50,22 @@ const addCsrfToken = function (csrfToken) {
   return parser;
 };
 
+const getCurrencyToQueryFromAddressTable = function (currency) {
+  /* Check if currency is an eth token, if yes, get ethereum address */
+  let currencyToQuery = currency;
+
+  const currencyConfig = currencies.find(c => c.value === currency);
+  if (currencyConfig.addressType === 'ethereum') {
+    const ethInConfig = currencies.find(c => c.symbol === 'ETH');
+
+    if (ethInConfig) {
+      currencyToQuery = ethInConfig.value;
+    }
+  }
+
+  return currencyToQuery;
+};
+
 module.exports = {
   getIp,
   getFingerPrint,
@@ -57,5 +74,6 @@ module.exports = {
   get2faQR,
   getNew2faSecret,
   isOtpValid,
-  addCsrfToken
+  addCsrfToken,
+  getCurrencyToQueryFromAddressTable
 };

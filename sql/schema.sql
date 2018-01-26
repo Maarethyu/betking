@@ -122,7 +122,7 @@ CREATE TABLE user_balances (
   id bigserial PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
   currency integer NOT NULL,
-  balance bigint NOT NULL
+  balance numeric (36, 0) NOT NULL
 );
 
 CREATE UNIQUE INDEX unique_user_id_currency ON user_balances(user_id, currency);
@@ -137,6 +137,19 @@ CREATE TABLE user_addresses (
 );
 
 CREATE INDEX user_addresses_user_id_currency_idx ON user_addresses(user_id, currency);
+
+-- user_deposits table
+CREATE TABLE user_deposits (
+  id uuid PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  currency integer NOT NULL,
+  amount numeric (36, 0) NOT NULL,
+  address text NOT NULL,
+  txid text NOT NULL,
+  created_at timestamp with time zone NOT NULL  DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX unique_user_id_txid ON user_deposits(user_id, txid);
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
