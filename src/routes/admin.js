@@ -1,7 +1,6 @@
 const express = require('express');
 const db = require('../db');
 const mw = require('../middleware');
-const BigNumber = require('bignumber.js');
 
 const router = express.Router();
 
@@ -11,14 +10,7 @@ router.post('/deposit-confirmed', async function (req, res, next) {
   req.checkBody('txid', 'Invalid transaction id').exists();
 
   req.checkBody('amount', 'Invalid amount').exists()
-    .custom(amount => {
-      if (!amount || !(typeof amount === 'number' || typeof amount === 'string')) {
-        return false;
-      }
-
-      const amt = new BigNumber(amount);
-      return amt.isInteger() && amt.gt(0);
-    });
+    .custom(amount => require('./validators/amountValidator')(amount));
 
   req.checkBody('currency', 'Invalid currency')
     .exists()

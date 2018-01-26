@@ -122,7 +122,7 @@ CREATE TABLE user_balances (
   id bigserial PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
   currency integer NOT NULL,
-  balance bigint NOT NULL
+  balance numeric (36, 0) NOT NULL
 );
 
 CREATE UNIQUE INDEX unique_user_id_currency ON user_balances(user_id, currency);
@@ -143,7 +143,7 @@ CREATE TABLE user_deposits (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
   currency integer NOT NULL,
-  amount bigint NOT NULL,
+  amount numeric (36, 0) NOT NULL,
   address text NOT NULL,
   txid text NOT NULL,
   created_at timestamp with time zone NOT NULL  DEFAULT NOW()

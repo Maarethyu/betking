@@ -73,7 +73,7 @@ const mutations = {
         'balance',
         new BigNumber(row.balance)
           .div(new BigNumber(10).pow(scale))
-          .toNumber()
+          .toString()
       );
     });
   },
