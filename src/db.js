@@ -1,6 +1,7 @@
 const config = require('config');
 const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
+const helpers = require('./helpers');
 
 const initOptions = {
   promiseLib: promise, // overriding the default (ES6 Promise);
@@ -234,9 +235,9 @@ const getAllBalancesForUser = async (userId) => {
 const createWithdrawalEntry = async (userId, currency, wdFee, amount, address, totalFee) => {
   await db.tx(t => {
     /* Check if user has sufficient balance in the account */
-    return t.one('SELECT balance from user_balances where user_id = $1 AND currency = $2', [userId, currency])
+    return t.oneOrNone('SELECT balance from user_balances where user_id = $1 AND currency = $2', [userId, currency])
       .then(res => {
-        if (wdFee.plus(amount).gt(res.balance)) {
+        if (!res || wdFee.plus(amount).gt(res.balance)) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
         return t.batch([
@@ -245,6 +246,85 @@ const createWithdrawalEntry = async (userId, currency, wdFee, amount, address, t
         ]);
       });
   });
+};
+
+const addDeposit = async (currency, amount, address, txid) => {
+  /* currencyToQuery is ETH if currency is an eth-token */
+  const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
+
+  await db.tx(t => {
+    return t.oneOrNone('SELECT user_id from user_addresses WHERE currency = $1 AND address = $2', [currencyToQuery, address])
+      .then(row => {
+        if (!row || !row.user_id) {
+          throw new Error('USER_NOT_FOUND_FOR_ADDRESS');
+        }
+
+        const userId = row.user_id;
+
+        /* If tx already added, throw error */
+        return t.oneOrNone('SELECT COUNT(*) > 0 as tx_exists FROM user_deposits WHERE txid = $1 AND user_id = $2', [txid, userId])
+          .then(row => {
+            if (row && row.tx_exists) {
+              throw new Error('TRANSACTION_EXISTS');
+            }
+
+            return userId;
+          });
+      })
+      .then(userId => {
+        /* Add a tx entry in user_deposits */
+        return t.one('INSERT INTO user_deposits (id, user_id, currency, amount, address, txid) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [uuidV4(), userId, currency, amount, address, txid]);
+      })
+      .then(row => {
+        /* Update or Insert Balance */
+        // TODO: We can have a better query for this which uses upsert / on conflict update ?
+        return t.oneOrNone('SELECT id FROM user_balances WHERE user_id = $1 AND currency = $2', [row.user_id, row.currency])
+          .then(res => {
+            if (!res) {
+              return t.none('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3)', [row.user_id, row.currency, row.amount]);
+            }
+
+            return t.none('UPDATE user_balances SET balance = balance + $1 WHERE id = $2', [row.amount, res.id]);
+          });
+      });
+  });
+};
+
+const getDepositAddress = async (userId, currency) => {
+  /* currencyToQuery is ETH if currency is an eth-token */
+  const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
+
+  const result = await db.tx(t => {
+    /* Check if user has an address already assigned. If yes, return */
+    return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currencyToQuery])
+      .then(res => {
+        if (res) {
+          return res.address;
+        }
+
+        /* Address not found in db. Find an available address */
+        return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currencyToQuery)
+          .then(res => {
+            if (!res) {
+              /* No address is free in db for the currency. Log this ? */
+              return null;
+            }
+
+            /* Assign the available address to current user (revalidate that the address is free) and return address */
+            return t.oneOrNone('UPDATE user_addresses SET user_id = $1 WHERE id = $2 AND user_id IS NULL RETURNING address', [userId, res.id]);
+          })
+          .then(res => {
+            if (!res) {
+              /* TODO: Race condition? No address was updated */
+              return null;
+            }
+
+            return res.address;
+          });
+      });
+  });
+
+  return result;
 };
 
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
@@ -282,3 +362,6 @@ module.exports.markEmailAsVerified = markEmailAsVerified;
 /* CRYPTO */
 module.exports.getAllBalancesForUser = getAllBalancesForUser;
 module.exports.createWithdrawalEntry = createWithdrawalEntry;
+module.exports.addDeposit = addDeposit;
+module.exports.getDepositAddress = getDepositAddress;
+

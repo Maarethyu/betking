@@ -59,7 +59,6 @@ export default {
         } else {
           this.errors = error.response.data.error;
         }
-        console.log(this.errors);
         this.message = '';
       });
     }

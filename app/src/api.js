@@ -85,5 +85,8 @@ export default {
   },
   withdrawCurrency (data) {
     return post('/api/account/withdraw', data);
+  },
+  getDepositAddress (currency) {
+    return get(`/api/account/deposit-address?currency=${currency}`);
   }
 };

@@ -234,6 +234,26 @@ router.get('/balances', async function (req, res, next) {
   res.json({balances});
 });
 
+
+router.get('/deposit-address', async function (req, res, next) {
+  /* Check if currency is valid and supported */
+  req.checkQuery('currency', 'Invalid currency')
+    .exists()
+    .isInt()
+    .custom(value => require('./validators/currencyValidator')(value));
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
+  /* Fetch address for (currency, user_id) from db */
+  const address = await db.getDepositAddress(req.currentUser.id, parseInt(req.query.currency, 10));
+
+  res.json({address});
+});
+
+// TODO: Add isCustomerAllowed middleware (check for CF-IPCountry ?)
 router.post('/withdraw', mw.require2fa, async function (req, res, next) {
   /* Check if currency is valid and supported */
   req.checkBody('currency', 'Invalid currency')
