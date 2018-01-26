@@ -60,6 +60,9 @@
         <button type="submit">Change Password</button>
       </form>
 
+      <h2>Withdrawal Whitelist</h2>
+      <WithdrawalWhitelist></WithdrawalWhitelist>
+
 	</div>
 </template>
 
@@ -67,8 +70,13 @@
 import api from 'src/api';
 import {mapGetters} from 'vuex';
 
+import WithdrawalWhitelist from 'components/WithdrawalWhitelist';
+
 export default {
   name: 'Settings',
+  components: {
+    WithdrawalWhitelist
+  },
   data: () => ({
     errors: {},
     newEmail: '',

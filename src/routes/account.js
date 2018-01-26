@@ -307,4 +307,60 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
   }
 });
 
+router.get('/whitelisted-address', async function (req, res, next) {
+  const whitelistedAddresses = await db.getWhitelistedAddresses(req.currentUser.id);
+
+  res.json({whitelistedAddresses});
+});
+
+router.post('/whitelisted-address/add', mw.require2fa, async function (req, res, next) {
+  req.checkBody('currency', 'Invalid currency')
+    .exists()
+    .isInt()
+    .custom(value => require('./validators/currencyValidator')(value));
+
+  req.checkBody('address', 'Invalid address')
+    .exists()
+    .custom(address => require('./validators/addressValidator')(address, req.body.currency));
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
+  try {
+    await db.addWhitelistedAddress(
+      req.currentUser.id,
+      parseInt(req.body.currency, 10),
+      req.body.address
+    );
+
+    res.end();
+  } catch (e) {
+    if (e.message === 'CURRENCY_ALREADY_WHITELISTED') {
+      return res.status(400).json({error: e.message});
+    }
+
+    throw e;
+  }
+});
+
+router.post('/whitelisted-address/remove', mw.require2fa, async function (req, res, next) {
+  req.checkBody('currency', 'Invalid currency')
+    .exists()
+    .isInt()
+    .custom(value => require('./validators/currencyValidator')(value));
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
+  await db.removeWhitelistedAddress(
+    req.currentUser.id,
+    parseInt(req.body.currency, 10)
+  );
+
+  res.end();
+});
 module.exports = router;

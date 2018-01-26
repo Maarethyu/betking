@@ -32,3 +32,21 @@ export const addCommas = (x) => {
   const parts = x.toString().split('.');
   return `${parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')}.${parts[1]}`;
 };
+
+export const formatCurrency = function (value, key) {
+  let field = key;
+  if (!key) {
+    field = 'symbol';
+  }
+
+  /* This helper should be added in component.methods
+    The component must map "currencies" getter from store in component.computed
+    */
+  const currency = this.currencies.find(c => c.value === value);
+
+  if (!currency) {
+    return null;
+  }
+
+  return currency[field];
+};

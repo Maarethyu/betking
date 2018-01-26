@@ -88,5 +88,14 @@ export default {
   },
   getDepositAddress (currency) {
     return get(`/api/account/deposit-address?currency=${currency}`);
+  },
+  fetchWhitelistedAddresses () {
+    return get('/api/account/whitelisted-address');
+  },
+  removeWhitelistedAddress (currency, otp) {
+    return post('/api/account/whitelisted-address/remove', {currency, otp});
+  },
+  addWhitelistedAddress (currency, address, otp) {
+    return post('/api/account/whitelisted-address/add', {currency, address, otp});
   }
 };
