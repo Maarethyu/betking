@@ -18,7 +18,7 @@
       <tbody>
         <tr v-for="currency in balances" :key="currency.symbol">
           <td>
-            <button @click="getDepositAddress(currency.value)">+</button>
+            <button @click="activateDepositModal(currency)">+</button>
             <button>-</button>
           </td>
           <td>{{ currency.name }}</td>
@@ -27,32 +27,34 @@
         </tr>
       </tbody>
     </table>
-
-    <div>
-      Deposit Address: {{ address }}
-    </div>
-
     <div>
       <button v-if="offset !== 0" @click='prev'>Previous</button>
       <button v-if="balances.length === this.limit" @click='next'>Next</button>
     </div>
+    <DepositModal v-if="showDepositModal" :currency="activeDepositCurrency" :depositAddress="address" :depositAddressQr="addressQr" @close="closeDepositModal"></DepositModal>
   </div>
 </template>
 
 <script>
 import {mapGetters} from 'vuex';
 import {addCommas, formatAmount} from 'src/helpers';
-import api from 'src/api';
-
+import DepositModal from './DepositModal';
 export default {
   name: 'Balances',
+  components: {
+    DepositModal
+  },
   data: () => ({
     hideZeroBalances: false,
     sortBy: 'balance',
     sortDir: -1,
     limit: 10,
     offset: 0,
-    address: '' // TODO: Temp field. Remove this once we have deposit modal
+    showDepositModal: false,
+    address: '',
+    activeDepositCurrency: {},
+    error: '',
+    addressQr: ''
   }),
   computed: {
     ...mapGetters({
@@ -87,6 +89,10 @@ export default {
     fetchBalances () {
       this.$store.dispatch('fetchAllBalances');
     },
+    activateDepositModal (currency) {
+      this.showDepositModal = true;
+      this.activeDepositCurrency = currency;
+    },
     setSortBy (field) {
       if (field === this.sortBy) {
         this.sortDir *= -1;
@@ -106,11 +112,8 @@ export default {
     next () {
       this.offset += this.balances.length;
     },
-    getDepositAddress (currency) {
-      api.getDepositAddress(currency)
-        .then(res => {
-          this.address = res.data.address;
-        });
+    closeDepositModal () {
+      this.showDepositModal = false;
     }
   }
 };
