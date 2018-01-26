@@ -1,10 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const BigNumber = require('bignumber.js');
 const router = express.Router();
 const db = require('../db');
 const helpers = require('../helpers');
 const mw = require('../middleware');
 const mailer = require('../mailer');
+const currencies = require('../currencies');
 
 router.use(mw.requireLoggedIn);
 
@@ -230,6 +232,52 @@ router.get('/balances', async function (req, res, next) {
   const balances = await db.getAllBalancesForUser(req.currentUser.id);
 
   res.json({balances});
+});
+
+router.post('/withdraw', mw.require2fa, async function (req, res, next) {
+  /* Check if currency is valid and supported */
+  req.checkBody('currency', 'Invalid currency')
+    .exists()
+    .isInt()
+    .custom(value => require('./validators/currencyValidator')(value));
+
+  req.checkBody('address', 'Invalid address')
+    .exists()
+    .custom(address => require('./validators/addressValidator')(address, req.body.currency));
+
+  req.checkBody('amount')
+    .exists()
+    .custom(amount => require('./validators/amountValidator')(amount));
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
+  const currency = currencies.find(c => c.value === req.body.currency);
+
+  const wdFee = new BigNumber(currency.wdFee)
+    .times(new BigNumber(10).pow(currency.scale));
+
+  const totalFee = wdFee.plus(req.body.amount);
+  /* Create a withdrwal entry in db and reduce user balance */
+  try {
+    await db.createWithdrawalEntry(
+      req.currentUser.id,
+      req.body.currency,
+      wdFee,
+      parseInt(req.body.amount, 10),
+      req.body.address,
+      parseInt(totalFee, 10));
+  } catch (e) {
+    if (e.message === 'INSUFFICIENT_BALANCE') {
+      return res.status(400).json({error: 'Insufficient balance'});
+    }
+
+    throw e;
+  }
+
+  res.end();
 });
 
 module.exports = router;

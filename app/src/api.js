@@ -82,5 +82,8 @@ export default {
   },
   fetchAllBalances () {
     return get('/api/account/balances');
+  },
+  withdrawCurrency (data) {
+    return post('/api/account/withdraw', data);
   }
 };

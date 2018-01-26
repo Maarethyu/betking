@@ -86,7 +86,7 @@ const updateEmail = async (userId, email) => {
       t.none('UPDATE users set email = $2, email_verified = false WHERE id = $1', [userId, email]),
       /* Mark all previous reset password tokens as expired */
       t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', userId)
-    ])
+    ]);
   });
 };
 
@@ -221,7 +221,7 @@ const markEmailAsVerified = async (token) => {
 
         // Expire all other verify email tokens
         t.none('UPDATE verify_email_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW() AND id != $2', [res.user_id, token])
-      ]))
+      ]));
   });
 };
 
@@ -229,6 +229,22 @@ const markEmailAsVerified = async (token) => {
 const getAllBalancesForUser = async (userId) => {
   const result = await db.any('SELECT balance, currency from user_balances where user_id = $1', userId);
   return result;
+};
+
+const createWithdrawalEntry = async (userId, currency, wdFee, amount, address, totalFee) => {
+  await db.tx(t => {
+    /* Check if user has sufficient balance in the account */
+    return t.one('SELECT balance from user_balances where user_id = $1 AND currency = $2', [userId, currency])
+      .then(res => {
+        if (wdFee.plus(amount).gt(res.balance)) {
+          throw new Error('INSUFFICIENT_BALANCE');
+        }
+        return t.batch([
+          t.none('INSERT INTO user_withdrawal (id, user_id, currency, amount, status, address) VALUES ($1, $2, $3, $4, $5, $6)', [uuidV4(), userId, currency, amount, 'pending', address]), 
+          t.none('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3', [totalFee, userId, currency])
+        ]);
+      });
+  });
 };
 
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
@@ -265,3 +281,4 @@ module.exports.createVerifyEmailToken = createVerifyEmailToken;
 module.exports.markEmailAsVerified = markEmailAsVerified;
 /* CRYPTO */
 module.exports.getAllBalancesForUser = getAllBalancesForUser;
+module.exports.createWithdrawalEntry = createWithdrawalEntry;
