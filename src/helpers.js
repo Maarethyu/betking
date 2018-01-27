@@ -66,6 +66,11 @@ const getCurrencyToQueryFromAddressTable = function (currency) {
   return currencyToQuery;
 };
 
+const getAddressQr = async function (address) {
+  const qr = await qrcode.toDataURL(address);
+  return qr;
+};
+
 module.exports = {
   getIp,
   getFingerPrint,
@@ -75,5 +80,6 @@ module.exports = {
   getNew2faSecret,
   isOtpValid,
   addCsrfToken,
-  getCurrencyToQueryFromAddressTable
+  getCurrencyToQueryFromAddressTable,
+  getAddressQr
 };

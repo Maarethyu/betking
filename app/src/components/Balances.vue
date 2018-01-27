@@ -18,7 +18,7 @@
       <tbody>
         <tr v-for="currency in balances" :key="currency.symbol">
           <td>
-            <button @click="getDepositAddress(currency.value)">+</button>
+            <button @click="activateDepositModal(currency)">+</button>
             <button @click="activateModal(currency)">-</button>
           </td>
           <td>{{ currency.name }}</td>
@@ -27,16 +27,12 @@
         </tr>
       </tbody>
     </table>
-
-    <div>
-      Deposit Address: {{ address }}
-    </div>
-
     <div>
       <button v-if="offset !== 0" @click='prev'>Previous</button>
       <button v-if="balances.length === this.limit" @click='next'>Next</button>
     </div>
     <Withdrawal v-if="showWithdrawalModal" :currency="activeWithdrawalCurrency" @close="closeWithdrawalModal" @withdrawalComplete="updateBalances"></Withdrawal>
+    <DepositModal v-if="showDepositModal" :currency="activeDepositCurrency" @close="closeDepositModal"></DepositModal>
   </div>
 </template>
 
@@ -44,12 +40,13 @@
 import {mapGetters} from 'vuex';
 import {addCommas, formatAmount} from 'src/helpers';
 import Withdrawal from './Withdrawal';
-import api from 'src/api';
+import DepositModal from './DepositModal';
 
 export default {
   name: 'Balances',
   components: {
-    Withdrawal
+    Withdrawal,
+    DepositModal
   },
   data: () => ({
     hideZeroBalances: false,
@@ -59,7 +56,9 @@ export default {
     limit: 10,
     offset: 0,
     activeWithdrawalCurrency: {},
-    address: '' // TODO: Temp field. Remove this once we have deposit modal
+    showDepositModal: false,
+    activeDepositCurrency: {},
+    error: '',
   }),
   computed: {
     ...mapGetters({
@@ -102,6 +101,10 @@ export default {
       this.activeWithdrawalCurrency = {};
       this.showWithdrawalModal = false;
     },
+    activateDepositModal (currency) {
+      this.showDepositModal = true;
+      this.activeDepositCurrency = currency;
+    },
     setSortBy (field) {
       if (field === this.sortBy) {
         this.sortDir *= -1;
@@ -124,11 +127,8 @@ export default {
     next () {
       this.offset += this.balances.length;
     },
-    getDepositAddress (currency) {
-      api.getDepositAddress(currency)
-        .then(res => {
-          this.address = res.data.address;
-        });
+    closeDepositModal () {
+      this.showDepositModal = false;
     }
   }
 };

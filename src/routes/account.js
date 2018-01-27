@@ -249,7 +249,12 @@ router.get('/deposit-address', async function (req, res, next) {
   /* Fetch address for (currency, user_id) from db */
   const address = await db.getDepositAddress(req.currentUser.id, parseInt(req.query.currency, 10));
 
-  res.json({address});
+  if (!address) {
+    return res.status(400).send({error: 'NO_DEPOSIT_ADDRESS_AVAILABLE'});
+  }
+  const addressQr = await helpers.getAddressQr(address);
+
+  res.json({address, addressQr});
 });
 
 // TODO: Add isCustomerAllowed middleware (check for CF-IPCountry ?)
@@ -280,10 +285,6 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
     return res.status(400).json({error: 'Requested amount is less than minimum withdrawal limit'});
   }
 
-  if (new BigNumber(currency.maxWdLimit).lt(new BigNumber(req.body.amount))) {
-    return res.status(400).json({error: 'Requested amount is more than maximum withdrawal limit'});
-  }
-
   const wdFee = new BigNumber(currency.wdFee).toString();
 
   /* Create a withdrwal entry in db and reduce user balance */
@@ -295,6 +296,8 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
       req.body.amount,
       req.body.address
     );
+
+    res.end();
   } catch (e) {
     if (e.message === 'INSUFFICIENT_BALANCE') {
       return res.status(400).json({error: 'Insufficient balance'});
@@ -302,8 +305,6 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
 
     throw e;
   }
-
-  res.end();
 });
 
 module.exports = router;

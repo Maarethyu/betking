@@ -241,7 +241,6 @@ const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) =
     /* Check if user has sufficient balance in the account */
     return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [totalFee, userId, currency])
       .then(res => {
-        console.log(res);
         if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
