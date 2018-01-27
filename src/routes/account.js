@@ -248,7 +248,12 @@ router.get('/deposit-address', async function (req, res, next) {
   /* Fetch address for (currency, user_id) from db */
   const address = await db.getDepositAddress(req.currentUser.id, parseInt(req.query.currency, 10));
 
-  res.json({address});
+  if (!address) {
+    return res.status(400).send({error: 'NO_DEPOSIT_ADDRESS_AVAILABLE'});
+  }
+  const addressQr = await helpers.getAddressQr(address);
+
+  res.json({address, addressQr});
 });
 
 module.exports = router;
