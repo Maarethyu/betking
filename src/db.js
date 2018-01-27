@@ -2,6 +2,7 @@ const config = require('config');
 const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
 const helpers = require('./helpers');
+const BigNumber = require('bignumber.js');
 
 const initOptions = {
   promiseLib: promise, // overriding the default (ES6 Promise);
@@ -232,6 +233,22 @@ const getAllBalancesForUser = async (userId) => {
   return result;
 };
 
+const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) => {
+  // TODO: totalFee should be calculated inside the query.
+  const totalFee = new BigNumber(wdFee).plus(new BigNumber(amount))
+    .toString();
+  await db.tx(t => {
+    /* Check if user has sufficient balance in the account */
+    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [totalFee, userId, currency])
+      .then(res => {
+        if (!res) {
+          throw new Error('INSUFFICIENT_BALANCE');
+        }
+        return t.none('INSERT INTO user_withdrawal (id, user_id, currency, amount, status, address) VALUES ($1, $2, $3, $4, $5, $6)', [uuidV4(), userId, currency, amount, 'pending', address]);
+      });
+  });
+};
+
 const addDeposit = async (currency, amount, address, txid) => {
   /* currencyToQuery is ETH if currency is an eth-token */
   const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
@@ -345,5 +362,6 @@ module.exports.createVerifyEmailToken = createVerifyEmailToken;
 module.exports.markEmailAsVerified = markEmailAsVerified;
 /* CRYPTO */
 module.exports.getAllBalancesForUser = getAllBalancesForUser;
+module.exports.createWithdrawalEntry = createWithdrawalEntry;
 module.exports.addDeposit = addDeposit;
 module.exports.getDepositAddress = getDepositAddress;

@@ -57,7 +57,7 @@ const ADDRESS_VALIDATORS = {
  * Returns false if not
  */
 module.exports = function (address, currency) {
-  if (!address || !currency) {
+  if (!address || (!currency && currency !== 0)) {
     return false;
   }
 
@@ -73,5 +73,6 @@ module.exports = function (address, currency) {
   }
 
   const {addressType} = currencyConfig;
+
   return ADDRESS_VALIDATORS[addressType] && ADDRESS_VALIDATORS[addressType](address);
 };

@@ -71,7 +71,7 @@ export default {
         })
         .catch(e => {
           if (e.response && e.response.status === 400) {
-            this.errorMessage = e.response.data === 'NO_DEPOSIT_ADDRESS_AVAILABLE' ? 'No deposit address available' : e.response.data;
+            this.errorMessage = e.response.data.error === 'NO_DEPOSIT_ADDRESS_AVAILABLE' ? 'No deposit address available' : e.response.data.error;
           }
 
           throw e;
@@ -102,7 +102,10 @@ export default {
   }
 
   .modal-container {
+<<<<<<< HEAD
+=======
     width: 600px;
+>>>>>>> master
     margin: 0px auto;
     padding: 20px 30px;
     background-color: #fff;

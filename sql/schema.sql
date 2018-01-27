@@ -128,6 +128,19 @@ CREATE TABLE user_balances (
 CREATE UNIQUE INDEX unique_user_id_currency ON user_balances(user_id, currency);
 CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
 
+
+-- user_withdrawals table
+CREATE TABLE user_withdrawal (
+  id uuid PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  currency integer NOT NULL,
+  amount bigint NOT NULL,
+  status text NOT NULL,
+  address text NOT NULL,
+  created_at timestamp with time zone NOT NULL  DEFAULT NOW()
+);
+
+
 -- deposit_addresses table
 CREATE TABLE user_addresses (
   id bigserial PRIMARY KEY,

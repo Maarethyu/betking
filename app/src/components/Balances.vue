@@ -19,7 +19,7 @@
         <tr v-for="currency in balances" :key="currency.symbol">
           <td>
             <button @click="activateDepositModal(currency)">+</button>
-            <button>-</button>
+            <button @click="activateModal(currency)">-</button>
           </td>
           <td>{{ currency.name }}</td>
           <td>{{ currency.symbol }}</td>
@@ -31,30 +31,34 @@
       <button v-if="offset !== 0" @click='prev'>Previous</button>
       <button v-if="balances.length === this.limit" @click='next'>Next</button>
     </div>
-    <DepositModal v-if="showDepositModal" :currency="activeDepositCurrency" :depositAddress="address" :depositAddressQr="addressQr" @close="closeDepositModal"></DepositModal>
+    <Withdrawal v-if="showWithdrawalModal" :currency="activeWithdrawalCurrency" @close="closeWithdrawalModal" @withdrawalComplete="updateBalances"></Withdrawal>
+    <DepositModal v-if="showDepositModal" :currency="activeDepositCurrency" @close="closeDepositModal"></DepositModal>
   </div>
 </template>
 
 <script>
 import {mapGetters} from 'vuex';
 import {addCommas, formatAmount} from 'src/helpers';
+import Withdrawal from './Withdrawal';
 import DepositModal from './DepositModal';
+
 export default {
   name: 'Balances',
   components: {
+    Withdrawal,
     DepositModal
   },
   data: () => ({
     hideZeroBalances: false,
     sortBy: 'balance',
     sortDir: -1,
+    showWithdrawalModal: false,
     limit: 10,
     offset: 0,
+    activeWithdrawalCurrency: {},
     showDepositModal: false,
-    address: '',
     activeDepositCurrency: {},
     error: '',
-    addressQr: ''
   }),
   computed: {
     ...mapGetters({
@@ -89,6 +93,14 @@ export default {
     fetchBalances () {
       this.$store.dispatch('fetchAllBalances');
     },
+    activateModal (currency) {
+      this.activeWithdrawalCurrency = currency;
+      this.showWithdrawalModal = true;
+    },
+    closeWithdrawalModal () {
+      this.activeWithdrawalCurrency = {};
+      this.showWithdrawalModal = false;
+    },
     activateDepositModal (currency) {
       this.showDepositModal = true;
       this.activeDepositCurrency = currency;
@@ -101,6 +113,9 @@ export default {
 
       this.sortBy = field;
       this.sortDir = 1;
+    },
+    updateBalances () {
+      this.fetchBalances();
     },
     prev () {
       if (this.offset - this.limit >= 0) {
