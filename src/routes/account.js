@@ -285,6 +285,11 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
     return res.status(400).json({error: 'Requested amount is less than minimum withdrawal limit'});
   }
 
+  const isAddressWhitelisted = await db.isAddressWhitelisted(req.currentUser.id, req.body.currency, req.body.address);
+  if (!isAddressWhitelisted) {
+    return res.status(400).json({error: 'Cannot withdraw to a non-whitelisted address'});
+  }
+
   const wdFee = new BigNumber(currency.wdFee).toString();
 
   /* Create a withdrwal entry in db and reduce user balance */

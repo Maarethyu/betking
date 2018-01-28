@@ -130,7 +130,7 @@ CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
 
 
 -- user_withdrawals table
-CREATE TABLE user_withdrawal (
+CREATE TABLE user_withdrawals (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
   currency integer NOT NULL,

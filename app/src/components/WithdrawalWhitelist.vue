@@ -22,7 +22,7 @@
         <tr>
           <td>Add new</td>
           <td>
-            <CurrencySelector @change="updateCurrency"></CurrencySelector>
+            <CurrencySelector @change="updateCurrency" :default="activeCurrency"></CurrencySelector>
             <div class="error">{{ errors.currency }}</div>
           </td>
           <td>
@@ -53,7 +53,7 @@ export default {
     CurrencySelector
   },
   data: () => ({
-    activeCurrency: null,
+    activeCurrency: -1,
     activeAddress: null,
     whitelistedAddresses: [],
     errors: {},
@@ -120,7 +120,7 @@ export default {
     refreshForms () {
       this.errors = {};
       this.successMessage = '';
-      this.activeCurrency = null;
+      this.activeCurrency = -1;
       this.activeAddress = null;
     },
     buildErrors (response) {
