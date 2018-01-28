@@ -377,47 +377,49 @@ const isAddressWhitelisted = async (userId, currency, address) => {
   return result;
 };
 
-module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
-module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
-module.exports.createUser = createUser;
-module.exports.createSession = createSession;
-module.exports.getUserByName = getUserByName;
-module.exports.getUserByEmail = getUserByEmail;
-module.exports.logLoginAttempt = logLoginAttempt;
-module.exports.log2faAttempt = log2faAttempt;
-module.exports.getConsecutiveFailedLogins = getConsecutiveFailedLogins;
-module.exports.getUserBySessionId = getUserBySessionId;
-module.exports.logoutSession = logoutSession;
-module.exports.updateEmail = updateEmail;
-module.exports.updatePassword = updatePassword;
-module.exports.getActiveSessions = getActiveSessions;
-module.exports.logoutAllSessions = logoutAllSessions;
-module.exports.addTemp2faSecret = addTemp2faSecret;
-module.exports.enableTwofactor = enableTwofactor;
-module.exports.disableTwoFactor = disableTwoFactor;
-module.exports.createResetToken = createResetToken;
-module.exports.findLatestActiveResetToken = findLatestActiveResetToken;
-module.exports.resetUserPasswordByToken = resetUserPasswordByToken;
-module.exports.insertTwoFactorCode = insertTwoFactorCode;
-module.exports.addIpInWhitelist = addIpInWhitelist;
-module.exports.removeIpFromWhitelist = removeIpFromWhitelist;
-module.exports.getWhitelistedIps = getWhitelistedIps;
-module.exports.isIpWhitelisted = isIpWhitelisted;
-module.exports.lockUserAccount = lockUserAccount;
-module.exports.logError = logError;
-module.exports.logEmailError = logEmailError;
-module.exports.getLoginAttempts = getLoginAttempts;
-module.exports.createVerifyEmailToken = createVerifyEmailToken;
-module.exports.markEmailAsVerified = markEmailAsVerified;
-/* CRYPTO */
-module.exports.getAllBalancesForUser = getAllBalancesForUser;
-module.exports.createWithdrawalEntry = createWithdrawalEntry;
-module.exports.addDeposit = addDeposit;
-module.exports.getDepositAddress = getDepositAddress;
-module.exports.getPendingWithdrawals = getPendingWithdrawals;
-module.exports.getWithdrawalHistory = getWithdrawalHistory;
-module.exports.getDepositHistory = getDepositHistory;
-module.exports.getWhitelistedAddresses = getWhitelistedAddresses;
-module.exports.removeWhitelistedAddress = removeWhitelistedAddress;
-module.exports.addWhitelistedAddress = addWhitelistedAddress;
-module.exports.isAddressWhitelisted = isAddressWhitelisted;
+module.exports = {
+  isEmailAlreadyTaken,
+  isUserNameAlreadyTaken,
+  createUser,
+  createSession,
+  getUserByName,
+  getUserByEmail,
+  logLoginAttempt,
+  log2faAttempt,
+  getConsecutiveFailedLogins,
+  getUserBySessionId,
+  logoutSession,
+  updateEmail,
+  updatePassword,
+  getActiveSessions,
+  logoutAllSessions,
+  addTemp2faSecret,
+  enableTwofactor,
+  disableTwoFactor,
+  createResetToken,
+  findLatestActiveResetToken,
+  resetUserPasswordByToken,
+  insertTwoFactorCode,
+  addIpInWhitelist,
+  removeIpFromWhitelist,
+  getWhitelistedIps,
+  isIpWhitelisted,
+  lockUserAccount,
+  logError,
+  logEmailError,
+  getLoginAttempts,
+  createVerifyEmailToken,
+  markEmailAsVerified,
+  /* CRYPTO */
+  getAllBalancesForUser,
+  createWithdrawalEntry,
+  addDeposit,
+  getDepositAddress,
+  getPendingWithdrawals,
+  getWithdrawalHistory,
+  getDepositHistory,
+  getWhitelistedAddresses,
+  removeWhitelistedAddress,
+  addWhitelistedAddress,
+  isAddressWhitelisted
+};

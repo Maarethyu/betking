@@ -81,8 +81,10 @@ const requireAdminSecret = async (req, res, next) => {
   next();
 };
 
-module.exports.attachCurrentUserToRequest = attachCurrentUserToRequest;
-module.exports.requireLoggedIn = requireLoggedIn;
-module.exports.require2fa = require2fa;
-module.exports.requireWhitelistedIp = requireWhitelistedIp;
-module.exports.requireAdminSecret = requireAdminSecret;
+module.exports = {
+  attachCurrentUserToRequest,
+  requireLoggedIn,
+  require2fa,
+  requireWhitelistedIp,
+  requireAdminSecret
+};

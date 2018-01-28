@@ -43,7 +43,8 @@ export const formatBigAmount = function (amount, value) {
     return null;
   }
 
-  return new BigNumber(amount).div(new BigNumber(10).pow(currency.scale)).toFixed(currency.scale, BigNumber.ROUND_DOWN);
+  return new BigNumber(amount).div(new BigNumber(10).pow(currency.scale))
+  .toFixed(currency.scale, BigNumber.ROUND_DOWN);
 };
 
 export const addCommas = (x) => {
