@@ -328,6 +328,27 @@ const getDepositAddress = async (userId, currency) => {
   return result;
 };
 
+const getPendingWithdrawals = async (userId, limit, skip, sort) => {
+  const results = await db.any('SELECT * FROM user_withdrawals WHERE user_id = $1 AND status IN ($2, $3, $4) ORDER BY $5~ DESC LIMIT $6 OFFSET $7', [userId, 'pending', 'pennding_email', 'processing', sort, limit, skip]);
+  const total = await db.one('SELECT COUNT(*) FROM user_withdrawals WHERE user_id = $1 AND status IN ($2, $3, $4)', [userId, 'pending', 'pending_email', 'processing']);
+
+  return {results, count: total.count};
+};
+
+const getWithdrawalHistory = async (userId, limit, skip, sort) => {
+  const results = await db.any('SELECT * FROM user_withdrawals WHERE user_id = $1 AND status = $2 ORDER BY $3~ DESC LIMIT $4 OFFSET $5', [userId, 'processed', sort, limit, skip]);
+  const total = await db.one('SELECT COUNT(*) FROM user_withdrawals WHERE user_id = $1 AND status = $2', [userId, 'processed']);
+
+  return {results, count: total.count};
+};
+
+const getDepositHistory = async (userId, limit, skip, sort) => {
+  const results = await db.any('SELECT * FROM user_deposits WHERE user_id = $1 ORDER BY $2~ DESC LIMIT $3 OFFSET $4', [userId, sort, limit, skip]);
+  const total = await db.one('SELECT COUNT(*) FROM user_deposits WHERE user_id = $1', [userId, 'processed']);
+
+  return {results, count: total.count};
+};
+
 const getWhitelistedAddresses = async (userId) => {
   const result = await db.any('SELECT * from whitelisted_addresses where user_id = $1', userId);
   return result;
@@ -393,6 +414,9 @@ module.exports.getAllBalancesForUser = getAllBalancesForUser;
 module.exports.createWithdrawalEntry = createWithdrawalEntry;
 module.exports.addDeposit = addDeposit;
 module.exports.getDepositAddress = getDepositAddress;
+module.exports.getPendingWithdrawals = getPendingWithdrawals;
+module.exports.getWithdrawalHistory = getWithdrawalHistory;
+module.exports.getDepositHistory = getDepositHistory;
 module.exports.getWhitelistedAddresses = getWhitelistedAddresses;
 module.exports.removeWhitelistedAddress = removeWhitelistedAddress;
 module.exports.addWhitelistedAddress = addWhitelistedAddress;

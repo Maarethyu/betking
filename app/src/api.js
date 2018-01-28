@@ -89,6 +89,15 @@ export default {
   getDepositAddress (currency) {
     return get(`/api/account/deposit-address?currency=${currency}`);
   },
+  fetchPendingWithdrawals (limit, skip, sort) {
+    return get(`/api/account/pending-withdrawals?limit=${limit}&skip=${skip}&sort=${sort}`);
+  },
+  fetchWithdrawalHistory (limit, skip, sort) {
+    return get(`/api/account/withdrawal-history?limit=${limit}&skip=${skip}&sort=${sort}`);
+  },
+  fetchDepositHistory (limit, skip, sort) {
+    return get(`/api/account/deposit-history?limit=${limit}&skip=${skip}&sort=${sort}`);
+  },
   fetchWhitelistedAddresses () {
     return get('/api/account/whitelisted-address');
   },

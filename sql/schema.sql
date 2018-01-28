@@ -134,12 +134,13 @@ CREATE TABLE user_withdrawals (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
   currency integer NOT NULL,
-  amount bigint NOT NULL,
+  amount numeric (36, 0) NOT NULL,
   status text NOT NULL,
   address text NOT NULL,
   created_at timestamp with time zone NOT NULL  DEFAULT NOW()
 );
 
+CREATE INDEX user_withdrawals_reated_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
 -- deposit_addresses table
 CREATE TABLE user_addresses (
@@ -163,6 +164,7 @@ CREATE TABLE user_deposits (
 );
 
 CREATE UNIQUE INDEX unique_user_id_txid ON user_deposits(user_id, txid);
+CREATE INDEX user_deposits_created_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
 -- whitelisted_addresses table
 CREATE TABLE whitelisted_addresses (
