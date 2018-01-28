@@ -8,7 +8,7 @@
             <th>+</th>
             <th v-on:click="setSortBy('created_at')">Date</th>
             <th >Currency Name</th>
-            <th v-on:click="setSortBy('amount')">Units</th>
+            <th v-on:click="setSortBy('amount')">Amount</th>
             <th >Status</th>
           </tr>
         </thead>
@@ -22,7 +22,7 @@
               </td>
               <td>{{ formatDate(tx.created_at) }}</td>
               <td>{{ formatCurrency(tx.currency, sym) }}</td>
-              <td>{{ addCommas(formatAmount(tx.amount, tx.currency)) }}</td>
+              <td>{{ addCommas(formatBigAmount(tx.amount, tx.currency)) }}</td>
               <td>{{ tx.status }}</td>
             </tr>
             <tr v-if="tx.expanded">
@@ -42,7 +42,7 @@
 <script>
 import {mapGetters} from 'vuex';
 import moment from 'moment';
-import {addCommas, formatAmount, formatCurrency} from 'src/helpers';
+import {addCommas, formatBigAmount, formatCurrency} from 'src/helpers';
 import api from 'src/api';
 
 export default {
@@ -64,7 +64,7 @@ export default {
     this.fetchPendingWithdrawals();
   },
   methods: {
-    formatAmount,
+    formatBigAmount,
     formatCurrency,
     addCommas,
     fetchPendingWithdrawals () {

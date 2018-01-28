@@ -33,6 +33,19 @@ export const formatAmount = function (amount, value) {
   return new BigNumber(amount).toFixed(currency.scale, BigNumber.ROUND_DOWN);
 };
 
+export const formatBigAmount = function (amount, value) {
+  /* This helper should be added in component.methods
+    The component must map "currencies" getter from store in component.computed
+    */
+  const currency = this.currencies.find(c => c.value === value);
+
+  if (!currency) {
+    return null;
+  }
+
+  return new BigNumber(amount).div(new BigNumber(10).pow(currency.scale)).toFixed(currency.scale, BigNumber.ROUND_DOWN);
+};
+
 export const addCommas = (x) => {
   if (parseFloat(x) === 0) {
     return 0;
