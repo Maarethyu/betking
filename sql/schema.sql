@@ -130,7 +130,7 @@ CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
 
 
 -- user_withdrawals table
-CREATE TABLE user_withdrawal (
+CREATE TABLE user_withdrawals (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
   currency integer NOT NULL,
@@ -140,6 +140,7 @@ CREATE TABLE user_withdrawal (
   created_at timestamp with time zone NOT NULL  DEFAULT NOW()
 );
 
+CREATE INDEX user_withdrawals_reated_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
 -- deposit_addresses table
 CREATE TABLE user_addresses (
@@ -163,6 +164,7 @@ CREATE TABLE user_deposits (
 );
 
 CREATE UNIQUE INDEX unique_user_id_txid ON user_deposits(user_id, txid);
+CREATE INDEX user_deposits_created_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;

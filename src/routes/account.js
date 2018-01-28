@@ -307,4 +307,67 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
   }
 });
 
+router.get('/pending-withdrawals', async function (req, res, next) {
+  req.checkQuery('limit', 'Invalid limit param')
+    .exists()
+    .isInt()
+    .optional({checkFalsy: true});
+
+  req.checkQuery('skip', 'Invalid skip param')
+    .exists()
+    .isInt()
+    .optional({checkFalsy: true});
+
+  req.checkQuery('sort', 'Invalid sort param')
+    .exists()
+    .isIn(['amount', 'created_at'])
+    .optional({checkFalsy: true});
+
+  const {results, count} = await db.getPendingWithdrawals(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
+
+  res.json({results, count});
+});
+
+router.get('/withdrawal-history', async function (req, res, next) {
+  req.checkQuery('limit', 'Invalid limit param')
+    .exists()
+    .isInt()
+    .optional({checkFalsy: true});
+
+  req.checkQuery('skip', 'Invalid skip param')
+    .exists()
+    .isInt()
+    .optional({checkFalsy: true});
+
+  req.checkQuery('sort', 'Invalid sort param')
+    .exists()
+    .isIn(['amount', 'created_at'])
+    .optional({checkFalsy: true});
+
+  const {results, count} = await db.getWithdrawalHistory(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
+
+  res.json({results, count});
+});
+
+router.get('/deposit-history', async function (req, res, next) {
+  req.checkQuery('limit', 'Invalid limit param')
+    .exists()
+    .isInt()
+    .optional({checkFalsy: true});
+
+  req.checkQuery('skip', 'Invalid skip param')
+    .exists()
+    .isInt()
+    .optional({checkFalsy: true});
+
+  req.checkQuery('sort', 'Invalid sort param')
+    .exists()
+    .isIn(['amount', 'created_at'])
+    .optional({checkFalsy: true});
+
+  const {results, count} = await db.getDepositHistory(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
+
+  res.json({results, count});
+});
+
 module.exports = router;

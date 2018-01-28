@@ -1,8 +1,9 @@
 <template>
   <div class="user-wallet">
   	<Balances />
-    <!-- <Deposits /> -->
-    <!-- <Withdrawals /> -->
+    <PendingWithdrawals />
+    <WithdrawalHistory />
+    <DepositHistory />
 	</div>
 </template>
 
@@ -20,11 +21,17 @@
 
 <script>
 import Balances from 'components/Balances';
+import PendingWithdrawals from 'components/PendingWithdrawals';
+import WithdrawalHistory from 'components/WithdrawalHistory';
+import DepositHistory from 'components/DepositHistory';
 
 export default {
   name: 'UserWallet',
   components: {
-    Balances
+    Balances,
+    PendingWithdrawals,
+    WithdrawalHistory,
+    DepositHistory
   }
 };
 </script>

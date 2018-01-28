@@ -23,7 +23,7 @@
           </td>
           <td>{{ currency.name }}</td>
           <td>{{ currency.symbol }}</td>
-          <td class="numeric">{{ addCommas(formatAmount(currency.balance, currency.scale)) }}</td>
+          <td class="numeric">{{ addCommas(formatAmount(currency.balance, currency.value)) }}</td>
         </tr>
       </tbody>
     </table>
