@@ -7,6 +7,7 @@ const validateBtcAddress = function (address) {
     bitcoin.address.toOutputScript(address, bitcoin.networks.bitcoin);
     return true;
   } catch (e) {
+    console.log(e);
     return false;
   }
 };

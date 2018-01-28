@@ -166,6 +166,17 @@ CREATE TABLE user_deposits (
 CREATE UNIQUE INDEX unique_user_id_txid ON user_deposits(user_id, txid);
 CREATE INDEX user_deposits_created_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
+-- whitelisted_addresses table
+CREATE TABLE whitelisted_addresses (
+  id bigserial PRIMARY KEY,
+  user_id bigint NULL REFERENCES users(id),
+  currency integer NOT NULL,
+  address text NOT NULL
+);
+
+CREATE UNIQUE INDEX unique_user_id_currency_idx ON whitelisted_addresses(user_id, currency);
+CREATE INDEX whitelisted_addresses_user_id_idx ON whitelisted_addresses USING btree(user_id);
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO bk;

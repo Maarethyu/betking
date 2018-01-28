@@ -97,5 +97,14 @@ export default {
   },
   fetchDepositHistory (limit, skip, sort) {
     return get(`/api/account/deposit-history?limit=${limit}&skip=${skip}&sort=${sort}`);
+  },
+  fetchWhitelistedAddresses () {
+    return get('/api/account/whitelisted-address');
+  },
+  removeWhitelistedAddress (currency, otp) {
+    return post('/api/account/whitelisted-address/remove', {currency, otp});
+  },
+  addWhitelistedAddress (currency, address, otp) {
+    return post('/api/account/whitelisted-address/add', {currency, address, otp});
   }
 };
