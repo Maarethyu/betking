@@ -130,7 +130,7 @@ CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
 
 
 -- user_withdrawals table
-CREATE TABLE user_withdrawal (
+CREATE TABLE user_withdrawals (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
   currency integer NOT NULL,
@@ -163,6 +163,17 @@ CREATE TABLE user_deposits (
 );
 
 CREATE UNIQUE INDEX unique_user_id_txid ON user_deposits(user_id, txid);
+
+-- whitelisted_addresses table
+CREATE TABLE whitelisted_addresses (
+  id bigserial PRIMARY KEY,
+  user_id bigint NULL REFERENCES users(id),
+  currency integer NOT NULL,
+  address text NOT NULL
+);
+
+CREATE UNIQUE INDEX unique_user_id_currency_idx ON whitelisted_addresses(user_id, currency);
+CREATE INDEX whitelisted_addresses_user_id_idx ON whitelisted_addresses USING btree(user_id);
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;

@@ -244,7 +244,7 @@ const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) =
         if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
-        return t.none('INSERT INTO user_withdrawal (id, user_id, currency, amount, status, address) VALUES ($1, $2, $3, $4, $5, $6)', [uuidV4(), userId, currency, amount, 'pending', address]);
+        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, status, address) VALUES ($1, $2, $3, $4, $5, $6)', [uuidV4(), userId, currency, amount, 'pending', address]);
       });
   });
 };
@@ -328,6 +328,34 @@ const getDepositAddress = async (userId, currency) => {
   return result;
 };
 
+const getWhitelistedAddresses = async (userId) => {
+  const result = await db.any('SELECT * from whitelisted_addresses where user_id = $1', userId);
+  return result;
+};
+
+const addWhitelistedAddress = async (userId, currency, address) => {
+  await db.none('INSERT INTO whitelisted_addresses (user_id, currency, address) VALUES ($1, $2, $3)', [userId, currency, address])
+    .catch(e => {
+      if (e.code === '23505') {
+        throw new Error('CURRENCY_ALREADY_WHITELISTED');
+      }
+
+      throw e;
+    });
+};
+
+const removeWhitelistedAddress = async (userId, currency) => {
+  await db.none('DELETE FROM whitelisted_addresses WHERE user_id = $1 AND currency = $2', [userId, currency]);
+};
+
+const isAddressWhitelisted = async (userId, currency, address) => {
+  /* Return true if user has no whitelisted address entry OR if whitelisted address matches address, else false */
+  const result = await db.oneOrNone('SELECT address = $1 as whitelisted FROM whitelisted_addresses WHERE user_id = $2 AND currency = $3', [address, userId, currency])
+    .then(row => (!row || row.whitelisted));
+
+  return result;
+};
+
 module.exports.isEmailAlreadyTaken = isEmailAlreadyTaken;
 module.exports.isUserNameAlreadyTaken = isUserNameAlreadyTaken;
 module.exports.createUser = createUser;
@@ -365,3 +393,7 @@ module.exports.getAllBalancesForUser = getAllBalancesForUser;
 module.exports.createWithdrawalEntry = createWithdrawalEntry;
 module.exports.addDeposit = addDeposit;
 module.exports.getDepositAddress = getDepositAddress;
+module.exports.getWhitelistedAddresses = getWhitelistedAddresses;
+module.exports.removeWhitelistedAddress = removeWhitelistedAddress;
+module.exports.addWhitelistedAddress = addWhitelistedAddress;
+module.exports.isAddressWhitelisted = isAddressWhitelisted;
