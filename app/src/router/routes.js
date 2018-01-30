@@ -1,5 +1,4 @@
-import Menu from 'components/Menu';
-import AppShell from 'components/AppShell';
+import AppShell from 'components/AppShell/AppShell';
 
 const routes = [
   /* Pages which need user session to be fetched */
@@ -7,12 +6,12 @@ const routes = [
     path: '/',
     components: {
       default: AppShell,
-      menu: Menu
+      // menu: Menu
     },
     meta: {requiresUser: true},
     children: [
       /* Pages which render for both user logged in or logged out state */
-      {path: '', component: () => import('pages/Index')},
+      {path: '', component: () => import('pages/Home/Home')},
 
       /* Pages which need user to be logged out */
       {path: '/login', component: () => import('pages/Login'), meta: {requiresLoggedOut: true}},
