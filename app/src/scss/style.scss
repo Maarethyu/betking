@@ -11,7 +11,8 @@
 @import "core/core";
 
 // Custom styles
-@import "custom";
+@import "custom/custom";
+@import "custom/btn";
 
 // Game styles
 // TODO: Make these only import on each game's own view

@@ -1,0 +1,71 @@
+.btn{
+  background-image:linear-gradient(rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 40%, rgba(0,0,0,0) 100%);
+  border-radius:4px;
+  text-shadow:0 -1px rgba(0,0,0,0.33);
+  font-family:roboto;
+  font-weight:500;
+  box-shadow:0 1px 1px 0 rgba(0,0,0,0.5);
+
+  &.padded{
+    padding-left:45px;
+    padding-right:45px;
+  }
+
+  &.btn-padded-small{
+    padding-left:6px;
+    padding-right:6px;
+    font-size:13px;
+  }
+
+  &.btn-85{
+    width:85px;
+  }
+
+  &.btn-90{
+    width:90px;
+  }
+
+  &.btn-100{
+    width:100px;
+  }
+
+  &.btn-110{
+    width:110px;
+  }
+
+  &.btn-125{
+    width:125px;
+  }
+
+  &.btn-150{
+    width:150px;
+  }
+  &.btn-md{
+    height:38px;
+    font-size:0.95rem;
+    @include media-breakpoint-down(sm){
+      height:32px;
+      font-size:0.825rem;
+    }
+    @include media-breakpoint-down(xs){
+      height:26px;
+      width:125px;
+      text-align:center;
+      padding:0;
+      line-height:12px;
+      font-size:0.8rem;
+    }
+  }
+
+  &.btn-no-right{
+    border-top-right-radius:0;
+    border-bottom-right-radius:0;
+    border-right:0;
+  }
+
+  &.btn-no-left{
+    border-top-left-radius:0;
+    border-bottom-left-radius:0;
+    border-left:0;
+  }
+}

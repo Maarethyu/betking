@@ -1,10 +1,10 @@
 <template>
   <div class="balanceBar">
-    <b-nav is-nav-bar class="ml-left logged-in">
+    <b-navbar-nav class="ml-left logged-in">
       <div style='display:inline-block;position:relative;top:2px;font-size:13px;'>
         <CurrencyDropdown/>
       </div>
-    </b-nav>
+    </b-navbar-nav>
     <div class='ml-auto'>
         <div class='d-block d-sm-none'>
             <b-button class='logged-in btn-85 btn-padded-small btn-no-right' variant="gray">DEPOSIT</b-button>
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import bNav from 'bootstrap-vue/es/components/nav/nav';
+import bNavbarNav from 'bootstrap-vue/es/components/navbar/navbar-nav';
 import bButton from 'bootstrap-vue/es/components/button/button';
 
 import CurrencyDropdown from './CurrencyDropdown.vue';
@@ -32,7 +32,7 @@ export default {
   name: 'balanceBar',
   components: {
     CurrencyDropdown,
-    'b-nav': bNav,
+    'b-navbar-nav': bNavbarNav,
     'b-button': bButton
   }
 };

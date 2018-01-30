@@ -64,7 +64,7 @@ app-root {
   .app-body {
     margin-top: $navbar-height;
     @include media-breakpoint-down(md){
-      margin-top:45px;
+      margin-top: $navbar-height - 15px;
     }
   }
 }
