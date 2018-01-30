@@ -1,0 +1,102 @@
+// Links, buttons, and more within the dropdown menu
+.dropdown-item {
+  position: relative;
+  padding: 10px 20px;
+  border-bottom: 1px solid $dropdown-border-color;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  i {
+    display: inline-block;
+    width: 20px;
+    margin-right: 10px;
+    margin-left: -10px;
+    color: $dropdown-border-color;
+    text-align: center;
+  }
+
+  .badge {
+    position: absolute;
+    right: 10px;
+    margin-top: 0px;
+    padding-top:5px;
+    text-indent:-1px;
+    text-align:center;
+    border-radius:50%;
+    width:20px;
+    height:20px;
+    font-weight:400;
+    
+  }
+}
+
+// Dropdown section headers
+.dropdown-header {
+  padding: 8px 20px;
+  background: $dropdown-divider-bg;
+  border-bottom: 1px solid $dropdown-border-color;
+
+  .btn {
+    margin-top: -7px;
+    color: $dropdown-header-color;
+
+    &:hover {
+      color: $body-color;
+    }
+
+    &.pull-right {
+      margin-right: -20px;
+    }
+  }
+}
+
+.dropdown-menu-lg {
+  width: 250px;
+}
+
+.navbar-nav {
+  .dropdown-menu {
+    top:32px;    
+    border:0;
+    position: absolute;
+    padding:20px!important;
+    background:#1b262d;
+    .dropdown-item{
+      transition:box-shadow 0.1s ease-in-out;
+      box-shadow:0 0 #d53939 inset !important;
+      color:#cacccc;
+      font-weight:500;
+      border-color:#2c3439;
+      &:hover, &:focus{
+        color:#fff;
+        background:#1a2328;
+      }
+      &:hover{
+        box-shadow:6px 0 #d53939 inset !important;
+      }
+    }
+    
+    .dropdown-header{
+      border-color:#2c3439;
+      background:transparent;
+      color:#fff;
+      font-size:15px;
+    }
+  }
+  // Menu positioning
+  //
+  // Add extra class to `.dropdown-menu` to flip the alignment of the dropdown
+  // menu with the parent.
+  .dropdown-menu-right {
+    right: 0;
+    left: auto; // Reset the default from `.dropdown-menu`
+  }
+
+  .dropdown-menu-left {
+    right: auto;
+    left: 0;
+  }
+}
+

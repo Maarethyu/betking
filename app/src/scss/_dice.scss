@@ -1,0 +1,83 @@
+main.dice{
+    @include media-breakpoint-down(md){
+        .container-fluid{
+            padding:0;
+        }
+    }
+}
+
+.game-dice{
+    width:100%;
+    max-width:570px;
+    height:360px;
+    background:rgba(0,0,0,0.8);
+    color:white;
+    text-align:center;
+    position:relative;
+
+    .ui-top{
+        position:absolute;
+        top:14px;
+        text-align:center;
+        width:100%;
+
+        input{
+            padding:6px;
+        }
+        
+        label{
+            font-weight:bold;
+            width:calc(50% - 56px);
+            display:inline-block;
+            padding:0 10px;
+            margin:0 10px 15px 0;
+            
+            @include media-breakpoint-down(xs){    
+                width:calc(50% - 26px);
+                padding:0;
+                margin:0 4px 15px 0;
+                
+            }
+
+            input{
+                width:calc(100% - 16px);
+                display:inline-block;
+            }
+        }
+    }
+
+    .ui-bottom{
+        position:absolute;
+        bottom:14px;
+        text-align:center;
+        width:100%;
+    }
+
+    .btn-bet{
+        font-weight:bold;
+        width:80px;
+        height:56px;
+        text-align:center;
+        line-height:13px;
+        font-size:14px;
+        margin: 0 20px;
+        @include media-breakpoint-down(xs){
+            margin: 0 14px;
+        
+        }
+    }
+
+    .btn-fair{
+        position:absolute;
+        right:5%;
+        top:8px;
+    }
+
+    .nudge{
+        height:26px;
+    }
+
+    .nudge-small{
+        height:5px;
+    }
+}

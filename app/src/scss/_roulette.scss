@@ -1,0 +1,1215 @@
+main.roulette{
+    background:radial-gradient(circle at center, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%), url(/static/img/roulette/felt.jpg) center repeat;
+    position:relative;
+    overflow-y:hidden;
+    overflow:hidden;
+    font-family: roboto;
+    
+    @include media-breakpoint-down(md){
+        .container-fluid{
+            padding:0;
+        }
+    }
+}
+.game-roulette{
+    $roulette-width:940px;
+    user-select: none; 
+    $cell-border:1px solid white;
+
+
+    @include media-breakpoint-down(xs){
+        @media screen and (orientation: portrait) {
+            padding-top:73px;
+        }     
+    }
+
+    .wheel{
+        $numbers:0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26;
+        $wedge:9.72972973deg;
+        position:absolute;
+        left:0;
+        right:0;
+        top:0;
+        bottom:0;
+        margin:auto;
+        height:600px;
+        width:600px;
+        max-width:calc(100vmin - 50px);
+        max-height:calc(100vmin - 50px);
+
+        
+        @include media-breakpoint-down(xs){
+            max-width:calc(100vw + 100px);
+            max-height:calc(100vw + 100px);
+            width:calc(100vw + 100px);
+            height:calc(100vw + 100px);
+            transform:translate(-50px, -50px);
+            z-index:1;
+        }
+
+        border-radius:50%;
+        background:url(/static/img/roulette/wheel_back.png);
+        background-size:100%;
+        z-index:99;
+        overflow:hidden;
+
+        .ball{
+
+            // TODO: Somehow rework this to work in edge
+            // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/4871428/
+            // http://vsimonian.me/iestylebug.html
+            // It appears edge has a bug handling this
+            // It seems randomly changing window height / width fixes it temporarily
+            @keyframes spin {
+                0%     {transform:rotate(1260deg - 240 * 3) translateY(51%); }
+                8.33%  {transform:rotate(1260deg - 240 * 2) translateY(51%); }
+                16.66% {transform:rotate(1260deg - 240 * 1.1) translateY(49%); }
+                25.00% {transform:rotate(1260deg - 240 * 0.57) translateY(47%); }
+                32.33% {transform:rotate(1260deg - 240 * 1.005) translateY(34%); }
+                33.33% {transform:rotate(1260deg - 240 * 1) translateY(33%); }
+                66.66% {transform:rotate(1260deg - 240 * 2) translateY(33%); }
+                100%   {transform:rotate(1260deg - 240 * 3) translateY(33%); }
+            }
+
+            width:80%;
+            height:80%;
+            top:10%;
+            left:10%;
+            z-index:101;
+            position:absolute;
+            
+            //transform: translateY(0deg%) rotate(0deg);
+            //border:1px solid red;
+            transform-origin:50% 50%;
+            transform:rotate(-1260deg + 240 * 3) translateY(33%);
+            
+            &.spin{
+                animation:spin 11s linear;
+            }       
+
+            &.instant{
+                transition: all 0s linear; // For resetting ball
+                transform:rotate(0deg) translateY(0);
+            }    
+
+            &::before{
+                z-index:101;
+                content:'';
+                top:-0px;
+                left:-0px;
+                right:0;
+                bottom:0;
+                margin:auto;
+                position:absolute;
+                width:5%;
+                height:18%;
+                background:rgba(255,255,0,0);
+                box-shadow:0 0 0px 0px yellow;
+                transform: translate(0px, 15%)  perspective(200px) rotateX(52deg);
+                transition: all 0.2s ease-in-out;
+            }
+
+            &.highlight::before{
+                background:rgba(255,255,0,0.275);
+                box-shadow:0 0 7px 3px yellow;
+            }
+
+            &::after{
+                z-index:101;
+                content:'';
+                top:-0px;
+                left:-0px;
+                right:0;
+                bottom:0;
+                margin:auto;
+                position:absolute;
+                width:16px;
+                height:16px;
+                background:#fff;
+                box-shadow:-2px 1px 4px 1px rgba(0,0,0,0.4) inset;
+                transform:translate(-8px -8px);
+                border-radius:50%;
+            }
+
+            &.highlight::after{
+                background:#ffc;
+                box-shadow:-2px 1px 4px 1px rgba(0,0,0,0.4) inset, 0 0 6px 3px yellow;
+            }
+        }
+
+        .numbers{
+            border-radius:50%;
+            z-index:99;
+            position:absolute;
+            width:69%;
+            height:69%;
+            left:0;
+            top:0;
+            bottom:0;
+            right:0;
+            margin:auto;
+            background:url(/static/img/roulette/wheel_numbers.png);
+            z-index:100;
+            background-repeat:no-repeat;
+            background-position: 50% 50%;   
+            background-size:100%;
+            transition:transform 11s linear;
+            
+            @each $stop in $numbers{
+                &[data-stop='#{$stop}']{
+                    transform:rotate(-1080deg - $wedge * (index($numbers,$stop) - 1));
+                    &.instant{
+                        transition: all 0s linear; // For resetting wheel
+                        transform:rotate(-360deg - $wedge * (index($numbers,$stop) - 1));
+                    }
+                }
+            }
+            
+        }
+        
+    }
+
+    .board{
+        width:100%;
+        max-width:$roulette-width;
+        font-size:0;
+        padding-top:63px;
+    }
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height:100%;
+
+    .roulette-row{
+        width:100%;
+        height:92px;
+
+        @include media-breakpoint-down(md){
+            height:64px;
+        }
+
+        @include media-breakpoint-down(sm){
+            height:50px;
+        }
+
+        @include media-breakpoint-down(xs){
+            height:42px;
+        }
+
+        //Full Size
+        max-height:(100vh / 10);
+        max-height:calc((100vh / 5) - (410px / 5)); 
+        
+        //Top UI Remvoed
+        @media screen and (max-height: 760px) {
+            max-height:calc((100vh / 5) - (340px / 5));
+        }
+        
+        //Small bottom UI
+        @media screen 
+        and (max-height: 700px) {
+            max-height:calc((100vh / 5) - (290px / 5));
+        }     
+    
+        //Infobar and Footer removed
+        @media screen 
+        and (max-height: 520px) {
+            max-height:calc((100vh / 5) - (235px / 5));   
+        }     
+
+        &:last-child{
+            .cell{
+                border-bottom:$cell-border;
+            }
+        }
+
+        .cell{
+            vertical-align:top;
+            touch-action:manipulation;            
+            width:(100% / 14);
+            height:100%;
+
+            border-top:$cell-border;
+            border-left:$cell-border;
+
+            &:last-child{
+                border-right:$cell-border;
+            }
+
+            font-size:26px;
+            font-weight:bold;
+            color:white;
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: center;
+            margin:0;
+            text-align:center;
+            position:relative;
+            background:rgba(255,255,255,0.1);
+            &:hover, &.active{
+                background:rgba(255,255,255,0.3);
+            }
+
+            position:relative;
+            cursor:pointer;
+
+            .color-bet{
+                width:60%;
+                height:50%;
+                border:$cell-border;
+                position:absolute;
+                left:20%;
+                top:25%;
+                border-radius:15% / 40%;
+
+                &.black{
+                    background:black;
+                }
+
+                &.red{
+                    background:#e11;
+                }
+                
+            }
+
+            &.black{
+                background:black;
+                &:hover, &.active{
+                    background:#484848;
+                    box-shadow:0 0 0 0.5px white inset, 0 0 18px rgba(255,255,255,0.6) inset;                    
+                }
+            }
+            
+            &.red{
+                background:#d11;
+                &:hover, &.active{
+                    background:#ff5a5a;
+                    box-shadow:0 0 0 0.5px white inset, 0 0 18px rgba(255,255,255,0.6) inset;                    
+                }
+            }
+
+            &.blank{
+                box-shadow:none;
+                background:transparent;
+                border:none;
+                cursor:default;
+            }
+
+            &.double{
+                width: calc(100% / 14 * 2);
+                margin-top:-1px;
+            }
+
+            &.quad{
+                width: calc(100% / 14 * 4);
+                margin-top:-1px;
+                &:last-child{
+                    border-right:$cell-border;
+                }
+            }
+
+            &.zero{
+                height:300%;
+                top:-100%;
+                position:relative;
+                border-bottom:$cell-border;
+            }
+
+            &.two-to-one{
+                margin-left:-1px;
+            }
+
+            &.border-bottom{
+                border-bottom:$cell-border;
+            }
+            
+            &.border-right{
+                border-right:$cell-border;
+            }
+
+            &.border-left{
+                border-left:$cell-border;
+                margin-top:-1px;
+            }
+
+            @include media-breakpoint-down(md){
+                font-size:22px;
+            }
+
+            @include media-breakpoint-down(sm){
+                font-size:18px;
+
+            }
+            
+            @include media-breakpoint-down(xs){
+                font-size:11px;
+            }
+
+
+            .corner, .side, .top, .bottom{
+                position:absolute;
+                display:inline-block;
+                width:12px;
+                height:12px;
+
+                &[data-targets='-1']{
+                    display:none;
+                }
+            }
+            
+            .corner{
+                width:18px;
+                height:18px;
+            }
+
+            .top{
+                top:-1px;
+                left:0;
+                right:0;
+                margin:auto;
+                width:100%;
+            }
+
+            .bottom{
+                bottom:-1px;
+                left:0;
+                right:0;
+                margin:auto;
+                width:100%;
+            }
+
+            .side{
+                &.left{
+                    left:-1px;
+                    height:100%;
+                }
+                &.right{
+                    right:-1px;
+                    height:100%;
+                }
+            }
+
+            .corner{
+                z-index:2;
+                &.top-left{
+                    left:-1px;
+                    top:-1px;
+                }
+                &.top-right{
+                    right:-1px;
+                    top:-1px;
+                }
+                &.bottom-right{
+                    right:-1px;
+                    bottom:-1px;
+                }
+                &.bottom-left{
+                    left:-1px;
+                    bottom:-1px;
+                }
+            }
+
+            .bet-container{
+                //box-shadow:0 0 0 8px rgba(128,255,255,1);
+                display:inline-block;
+                position:absolute;
+                width:0;
+                height:0;
+                z-index:3;
+                font-size:16px;
+
+                &.center{
+                    left:0;
+                    right:0;
+                    top:0;
+                    bottom:0;
+                    margin:auto;
+                }
+
+                &.top-left{
+                    left:-1px;
+                    top:-1px;
+                }
+
+                &.bottom-left{
+                    left:-1px;
+                    bottom:-1px;
+                }
+
+                &.bottom{
+                    left:0;
+                    right:0;
+                    bottom:-1px;
+                    margin:auto;
+                }
+
+                &.left{
+                    left:-1px;
+                    bottom:0;
+                    top:0;
+                    margin:auto;
+                }
+
+                &[data-receive='-1']{
+                    display:none;
+                }
+
+                .chip{
+                    position:absolute;
+                    line-height:0;
+                    width:36px;
+                    height:36px;
+                    transform:translate(-18px, -18px);
+                    font-size:0;
+                    top:0px;
+                    &.cell-value{
+                        font-size:12px;
+                        background:none;
+                        top:0px;
+                        z-index:4;
+                    }
+
+                    +.chip{
+                        top:-1px;
+                        +.chip{
+                            top:-2px;
+                            +.chip{
+                                top:-3px;
+                                +.chip{
+                                    top:-4px;
+                                    +.chip{
+                                        top:-5px;
+                                        +.chip{
+                                            top:-6px;
+                                            +.chip{
+                                                top:-7px;
+                                                +.chip{
+                                                    top:-8px;
+                                                    +.chip{
+                                                        top:-9px;
+                                                        +.chip{
+                                                            top:-10px;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } // .. Chip positions
+
+                }
+            }
+        }
+    } // End roulette row desktop
+
+
+
+    .ui-top{
+        width:100%;
+        position:absolute;
+        top:0;
+        height:48px;
+        background:url(/static/img/roulette/ui_top.png);
+        background-size:cover;
+        margin:0;
+        left:0;
+        font-size:14px;
+        line-height:48px;
+        color:#b0b0b2;
+        font-weight:bold;
+        box-shadow:0 0 12px 2px black;
+        padding:0 20px;
+        
+        button{
+            height:38px;
+            line-height:38px;
+            padding:0;
+            width:100px;
+            margin-left:7px;
+            background:rgba(0,0,0,0.33);
+            border:0;
+            color:inherit;
+            font-weight:bold;
+            font-size:15px;
+            border-width:0 1px 0 1px;
+            border-style:solid;
+            border-image: linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            border-image-slice: 1;
+            &:hover{
+                background:rgba(0,0,0,0.6);
+                border-image: linear-gradient(to top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.1) 100%);
+                border-image-slice: 1;
+            }
+            &:focus{
+                box-shadow:none;
+                outline:none;
+            }
+        }
+
+        .right{
+            position:absolute;
+            right:10px;
+            top:0;
+            vertical-align:top;
+            .bet-history{
+
+                @include media-breakpoint-down(xs){
+                    max-width:140px;
+                }
+
+                overflow:hidden;
+                vertical-align:top;
+                position:relative;
+                top:10px;
+                font-size:0;
+                height:28px;
+                display:inline-block;
+                box-shadow:0 0 0 1px rgba(255,255,255,0.4);
+                .history-cell{
+                    vertical-align:top;
+                    text-align:center;
+                    width:(100%/8);
+                    display:inline-block;
+                    color:white;
+                    height:28px;
+                    width:28px;
+                    font-size:16px;
+                    line-height:28px;
+                    border-left:1px solid;
+                    border-right:1px solid;
+                    border-image: linear-gradient(to top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.2) 100%);
+                    border-image-slice: 1;
+                    position:relative;
+
+                    &:first-child{
+                        border-left:0;
+                        &::before{
+                            top:0;
+                            left:8px;
+                            position:absolute;
+                            width: 0;
+                            height: 0;
+                            border-style: solid;
+                            border-width: 5px 5px 0 5px;
+                            border-color: rgba(255,255,255,0.66) transparent transparent transparent;
+                            content:"";
+                        }
+                    }
+
+                    &:last-child{
+                        border-right:0;
+                    }
+
+                    &.black{
+                        background:black;
+                    }
+    
+                    &.red{
+                        background:#e11;
+                    }
+
+                    &.green{
+                        background:#181;
+                    }
+                }
+            }
+        }
+
+        .divider{
+            display:inline-block;
+            width:0px;
+            height:28px;
+            line-height:0;
+            border-left:1px solid;
+            position:relative;
+            top:9px;
+            margin:0 6px;
+            border-image: linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+            border-image-slice: 1;
+        }
+
+        @include media-breakpoint-down(sm){
+            top:0;
+        }
+        @include media-breakpoint-down(xs){
+            top:0;
+        }
+    }
+
+    .ui-bottom{
+        width:100%;
+        position:absolute;
+        bottom:0;
+        left:0;
+        font-size:24px;
+        color:white;
+        transition:0.2s ease-in-out transform;
+
+        //Desktop theme
+        .left{
+            background:url(/static/img/roulette/ui_bottom_left.png);
+            background-repeat:no-repeat;
+            width:462px;
+            height:135px;
+            position:absolute;
+            bottom:0;
+            left:0;
+            padding:10px;
+            padding-top:15px;
+        }
+        
+        .right{
+            background:url(/static/img/roulette/ui_bottom_right.png);
+            background-repeat:no-repeat;
+            background-position: right 0 bottom 0px;
+            width:100%;
+            height:135px;
+            position:absolute;
+            bottom:0;
+            right:0;
+            text-align:right;
+            padding:10px;
+            padding-top:15px;
+            font-size:0;
+
+            .btn-back{
+                display:inline-block;
+                width:50px;
+                height:50px;
+                border-radius:100%;
+                margin-top:26px;
+                margin-left:9px;
+                transition:0.08s color ease-in-out, 0.08s background ease-in-out;
+                background:linear-gradient(to left, rgba(135,135,135,1) 0%, rgba(50,50,50,1) 15%, rgba(30,30,30,1) 50%, rgba(50,50,50,1) 85%, rgba(135,135,135,1) 100%);
+                &:hover{
+                    background:linear-gradient(to left, rgba(185,185,185,1) 0%, rgba(80,80,80,1) 15%, rgba(60,60,60,1) 50%, rgba(80,80,80,1) 85%, rgba(185,185,185,1) 100%);
+                }
+                
+                button{
+                    transition:0.08s color ease-in-out, 0.08s background ease-in-out;
+                    &:focus, &:hover{
+                        box-shadow:none;
+                    }
+                    touch-action:manipulation;
+                    border:none;
+                    background:rgba(0,0,0,0.75);
+                    width:46px;
+                    height:46px;
+                    margin-bottom:20px;
+                    pointer-events:auto;
+                    font-weight:bold;
+                    padding:0;
+                    font-size:22px;
+                    border-radius:50%;
+                    position:relative;
+                    top:2px;
+                    right:2px;
+                    color:#7f7f80;
+                    
+                    &:hover{
+                        background:rgba(0,0,0,1);
+                        color:white;
+                    }
+                    &::before{
+                        color:white;
+                        content:attr(data-text);
+                        font-size:10px;
+                        display:inline-block;
+                        position:absolute;
+                        left:0;
+                        right:0;
+                        height:34px;
+                        line-height:50px;
+                        margin:auto;
+                        bottom:-24px;
+                        text-transform:uppercase;
+                    }
+                }    
+            }
+            .bet-controls{
+                width:200px;
+            }
+        }
+
+        .left, .right{
+            background-size:462px 135px;
+            z-index:2;
+            pointer-events: none;
+        }
+
+        .middle{
+            width:calc(100% - 545px);
+            white-space: nowrap;
+            max-width:730px;
+            margin-left:auto;
+            margin-right:auto;
+            overflow:hidden;
+            position:absolute;
+            bottom:16px;
+            left:0;
+            right:0;
+            text-align:center;
+            z-index:1;
+
+            .chipscroll_container{
+                font-weight:bold;
+                height:40px;
+                max-width:730px;
+                width:100%;
+                padding-bottom:46px;
+                margin-bottom:13px;
+                border-bottom:1px solid;
+                border-image: linear-gradient(to left, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
+                border-image-slice: 1;
+                .scroll_chips{
+                    width:40px;
+                    text-align:center;
+                    display:inline-block;
+                    cursor:pointer;
+                    opacity:0.7;
+                    &:hover{
+                        opacity:1;
+                    }
+                }
+
+                @media screen 
+                and (max-height: 800px) {
+                    padding-bottom:12px;
+                    margin-bottom:9px;
+                    font-size:20px;
+                }      
+            }
+
+            .chip-container-outer{
+                overflow:hidden;
+                height:96px;
+                .chip-container{
+                    font-size:0;
+                    overflow-x:scroll; 
+                    padding:4px 40px 16px 40px;  
+                    .chip{
+                        transition:all 0.08s ease-in-out;
+                        cursor:pointer;
+                        opacity:0.7;
+                        box-shadow:0 0 0 0 white inset, 4px 4px 12px 0 rgba(0,0,0,0.65);
+                        &.selected, &:hover{
+                            box-shadow:0 0 0 2px white inset, 4px 4px 12px 0 rgba(0,0,0,0.65);
+                            transform:scale(1.05);
+                            opacity:1;
+                        }
+                        margin:0 6px;
+                    }
+                }
+            }
+        }
+                
+        @media screen and (max-height: 700px), screen and (max-width: 780px) {
+
+            .chipscroll_container{
+                display:none;
+            }
+            .middle{
+                max-width:100%;
+                width:100%;
+                text-align:left;
+                padding-right:240px;
+                bottom:42px;
+                .chip-container-outer{
+                    width:100%;
+                    height:80px;                    
+                    .chip-container{
+                        padding-left:0;
+                        padding-right:70px;
+                        .chip{
+                            width:58px;
+                            height:58px;
+                            margin-top:8px;
+                            font-size:16px;
+                        }
+                    }
+                }
+            }
+            .left{
+                height:40px;
+                padding:0;
+                width:464px;
+                z-index:3;
+                background:transparent;
+
+                @media screen and (max-width: 736px) {
+                    width:288px;
+                    .bet-info div.roulette-balance{
+                        display:none;
+                    }
+                }
+
+                .bet-info{
+                    width:100%;
+                    text-align:center;
+                    display:flex;
+                    justify-content: flex-start;
+                    padding-left:3px;
+                    div{
+                        display:inline-block;
+                        margin-left:7px;
+                        position:relative;
+                        border:none;
+                        background:none;
+                        line-height:30px;
+                        span{
+                            font-size:15px;
+                            position:static;
+                            display:inline-block;
+                            margin:0 5px;
+                            padding:0
+                        }
+                    }
+                }
+            }
+            .right{
+                background:url(/static/img/roulette/ui_bottom_right_mobile.png);    
+                background-position: right 0 bottom 0px;              
+                background-repeat:no-repeat;                
+                background-size:1400px 120px;
+                height:120px;
+                padding:8px;
+                .btn-back{
+                    height:48px;
+                    width:48px;
+                    margin-top:22px;
+                    margin-bottom:0;                 
+                    button{
+                        height:44px;
+                        width:44px;
+                    }
+                }
+            }
+        }
+
+        .chip{
+            width:80px;
+            height:80px;
+            font-size:23px;
+            touch-action:manipulation;
+        }
+        
+
+        .bet-info{
+            width:250px;
+            position:relative;
+            div{
+                border-top:1px solid white;
+                border-bottom:1px solid white;
+                border-image: linear-gradient(to left, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+                background:rgba(0,0,0,0.2);
+                border-image-slice: 1;
+                display:flex;
+                height:1.4em;
+                flex-direction: column;
+                justify-content: center;
+                margin-bottom:5px;
+            }
+            span{
+                font-size:20px;
+                &:first-child{
+                    position:absolute;
+                    left:0;
+                    font-weight:bold;
+                    padding-left:5px;
+                    font-size:70%;
+                }
+                &:last-child{
+                    position:absolute;
+                    right:0;
+                    text-align:right;
+                    padding-right:5px;
+                }
+            }
+        }
+    }
+    
+
+
+    .chip{
+
+        //Low stakes chips
+        &.chip-1{
+            background-color:#43985A;
+            &::after{
+                content:"10K";            
+            }
+        }
+        &.chip-2{
+            background-color:#C72E2E;
+            &::after{
+                content:"20K";            
+            }
+        }
+        &.chip-5{
+            background-color:#1560A9;
+            &::after{
+                content:"50K";            
+            }
+        }
+        &.chip-10{
+            background-color:#DF5D22;
+            &::after{
+                content:"100K";            
+            }        
+        }
+        &.chip-25{
+            background-color:#4E3B6B;
+            &::after{
+                content:"250K";            
+            }        
+        }
+        &.chip-100{
+            background-color:#E37193;
+            &::after{
+                content:"1M";            
+            }        
+        }
+        &.chip-500{
+            background-color:#101010;
+            &::after{
+                content:"5M";            
+            }       
+        }
+
+        //High stakes chips
+        &.chip-1000000{
+            background-color:#43985A;
+            &::after{
+                content:"0.01";            
+            }       
+        }       
+        &.chip-2000000{
+            background-color:#C72E2E;
+            &::after{
+                content:"0.02";            
+            }       
+        }
+        &.chip-5000000{
+            background-color:#1560A9;
+            &::after{
+                content:"0.05";            
+            }       
+        }
+        &.chip-10000000{
+            background-color:#DF5D22;
+            &::after{
+                content:"0.10";            
+            }       
+        }
+        &.chip-25000000{
+            background-color:#4E3B6B;
+            &::after{
+                content:"0.25";            
+            }       
+        }
+        &.chip-50000000{
+            background-color:#E37193;
+            &::after{
+                content:"0.50";            
+            }       
+        }
+        &.chip-100000000{
+            background-color:#101010;
+            &::after{
+                content:"1.00";            
+            }       
+        }
+        
+        background:url(/static/img/roulette/chip_back.png);
+        border-radius:50%;
+        background-size:cover;
+        
+        width:16px;
+        height:16px;
+        font-weight:bold;
+        font-size:12px;
+        color:white;
+        display:inline-flex;
+        flex-direction:column;
+        justify-content:center;
+        position:relative;
+        text-align:center;
+        text-shadow:1px 1px rgba(0,0,0,0.6);
+        
+        &::after{
+            text-align:center;
+            font-size:inherit;
+            color:inherit;
+            position:relative;
+            width:inherit;
+        }
+    }
+    @include media-breakpoint-down(xs){
+        @media screen 
+        and (orientation: portrait) {
+            .board-container-scroll{
+                height:100vh;
+                max-height:calc(100vh - 278px);
+                overflow-y:scroll;
+                overflow-x:hidden;
+                position:relative;
+                top:-24px;
+                padding-top:10px;
+            }
+            .board-container{
+                height:100vh;
+                width:100%;
+            }
+            .board{
+                touch-action:pan-y;            
+                left:0;
+                top:0;
+                padding:0;
+                margin:0;
+                max-width:none;
+                max-height:none;
+                width:100%;
+                transform:translateY(calc(2px + 2.6vw)) rotate(90deg) scaleX(1.6);
+
+                .roulette-row{
+                    transform:scaleX(0.625);
+                    height:(100vw / 5.3);
+                    max-height:(100vw / 5.3);
+                    max-width:none;
+                    white-space:nowrap;
+                    position:relative;
+                    &:nth-of-type(5){
+                        z-index:1;
+                    }
+                    &:nth-of-type(4){
+                        z-index:2;
+
+                    }
+                    &:nth-of-type(3){
+                        z-index:3;
+                        .cell:not(.blank){
+                            border-bottom:1px solid white!important;;
+                            border-top:none!important;
+                        }
+                    }
+                    &:nth-of-type(2){
+                        z-index:4;
+                        .cell:not(.blank){
+                            border-bottom:1px solid white!important;;
+                            border-top:none!important;
+                        }
+                    }
+                    &:nth-of-type(1){
+                        z-index:5;
+                        .cell:not(.blank){
+                            border-bottom:1px solid white!important;;
+                        }
+                        .cell.blank{
+                            border-top:1px solid white!important;;
+                        }
+                    }
+                    .cell{
+                        font-size:16px;
+                        width:calc((160vh/14) - (288px / 14));
+                        &.double{
+                            width:calc((160vh/7) - (288px / 7));
+                        }
+                        &.quad{
+                            width:calc((160vh/3.5) - (288px / 3.5));
+                        }
+                        span{
+                            pointer-events:none;                            
+                            display:inline-block;
+                            transform:rotate(270deg);
+                        }
+
+                        .bet-container{
+                            transform:rotate(270deg);
+                        }
+                    }
+                }
+            }
+            .ui-bottom{
+                .left{
+                    width:100%;
+                    height:40px;
+                    background:#363838;
+                    background-image:url(/static/img/roulette/ui_texture.png);
+                    box-shadow:0 0 5px 0 black;
+                    
+                    .bet-info{
+                        width:100%;
+                        div{
+                            margin:0;
+                            width:50%;
+                            font-size:16px;
+                            line-height:40px;
+                            height:40px;
+                        }
+                        span{
+                            &:first-child, &:last-child{
+                                font-size:16px;
+                            }
+                        }
+                    }
+                }
+                .right{
+                    width:100%;
+                    background:#363838;
+                    background-image:url(/static/img/roulette/ui_texture.png);
+                    text-align:center;
+                    height:62px;
+                    bottom:110px;
+                    padding:5px 0 0 0;
+                    box-shadow:0 0 5px 0 black, 0 -5px 15px -5px rgba(0,0,0,0.5);
+                    .btn-back{
+                        height:53px;
+                        width:calc((100vw / 5) - 5px);
+                        border-radius:2px;
+                        margin:0 2px;
+                        button{
+                            border-radius:2px;
+                            height:49px;
+                            width:calc((100vw / 5) - 9px);
+                            left:0;
+                            &::before{
+                                display:none;
+                            }
+                        }
+                    }
+                }
+                .middle{
+                    width:100%;
+                    bottom:40px;
+                    padding:4px 0;
+                    height:72px;
+                    margin:0;
+                    padding:0;
+                    background:darken(#363838,9%);
+                    background-image:url(/static/img/roulette/ui_texture.png);
+                    .chip-container-outer{
+                        margin:0;
+                        padding:0;
+                        width:100%;
+                        max-width:100%;
+                        .chipscroll_container{
+                            width:100%;
+                            max-width:100%;
+                        }
+                        .chip-container{
+                            padding:0 5px;
+                            width:100%;
+                            max-width:100%;
+                            height:92px;
+                            overflow-y:hidden;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
