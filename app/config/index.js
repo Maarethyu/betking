@@ -35,12 +35,12 @@ module.exports = {
     host: 'localhost', // can be overwritten by process.env.HOST,
     port: 8080,
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: '/static',
     proxyTable: {
-      '/api': {
-        target: 'http://localhost:3002',
-        changeOrigin: true
-      }
+      // '/api': {
+      //   target: 'http://localhost:3002',
+      //   changeOrigin: true
+      // }
     },
     autoOpenBrowser: true,
     errorOverlay: true,

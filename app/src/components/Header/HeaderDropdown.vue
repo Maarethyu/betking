@@ -1,23 +1,20 @@
 <template>
   <b-nav-item-dropdown right>
     <template slot="button-content">
-      <Avatar username="nverdhan" :size="25" :backgroundColor="'#d53939'"
+      <Avatar username="nverdhan" :size="30" :backgroundColor="'#d53939'"
         :color="'#fff'" :customStyle="{display: 'inline-block', position: 'relative', top: -3}"></Avatar>
       <span class="d-md-down-none">nverdhan</span>
     </template>
-    <b-dropdown-header tag="div" class="text-center"><strong>NEW</strong></b-dropdown-header>
-    <b-dropdown-item><i class="fa fa-wrench"></i>Settings</b-dropdown-item>
-    <b-dropdown-item><i class="fa fa-laptop"></i>Sessions</b-dropdown-item>
-    <b-dropdown-item><i class="fa fa-shield"></i>Two factor</b-dropdown-item>
-    <b-dropdown-item><i class="fa fa-comments"></i>Whitelisted IPs</b-dropdown-item>
-    <b-dropdown-header tag="div" class="text-center"><strong>Settings</strong></b-dropdown-header>
-    <b-dropdown-item><i class="fa fa-user"></i> Profile</b-dropdown-item>
-    <b-dropdown-item><i class="fa fa-wrench"></i> Settings</b-dropdown-item>
-    <b-dropdown-item><i class="fa fa-usd"></i> Payments<b-badge variant="danger">{{itemsCount}}</b-badge></b-dropdown-item>
-    <b-dropdown-item><i class="fa fa-file"></i> Projects<b-badge variant="danger">{{itemsCount}}</b-badge></b-dropdown-item>
+    <b-dropdown-header tag="div" class="text-center"><strong>Profile</strong></b-dropdown-header>
+    <b-dropdown-item :to="'settings'"><i class="fa fa-wrench"></i>Settings</b-dropdown-item>
+    <b-dropdown-item :to="'wallet'"><i class="fa fa-wrench"></i> Wallet</b-dropdown-item>
+    <b-dropdown-item :to="'sessions'"><i class="fa fa-laptop"></i>Sessions</b-dropdown-item>
+    <b-dropdown-header tag="div" class="text-center"><strong>Security</strong></b-dropdown-header>
+    <b-dropdown-item :to="'two-factor'"><i class="fa fa-shield"></i>Two factor Auth</b-dropdown-item>
+    <b-dropdown-item :to="'whitelisted-ips'"><i class="fa fa-comments"></i>Whitelisted IPs</b-dropdown-item>
+    <b-dropdown-item :to="'login-attempts'"><i class="fa fa-user"></i> Login Attempts</b-dropdown-item>
     <b-dropdown-divider></b-dropdown-divider>
-    <b-dropdown-item><i class="fa fa-shield"></i> Lock Account</b-dropdown-item>
-    <b-dropdown-item @click='$root.$emit("logout")'><i class="fa fa-lock"></i> Logout</b-dropdown-item>
+    <b-dropdown-item @click="logout"><i class="fa fa-lock"></i> Logout</b-dropdown-item>
   </b-nav-item-dropdown>
 </template>
 <style lang="scss">
@@ -50,6 +47,11 @@
       'b-dropdown-item': bDropdownItem,
       'b-dropdown-divider': bDropdownDivider,
       'b-badge': bBadge
+    },
+    methods: {
+      logout () {
+        this.$store.dispatch('logout');
+      }
     }
   };
 </script>
