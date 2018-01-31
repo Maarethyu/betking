@@ -20,6 +20,15 @@
     <b-dropdown-item @click='$root.$emit("logout")'><i class="fa fa-lock"></i> Logout</b-dropdown-item>
   </b-nav-item-dropdown>
 </template>
+<style lang="scss">
+  .dropdown-toggle::after {
+    margin-left: 0.5em;
+    border-top: 0.5em solid;
+    border-right: 0.5em solid transparent;
+    border-left: 0.5em solid transparent;
+    vertical-align: 0;
+  }
+</style>
 <script>
   import bNavItemDropdown from 'bootstrap-vue/es/components/nav/nav-item-dropdown';
   import bDropdownHeader from 'bootstrap-vue/es/components/dropdown/dropdown-header';

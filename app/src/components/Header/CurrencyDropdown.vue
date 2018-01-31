@@ -2,14 +2,11 @@
   <b-nav-item-dropdown left class='text-left currency-dropdown'>
     <template slot="button-content">
       <span class="d-none d-sm-inline-block d-md-inline-block d-lg-none d-xl-inline-block currency-dropdown__balance">
-        BALANCE: {{balance}}
+        BALANCE: {{addCommas(formatAmount(activeCurrency.balance, activeCurrency.value))}}
       </span>
       <span><img src='/static/img/main/btc.png' width='13' height='13'></span>
     </template>
-    <b-dropdown-item @click="currency = '(B)'; balance=$root.state.user.balance.btc"><i class="fa fa-btc"></i> Bitcoin</b-dropdown-item>
-    <b-dropdown-item @click="currency = '(L)'; balance=$root.state.user.balance.ltc"><i class="fa fa-btc"></i> Ethereum</b-dropdown-item>
-    <b-dropdown-item @click="currency = '(E)'; balance=$root.state.user.balance.eth"><i class="fa fa-btc"></i> Litecoin</b-dropdown-item>
-    <b-dropdown-item @click="currency = '(B)'; balance=$root.state.user.balance.bkb"><i class="fa fa-btc"></i> BetKing BKB</b-dropdown-item>
+    <b-dropdown-item v-for="currency in currencies" :key="currency.symbol" @click="setActiveCurrency(currency.value)" balance="currency.balance"><i class="fa fa-btc"></i>{{currency.name}}</b-dropdown-item>
   </b-nav-item-dropdown>
 </template>
 
@@ -25,7 +22,7 @@
     font-size: 0.75rem;
   }
 
-  .nav-link{
+  .nav-link {
     height:1.5em;
     padding:4px 8px;
     padding:0;
@@ -52,6 +49,10 @@
 
 
 <script>
+  import {mapGetters} from 'vuex';
+
+  import {addCommas, formatAmount} from 'src/helpers';
+
   import bNavItemDropdown from 'bootstrap-vue/es/components/nav/nav-item-dropdown';
   import bDropdownItem from 'bootstrap-vue/es/components/dropdown/dropdown-item';
 
@@ -61,11 +62,31 @@
       'b-nav-item-dropdown': bNavItemDropdown,
       'b-dropdown-item': bDropdownItem
     },
+    computed: {
+      ...mapGetters({
+        currencies: 'currencies',
+      })
+    },
     data: () => {
       return {
-        currency: '',
-        balance: '20.000000010000000000'
+        activeCurrency: {
+          balance: 0,
+          value: 0
+        }
       };
+    },
+    mounted () {
+      this.fetchBalances();
+    },
+    methods: {
+      addCommas,
+      formatAmount,
+      setActiveCurrency (value) {
+        this.activeCurrency = this.currencies.find(c => c.value === value);
+      },
+      fetchBalances () {
+        this.$store.dispatch('fetchAllBalances');
+      }
     }
   };
 </script>

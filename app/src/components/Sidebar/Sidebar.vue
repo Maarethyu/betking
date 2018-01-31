@@ -5,8 +5,8 @@
     <nav class="sidebar-nav">
       <div slot="header"></div>
       <ul class="nav">
-        <div class="navbar-close navbar-toggler mobile-sidebar-toggler d-lg-none" @click="mobileSidebarToggle"><i class='fa fa-times'></i></div>
-        <div class="navbar-close navbar-toggler sidebar-toggler d-md-down-none" @click="sidebarToggle"><i class='fa fa-times'></i></div>
+        <div class="navbar-close navbar-toggler mobile-sidebar-toggler d-lg-none" @click="toggleMobileSideBar"><i class='fa fa-times'></i></div>
+        <div class="navbar-close navbar-toggler sidebar-toggler d-md-down-none" @click="toggleSideBar"><i class='fa fa-times'></i></div>
         <div class='navbar-logo-container'>
           <router-link to='/' class='logo'></router-link>
         </div>
@@ -67,6 +67,14 @@ export default {
       type: Array,
       required: true,
       default: () => []
+    },
+    toggleSideBar: {
+      type: Function,
+      required: true
+    },
+    toggleMobileSideBar: {
+      type: Function,
+      required: true
     }
   },
   components: {
@@ -78,24 +86,6 @@ export default {
     SidebarNavLink,
     SidebarNavTitle,
     SidebarNavItem
-  },
-  methods: {
-    handleClick (e) {
-      e.preventDefault();
-      e.target.parentElement.classList.toggle('open');
-    },
-    sidebarToggle (e) {
-      e.preventDefault();
-      document.body.classList.toggle('sidebar-hidden');
-    },
-    sidebarMinimize (e) {
-      e.preventDefault();
-      document.body.classList.toggle('sidebar-minimized');
-    },
-    mobileSidebarToggle (e) {
-      e.preventDefault();
-      document.body.classList.toggle('sidebar-mobile-show');
-    }
   }
 };
 </script>

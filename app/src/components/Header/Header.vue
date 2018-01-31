@@ -2,50 +2,45 @@
   <header class="bk-header app-header navbar">
 
     <button class="navbar-toggler bk-header__sidebar-toggle--mobile d-lg-none"
-      @click="mobileSidebarToggle">
+      @click="toggleMobileSideBar">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <b-link class="navbar-brand" to="/"></b-link>
 
-    <button class="navbar-toggler bk-header__sidebar-toggle d-md-down-none" @click="sidebarToggle">
+    <button class="navbar-toggler bk-header__sidebar-toggle d-md-down-none" @click="toggleSideBar">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <b-navbar-nav class="ml-left logged-in d-none d-lg-inline-block">
+    <b-navbar-nav class="ml-left d-none d-lg-inline-block" v-if="isAuthenticated">
       <CurrencyDropdown/>
     </b-navbar-nav>
 
-    <div class="cashierButtons">
-      <b-button style='margin-right:3px;' class='logged-in btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">DEPOSIT</b-button>
-      <b-button @click="$root.$emit('showModal', 'withdraw')" class='btn-90 btn-padded-small logged-in d-none d-md-none d-lg-inline-block' variant="gray">WITHDRAW</b-button>
+    <div class="cashierButtons" v-if="isAuthenticated">
+      <b-button style='margin-right:3px;' class='btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">DEPOSIT</b-button>
+      <b-button @click="$root.$emit('showModal', 'withdraw')" class='btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">WITHDRAW</b-button>
     </div>
 
-    <b-navbar-nav class="ml-auto logged-in">
-      <b-nav-item class="d-sm-down-none">
-        <i class="icon-envelope"></i>
-        <b-badge pill variant="danger">5</b-badge>
-      </b-nav-item>
-      <b-nav-item class="d-sm-down-none">
-        <i class="icon-bell"></i>
-        <b-badge pill variant="danger">2</b-badge>
-      </b-nav-item>
+    <b-navbar-nav class="ml-auto" v-if="isAuthenticated">
       <HeaderDropdown/>
       <div class='d-none d-lg-inline-block'>
-        <!-- <LanguageDropdown/> -->
       </div>
     </b-navbar-nav>
-    <!-- <b-navbar-nav class="ml-auto logged-out">
+    <b-navbar-nav class="ml-auto" v-if="isLoggedOut">
       <b-button class='d-none d-sm-none d-md-inline-block' @click="$root.$emit('showModal', 'register')" variant="danger">Register</b-button>
       <b-button style='margin-left:5px;' class='d-none d-sm-none d-md-inline-block' @click="$root.$emit('showModal', 'login')" variant="gray">Log In</b-button>
-      <LanguageDropdown/>
-    </b-navbar-nav> -->
+    </b-navbar-nav>
   </header>
 </template>
 
 <style lang="scss">
   .app-header.bk-header {
     color: #fff;
+    padding-right: 15px;
+
+    .navbar-brand {
+      bottom: 10px;
+    }
 
     &__sidebar-toggle {
       &--mobile {
@@ -68,6 +63,8 @@
 
 
 <script>
+import {mapGetters} from 'vuex';
+
 import bLink from 'bootstrap-vue/es/components/link/link';
 import bNav from 'bootstrap-vue/es/components/nav/nav';
 import bButton from 'bootstrap-vue/es/components/button/button';
@@ -81,6 +78,7 @@ import CurrencyDropdown from './CurrencyDropdown.vue';
 
 export default {
   name: 'Header',
+  props: ['toggleSideBar', 'toggleMobileSideBar'],
   components: {
     CurrencyDropdown,
     // LanguageDropdown,
@@ -92,19 +90,11 @@ export default {
     'b-badge': bBadge,
     'b-navbar-nav': bNavbarNav
   },
-  methods: {
-    sidebarToggle (e) {
-      e.preventDefault();
-      document.body.classList.toggle('sidebar-hidden');
-    },
-    sidebarMinimize (e) {
-      e.preventDefault();
-      document.body.classList.toggle('sidebar-minimized');
-    },
-    mobileSidebarToggle (e) {
-      e.preventDefault();
-      document.body.classList.toggle('sidebar-mobile-show');
-    }
+  computed: {
+    ...mapGetters({
+      isAuthenticated: 'isAuthenticated',
+      isLoggedOut: 'isLoggedOut'
+    }),
   }
 };
 </script>

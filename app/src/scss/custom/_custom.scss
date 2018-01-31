@@ -3,8 +3,7 @@ body{
   font-family:monda;
   overflow-x:hidden;
 }
-
-.balanceBar {
+.mobile-secondry-header {
   font-size:0;
   padding: 0.4rem 0.35rem;
   background:$navbar-bg;
@@ -13,92 +12,6 @@ body{
   display:none;
   @include media-breakpoint-down(md){
     display:flex;
-  }
-}
-
-.infoBar {
-  border-bottom: 1px solid #c2cfd6;
-  display: flex;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0;
-  list-style: none;
-  background-color: #fff;
-  position:relative;
-  z-index:2;
-  font-family:roboto;
-  font-weight:500;
-  font-size:14px;
-  text-transform:uppercase;
-
-  @include media-breakpoint-down(md){
-    padding: 0.5rem 0.35rem;
-  }
-
-  @media screen
-  and (max-height: 520px)
-  and (orientation: landscape) {
-    display:none; // Hide on mobile landscape to "fullscreen" games
-  }
-
-
-
-  ul{
-    margin-bottom: 0;
-  }
-
-  .badge-pill{
-    height:18px;
-    width:18px;
-    font-size:13px;
-    padding:2px 0;
-    position:relative;
-    margin-left:6px;
-    top:-6px;
-  }
-
-  .infoBar-item{
-    display: inline-block;
-    padding-right: 0.25rem;
-    padding-left: 0.25rem;
-    height:22px;
-    line-height:22px;
-    color:#1b262d;
-
-    margin:0;
-
-    @include media-breakpoint-down(xs){
-        padding-right: 0.2rem;
-        padding-left: 0.2rem;
-    }
-  }
-
-  .level-bar{
-      width:170px;
-      box-shadow:0 0 0 1px #bebfc3 inset;
-      overflow:hidden;
-      height:20px;
-      line-height:21px;
-      font-size:12px;
-      text-align:center;
-      display:inline-block;
-      position:relative;
-      top:1px;
-
-      @include media-breakpoint-down(xs){
-        width:125px;
-      }
-
-      .level-progress{
-          background:#86d379;
-          text-align:center;
-          overflow:visible;
-          text-align:right;
-          height:inherit;
-          white-space: nowrap;
-          font-weight:600;
-      }
   }
 }
 
@@ -112,18 +25,6 @@ img.flag{
         position:relative;
         top:-1px;
     }
-}
-
-body.logged-in{
-  .logged-out{
-    display:none!important;
-  }
-}
-
-body.logged-out{
-  .logged-in{
-    display:none!important;
-  }
 }
 
 .modal-container{
