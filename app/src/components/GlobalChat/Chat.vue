@@ -1,15 +1,12 @@
 <template>
-  <ChatWrapper>
+  <div>
     Global Chat
-  </ChatWrapper>
+  </div>
 </template>
 
 <script>
-import ChatWrapper from './ChatWrapper';
 
 export default {
-  components: {
-    ChatWrapper
-  }
+  name: 'Chat'
 };
 </script>

@@ -13,7 +13,7 @@
     </div>
     <div class='logged-in nudge-info'></div>
     <div class="ml-auto">
-      <button class="navbar-toggler aside-menu-toggler" type="button" v-b-toggle.global-chat>
+      <button class="navbar-toggler aside-menu-toggler" type="button" @click="toggleChat">
         <span class="icon-bubble"></span>
       </button>
     </div>
@@ -53,6 +53,12 @@ import bToggle from 'bootstrap-vue/es/directives/toggle/toggle';
 export default {
   directives: {
     'b-toggle': bToggle
+  },
+  props: {
+    toggleChat: {
+      type: Function,
+      default: () => {}
+    }
   }
 };
 </script>
