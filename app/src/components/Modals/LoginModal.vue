@@ -37,7 +37,7 @@
       </b-form-group>
 
       <b-form-group>
-        <div id="g-recaptcha" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
+        <div id="g-recaptcha-login" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
       </b-form-group>
 
       <div class="submit-buttons">
@@ -163,7 +163,7 @@ export default {
         if (this.captchaId !== null) {
           window.grecaptcha.reset(this.captchaId);
         } else {
-          this.captchaId = window.grecaptcha.render('g-recaptcha');
+          this.captchaId = window.grecaptcha.render('g-recaptcha-login');
         }
       }
     }

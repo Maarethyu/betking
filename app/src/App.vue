@@ -13,6 +13,7 @@ export default {
   name: 'app',
   mounted () {
     this.scanForAffiliateId();
+    this.setFingerprint();
   },
   methods: {
     scanForAffiliateId () {
@@ -21,6 +22,9 @@ export default {
       if (ref) {
         Cookies.set('aff_id', ref, {expires: 1});
       }
+    },
+    setFingerprint () {
+      this.$store.dispatch('setFingerprint');
     }
   }
 };

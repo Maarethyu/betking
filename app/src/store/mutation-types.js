@@ -1,6 +1,7 @@
 /* Account Module */
 export const UPDATE_AUTHSTATE = 'UPDATE_AUTHSTATE';
 export const SET_USER = 'SET_USER';
+export const SET_FINGERPRINT = 'SET_FINGERPRINT';
 
 /* Funds Module */
 export const SET_CURRENCIES = 'SET_CURRENCIES';
