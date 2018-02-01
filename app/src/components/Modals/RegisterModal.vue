@@ -27,7 +27,7 @@
         <b-form-input id="password2" type="password" placeholder="Confirm password" name="password2" required/>
       </b-form-group>
 
-      <b-form-group >
+      <b-form-group :invalid-feedback="errors['g-recaptcha-response']" :state="!errors['g-recaptcha-response']">
         <div id="g-recaptcha-register" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
       </b-form-group>
 

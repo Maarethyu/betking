@@ -8,7 +8,7 @@
     <b-form v-on:submit.prevent="onLogin">
 
       <b-form-group label="Login via" label-for="loginVia" :invalid-feedback="errors.loginvia"
-        :state="errors.loginvia">
+        :state="!errors.loginvia">
         <b-form-select name="loginvia" id="loginvia" v-model="usernameOrEmail">
           <option value="Username">Username</option>
           <option value="Email">Email</option>
@@ -16,27 +16,27 @@
       </b-form-group>
 
       <b-form-group :label="usernameOrEmail" label-for="username" :invalid-feedback="errors.username || errors.email"
-        :state="errors.username || errors.email">
+        :state="!errors.username || errors.email">
         <b-form-input id="username" :placeholder="usernameOrEmail" name="username" />
       </b-form-group>
 
       <b-form-group label="Password" label-for="password" :invalid-feedback="errors.password"
-        :state="errors.password">
+        :state="!errors.password">
         <b-form-input id="password" type="password" placeholder="Password" name="password" />
       </b-form-group>
 
       <b-form-group label="Two factor code (if enabled)" label-for="otp" :invalid-feedback="errors.otp"
-        :state="errors.password">
+        :state="!errors.otp">
         <b-form-input id="otp" placeholder="OTP" name="otp" />
       </b-form-group>
 
-      <b-form-group :invalid-feedback="errors.rememberme" :state="errors.rememberme">
+      <b-form-group :invalid-feedback="errors.rememberme" :state="!errors.rememberme">
         <b-form-checkbox id="rememberme" type="checkbox" name="rememberme">
           Remember me?
         </b-form-checkbox>
       </b-form-group>
 
-      <b-form-group>
+      <b-form-group :invalid-feedback="errors['g-recaptcha-login']" :state="!errors['g-recaptcha-login']">
         <div id="g-recaptcha-login" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
       </b-form-group>
 
@@ -79,15 +79,16 @@ export default {
   data: () => ({
     captchaId: null,
     errors: {},
-    fingerprint: null,
     usernameOrEmail: 'Username'
   }),
-  computed: mapGetters({
-    isAuthenticated: 'isAuthenticated'
-  }),
+  computed: {
+    ...mapGetters({
+      isAuthenticated: 'isAuthenticated',
+      fingerprint: 'fingerprint'
+    })
+  },
   created () {
     loadRecaptcha(this.checkForCaptcha.bind(this));
-    this.setFingerPrint();
 
     if (this.isAuthenticated) {
       this.closeModal();
@@ -128,9 +129,6 @@ export default {
           this.checkForCaptcha();
           this.showErrors(error.response);
         });
-    },
-    setFingerPrint () {
-      new Fingerprint2().get(fingerprint => { this.fingerprint = fingerprint; });
     },
     showErrors (response) {
       if (response && (response.status === 409 || response.status === 401)) {
