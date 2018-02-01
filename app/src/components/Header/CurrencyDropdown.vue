@@ -23,6 +23,7 @@
 
   &__balance {
     font-size: 0.75rem;
+    font-family: roboto;
   }
 
   .nav-link {
