@@ -69,7 +69,9 @@ app.use('/api', router);
 
 const frontendStaticPath = require('path').join(__dirname, '..', 'app/dist');
 
-app.use('/static', express.static(`${frontendStaticPath}/static`));
+if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
+  app.use('/static', express.static(`${frontendStaticPath}/static`));
+}
 
 app.get('/404', function (req, res) {
   res.status(404).send('Not found');

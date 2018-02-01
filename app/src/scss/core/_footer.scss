@@ -1,0 +1,86 @@
+.app-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0 $spacer;
+  padding-bottom:25px;
+  color: $footer-color;
+  background: $footer-bg;
+  flex-flow: row wrap;
+  color:#dedddd;
+  
+  justify-content: center;
+  @include borders($footer-borders);
+  z-index:2;
+  background:$navbar-bg;
+  font-size:12px;
+  font-family:roboto;
+  
+  .footer-content{
+    flex-basis:100%;
+    display:block;
+    text-align:center;
+
+    .footer-row{
+      padding:9px 0;
+    }
+
+    .fa{
+      font-size:32px;
+      margin:0 10px;
+      cursor:pointer;
+      &:hover{
+        color:$danger;
+      }
+      color:#fff;
+    }
+
+    .footer-logo{
+      max-width:185px;
+      width:40%;
+      margin-bottom:12px;
+    }
+
+    .gamble-aware{
+      cursor:pointer;
+      height:32px;
+      margin:-20px 10px 0px 10px;
+    }
+
+    @include media-breakpoint-down(xs){
+      .footer-row{
+        padding:11px 0;
+      }
+  
+      .fa{
+        font-size:26px;
+        margin:0 5px;
+      }
+  
+      .footer-logo{
+        margin-bottom:2px;
+      }
+
+      .gamble-aware{
+        cursor:pointer;
+        height:26px;
+        margin:-14px 5px 0px 5px;
+      }
+    }
+  }
+  @include media-breakpoint-down(xs){
+    padding-bottom:0px;
+  }
+  @media screen 
+  and (max-height: 520px) 
+  and (orientation: landscape) {
+    display:none; // Hide on mobile landscape to "fullscreen" games
+  }
+  
+  /*@include media-breakpoint-down(xs){
+    @media screen 
+    and (orientation: portrait) {
+      display:none; //Hide on mobile portrait too? Takes up a lot of space being 2 lines on mobile
+    }
+  }*/
+}

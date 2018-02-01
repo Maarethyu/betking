@@ -1,0 +1,23 @@
+// Override Boostrap variables
+@import "bootstrap-variables";
+
+// Import Bootstrap source files
+@import "~bootstrap/scss/bootstrap";
+
+// Override core variables
+@import "core-variables";
+
+// Import core styles
+@import "core/core";
+
+// Custom styles
+@import "custom/custom";
+@import "custom/btn";
+@import "custom/text";
+@import "custom/modal";
+
+// Game styles
+// TODO: Make these only import on each game's own view
+/* @import "dice";
+@import "roulette";
+@import "blackjack";*/

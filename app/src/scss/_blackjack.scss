@@ -1,0 +1,629 @@
+main.blackjack{
+    background:radial-gradient(circle at center, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%), url(/static/img/roulette/felt.jpg) center repeat;
+    position:relative;
+    overflow-y:hidden;
+    overflow:hidden;
+    font-family: roboto;
+    @include media-breakpoint-down(md){
+        .container-fluid{
+            padding:0;
+        }
+    }
+}
+.game-blackjack{
+    $roulette-width:940px;
+    user-select: none; 
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height:100%;
+
+    .bet-container{
+    display:inline-block;
+    position:absolute;
+    width:0;
+    height:0;
+    z-index:3;
+    font-size:16px;
+
+        .chip{
+            position:absolute;
+            line-height:0;
+            width:36px;
+            height:36px;
+            transform:translate(-18px, -18px);
+            font-size:0;
+            top:0px;
+            
+            &.cell-value{
+                font-size:12px;
+                background:none;
+                top:0px;
+                z-index:4;
+            }
+
+            +.chip{
+                top:-1px;
+                +.chip{
+                    top:-2px;
+                    +.chip{
+                        top:-3px;
+                        +.chip{
+                            top:-4px;
+                            +.chip{
+                                top:-5px;
+                                +.chip{
+                                    top:-6px;
+                                    +.chip{
+                                        top:-7px;
+                                        +.chip{
+                                            top:-8px;
+                                            +.chip{
+                                                top:-9px;
+                                                +.chip{
+                                                    top:-10px;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } // .. Chip positions
+        }
+    }
+
+    .ui-top{
+        width:100%;
+        position:absolute;
+        top:0;
+        height:48px;
+        background:url(/static/img/roulette/ui_top.png);
+        background-size:cover;
+        margin:0;
+        left:0;
+        font-size:14px;
+        line-height:48px;
+        color:#b0b0b2;
+        font-weight:bold;
+        box-shadow:0 0 12px 2px black;
+        padding:0 20px;
+        
+        button{
+            height:38px;
+            line-height:38px;
+            padding:0;
+            width:100px;
+            margin-left:7px;
+            background:rgba(0,0,0,0.33);
+            border:0;
+            color:inherit;
+            font-weight:bold;
+            font-size:15px;
+            border-width:0 1px 0 1px;
+            border-style:solid;
+            border-image: linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            border-image-slice: 1;
+            &:hover{
+                background:rgba(0,0,0,0.6);
+                border-image: linear-gradient(to top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.1) 100%);
+                border-image-slice: 1;
+            }
+            &:focus{
+                box-shadow:none;
+                outline:none;
+            }
+        }
+
+        .right{
+            position:absolute;
+            right:10px;
+            top:0;
+            vertical-align:top;
+        }
+
+        .divider{
+            display:inline-block;
+            width:0px;
+            height:28px;
+            line-height:0;
+            border-left:1px solid;
+            position:relative;
+            top:9px;
+            margin:0 6px;
+            border-image: linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+            border-image-slice: 1;
+        }
+    }
+
+    .ui-bottom{
+        width:100%;
+        position:absolute;
+        bottom:0;
+        left:0;
+        font-size:24px;
+        color:white;
+        transition:0.2s ease-in-out transform;
+
+        //Desktop theme
+        .left{
+            background:url(/static/img/roulette/ui_bottom_left.png);
+            background-repeat:no-repeat;
+            width:462px;
+            height:135px;
+            position:absolute;
+            bottom:0;
+            left:0;
+            padding:10px;
+            padding-top:15px;
+        }
+        
+        .right{
+            background:url(/static/img/roulette/ui_bottom_right.png);
+            background-repeat:no-repeat;
+            background-position: right 0 bottom 0px;
+            width:100%;
+            height:135px;
+            position:absolute;
+            bottom:0;
+            right:0;
+            text-align:right;
+            padding:10px;
+            padding-top:15px;
+            font-size:0;
+
+            .btn-back{
+                display:inline-block;
+                width:50px;
+                height:50px;
+                border-radius:100%;
+                margin-top:26px;
+                margin-left:9px;
+                transition:0.08s color ease-in-out, 0.08s background ease-in-out;
+                background:linear-gradient(to left, rgba(135,135,135,1) 0%, rgba(50,50,50,1) 15%, rgba(30,30,30,1) 50%, rgba(50,50,50,1) 85%, rgba(135,135,135,1) 100%);
+                &:hover{
+                    background:linear-gradient(to left, rgba(185,185,185,1) 0%, rgba(80,80,80,1) 15%, rgba(60,60,60,1) 50%, rgba(80,80,80,1) 85%, rgba(185,185,185,1) 100%);
+                }
+                
+                button{
+                    transition:0.08s color ease-in-out, 0.08s background ease-in-out;
+                    &:focus, &:hover{
+                        box-shadow:none;
+                    }
+                    touch-action:manipulation;
+                    border:none;
+                    background:rgba(0,0,0,0.75);
+                    width:46px;
+                    height:46px;
+                    margin-bottom:20px;
+                    pointer-events:auto;
+                    font-weight:bold;
+                    padding:0;
+                    font-size:22px;
+                    border-radius:50%;
+                    position:relative;
+                    top:2px;
+                    right:2px;
+                    color:#7f7f80;
+                    
+                    &:hover{
+                        background:rgba(0,0,0,1);
+                        color:white;
+                    }
+                    &::before{
+                        color:white;
+                        content:attr(data-text);
+                        font-size:10px;
+                        display:inline-block;
+                        position:absolute;
+                        left:0;
+                        right:0;
+                        height:34px;
+                        line-height:50px;
+                        margin:auto;
+                        bottom:-24px;
+                        text-transform:uppercase;
+                    }
+                }    
+            }
+            .bet-controls{
+                width:200px;
+            }
+        }
+
+        .left, .right{
+            background-size:462px 135px;
+            z-index:2;
+            pointer-events: none;
+        }
+
+        .middle{
+            width:calc(100% - 545px);
+            white-space: nowrap;
+            max-width:730px;
+            margin-left:auto;
+            margin-right:auto;
+            overflow:hidden;
+            position:absolute;
+            bottom:16px;
+            left:0;
+            right:0;
+            text-align:center;
+            z-index:1;
+
+            .chipscroll_container{
+                font-weight:bold;
+                height:40px;
+                max-width:730px;
+                width:100%;
+                padding-bottom:46px;
+                margin-bottom:13px;
+                border-bottom:1px solid;
+                border-image: linear-gradient(to left, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
+                border-image-slice: 1;
+                .scroll_chips{
+                    width:40px;
+                    text-align:center;
+                    display:inline-block;
+                    cursor:pointer;
+                    opacity:0.7;
+                    &:hover{
+                        opacity:1;
+                    }
+                }
+
+                @media screen 
+                and (max-height: 800px) {
+                    padding-bottom:12px;
+                    margin-bottom:9px;
+                    font-size:20px;
+                }      
+            }
+
+            .chip-container-outer{
+                overflow:hidden;
+                height:96px;
+                .chip-container{
+                    font-size:0;
+                    overflow-x:scroll; 
+                    padding:4px 40px 16px 40px;  
+                    .chip{
+                        transition:all 0.08s ease-in-out;
+                        cursor:pointer;
+                        opacity:0.7;
+                        box-shadow:0 0 0 0 white inset, 4px 4px 12px 0 rgba(0,0,0,0.65);
+                        &.selected, &:hover{
+                            box-shadow:0 0 0 2px white inset, 4px 4px 12px 0 rgba(0,0,0,0.65);
+                            transform:scale(1.05);
+                            opacity:1;
+                        }
+                        margin:0 6px;
+                    }
+                }
+            }
+        }
+                
+        @media screen and (max-height: 700px), screen and (max-width: 780px) {
+
+            .chipscroll_container{
+                display:none;
+            }
+            .middle{
+                max-width:100%;
+                width:100%;
+                text-align:left;
+                padding-right:240px;
+                bottom:42px;
+                .chip-container-outer{
+                    width:100%;
+                    height:80px;                    
+                    .chip-container{
+                        padding-left:0;
+                        padding-right:70px;
+                        .chip{
+                            width:58px;
+                            height:58px;
+                            margin-top:8px;
+                            font-size:16px;
+                        }
+                    }
+                }
+            }
+            .left{
+                height:40px;
+                padding:0;
+                width:464px;
+                z-index:3;
+                background:transparent;
+
+                @media screen and (max-width: 736px) {
+                    width:288px;
+                    .bet-info div.roulette-balance{
+                        display:none;
+                    }
+                }
+
+                .bet-info{
+                    width:100%;
+                    text-align:center;
+                    display:flex;
+                    justify-content: flex-start;
+                    padding-left:3px;
+                    div{
+                        display:inline-block;
+                        margin-left:7px;
+                        position:relative;
+                        border:none;
+                        background:none;
+                        line-height:30px;
+                        span{
+                            font-size:15px;
+                            position:static;
+                            display:inline-block;
+                            margin:0 5px;
+                            padding:0
+                        }
+                    }
+                }
+            }
+            .right{
+                background:url(/static/img/roulette/ui_bottom_right_mobile.png);    
+                background-position: right 0 bottom 0px;              
+                background-repeat:no-repeat;                
+                background-size:1400px 120px;
+                height:120px;
+                padding:8px;
+                .btn-back{
+                    height:48px;
+                    width:48px;
+                    margin-top:22px;
+                    margin-bottom:0;                 
+                    button{
+                        height:44px;
+                        width:44px;
+                    }
+                }
+            }
+        }
+
+        .chip{
+            width:80px;
+            height:80px;
+            font-size:23px;
+            touch-action:manipulation;
+        }
+        
+
+        .bet-info{
+            width:250px;
+            position:relative;
+            div{
+                border-top:1px solid white;
+                border-bottom:1px solid white;
+                border-image: linear-gradient(to left, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+                background:rgba(0,0,0,0.2);
+                border-image-slice: 1;
+                display:flex;
+                height:1.4em;
+                flex-direction: column;
+                justify-content: center;
+                margin-bottom:5px;
+            }
+            span{
+                font-size:20px;
+                &:first-child{
+                    position:absolute;
+                    left:0;
+                    font-weight:bold;
+                    padding-left:5px;
+                    font-size:70%;
+                }
+                &:last-child{
+                    position:absolute;
+                    right:0;
+                    text-align:right;
+                    padding-right:5px;
+                }
+            }
+        }
+    }
+    
+    .chip{
+        //Low stakes chips
+        &.chip-1{
+            background-color:#43985A;
+            &::after{
+                content:"10K";            
+            }
+        }
+        &.chip-2{
+            background-color:#C72E2E;
+            &::after{
+                content:"20K";            
+            }
+        }
+        &.chip-5{
+            background-color:#1560A9;
+            &::after{
+                content:"50K";            
+            }
+        }
+        &.chip-10{
+            background-color:#DF5D22;
+            &::after{
+                content:"100K";            
+            }        
+        }
+        &.chip-25{
+            background-color:#4E3B6B;
+            &::after{
+                content:"250K";            
+            }        
+        }
+        &.chip-100{
+            background-color:#E37193;
+            &::after{
+                content:"1M";            
+            }        
+        }
+        &.chip-500{
+            background-color:#101010;
+            &::after{
+                content:"5M";            
+            }       
+        }
+
+        //High stakes chips
+        &.chip-1000000{
+            background-color:#43985A;
+            &::after{
+                content:"0.01";            
+            }       
+        }       
+        &.chip-2000000{
+            background-color:#C72E2E;
+            &::after{
+                content:"0.02";            
+            }       
+        }
+        &.chip-5000000{
+            background-color:#1560A9;
+            &::after{
+                content:"0.05";            
+            }       
+        }
+        &.chip-10000000{
+            background-color:#DF5D22;
+            &::after{
+                content:"0.10";            
+            }       
+        }
+        &.chip-25000000{
+            background-color:#4E3B6B;
+            &::after{
+                content:"0.25";            
+            }       
+        }
+        &.chip-50000000{
+            background-color:#E37193;
+            &::after{
+                content:"0.50";            
+            }       
+        }
+        &.chip-100000000{
+            background-color:#101010;
+            &::after{
+                content:"1.00";            
+            }       
+        }
+        
+        background:url(/static/img/roulette/chip_back.png);
+        border-radius:50%;
+        background-size:cover;
+        
+        width:16px;
+        height:16px;
+        font-weight:bold;
+        font-size:12px;
+        color:white;
+        display:inline-flex;
+        flex-direction:column;
+        justify-content:center;
+        position:relative;
+        text-align:center;
+        text-shadow:1px 1px rgba(0,0,0,0.6);
+        
+        &::after{
+            text-align:center;
+            font-size:inherit;
+            color:inherit;
+            position:relative;
+            width:inherit;
+        }
+    }
+    @include media-breakpoint-down(xs){
+        @media screen 
+        and (orientation: portrait) {
+            .ui-bottom{
+                .left{
+                    width:100%;
+                    height:40px;
+                    background:#363838;
+                    background-image:url(/static/img/roulette/ui_texture.png);
+                    box-shadow:0 0 5px 0 black;
+                    
+                    .bet-info{
+                        width:100%;
+                        div{
+                            margin:0;
+                            width:50%;
+                            font-size:16px;
+                            line-height:40px;
+                            height:40px;
+                        }
+                        span{
+                            &:first-child, &:last-child{
+                                font-size:16px;
+                            }
+                        }
+                    }
+                }
+                .right{
+                    width:100%;
+                    background:#363838;
+                    background-image:url(/static/img/roulette/ui_texture.png);
+                    text-align:center;
+                    height:62px;
+                    bottom:110px;
+                    padding:5px 0 0 0;
+                    box-shadow:0 0 5px 0 black, 0 -5px 15px -5px rgba(0,0,0,0.5);
+                    .btn-back{
+                        height:53px;
+                        width:calc((100vw / 5) - 5px);
+                        border-radius:2px;
+                        margin:0 2px;
+                        button{
+                            border-radius:2px;
+                            height:49px;
+                            width:calc((100vw / 5) - 9px);
+                            left:0;
+                            &::before{
+                                display:none;
+                            }
+                        }
+                    }
+                }
+                .middle{
+                    width:100%;
+                    bottom:40px;
+                    padding:4px 0;
+                    height:72px;
+                    margin:0;
+                    padding:0;
+                    background:darken(#363838,9%);
+                    background-image:url(/static/img/roulette/ui_texture.png);
+                    .chip-container-outer{
+                        margin:0;
+                        padding:0;
+                        width:100%;
+                        max-width:100%;
+                        .chipscroll_container{
+                            width:100%;
+                            max-width:100%;
+                        }
+                        .chip-container{
+                            padding:0 5px;
+                            width:100%;
+                            max-width:100%;
+                            height:92px;
+                            overflow-y:hidden;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,447 @@
+// Here you can add other styles
+body{
+  font-family:monda;
+  overflow-x:hidden;
+}
+.mobile-secondry-header {
+  font-size:0;
+  padding: 0.4rem 0.35rem;
+  background:$navbar-bg;
+  border-top: 1px solid rgba(218,240,255,0.2);
+  width:100%;
+  display:none;
+  @include media-breakpoint-down(md){
+    display:flex;
+  }
+}
+
+img.flag{
+  height:1.5em;
+  width:1.5em;
+}
+
+.dropdown-item{
+    .flag{
+        position:relative;
+        top:-1px;
+    }
+}
+
+.home-row{
+  text-align:center;
+  padding:15px 0;
+
+  @include media-breakpoint-down(sm){
+    padding:0;
+  }
+
+
+    .break-lg{
+      display:block;
+      width:0;
+      height:0;
+    }
+
+    .break-sm{
+      display:none;
+    }
+
+
+
+  }
+
+.game-cards{
+
+  .card-container{
+    max-width:270px;
+    width:30%;
+    margin:0 0.6% 0 0.6%;
+    display:inline-block;
+    text-decoration:none;
+
+    &:hover{
+      .game-image::before{
+        content:'PLAY NOW';
+        position:absolute;
+        left:0;
+        right:0;
+        top:0;
+        bottom:0;
+        margin:auto;
+        width:61%;
+        height:42px;
+        color:white;
+        background:#d53939;
+        border:1px solid darken(#d53939,2%);
+        border-radius:4px;
+        line-height:42px;
+        font-size:0.9rem;
+        z-index:101;
+        background-image:linear-gradient(rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 40%, rgba(0,0,0,0) 100%);
+        text-shadow:0 -1px rgba(0,0,0,0.33);
+        font-family:roboto;
+        font-weight:500;
+        box-shadow:0 1px 1px 0 rgba(0,0,0,0.5);
+
+      }
+      .game-image::after{
+        content:'';
+        position:absolute;
+        left:0;
+        right:0;
+        top:0;
+        width:100%;
+        height:100%;
+        filter:invert(1);
+        opacity:0.8;
+        background:rgba(255,255,255,0.55);
+        background-image:url('/static/img/home/gradient-fade.png');
+
+        z-index:100;
+      }
+    }
+
+    &:active{
+      .game-image::before{
+        background:darken(#d53939,3%);
+        box-shadow:0 0 0 3px transparentize(#d53939,0.55);
+      }
+    }
+  }
+
+  @include media-breakpoint-down(sm){
+    .card-container{
+        max-width:270px;
+        width:44%;
+        margin:-1% 0.8% -1% 0.8%;
+      }
+
+      .break-lg{
+        display:none;
+      }
+
+      .break-sm{
+        display:block;
+        width:0;
+        height:0;
+      }
+    }
+
+    .card{
+      border:none;
+      box-shadow:0 0 3px 1px rgba(0,0,0,0.125);
+      border-radius:4px;
+      background:#f8f8f8;
+      color:#1b262d;
+      text-align:center;
+      max-width:270px;
+
+      .card-header{
+        background:transparent;
+        text-align:center;
+        font-weight:600;
+        padding:5px 0;
+        font-size:18px;
+        border:none;
+        @include media-breakpoint-down(sm){
+          font-size:17px;
+        }
+      }
+
+      .card-body{
+        padding:0;
+        font-weight:500;
+
+        .game-image{
+          position:relative;
+          width:100%;
+          padding-top:(200% / 360 * 100);
+
+          &.dice{
+            background:url('/static/img/home/dice.png')
+          }
+          &.roulette{
+            background:url('/static/img/home/roulette.png')
+          }
+          &.blackjack{
+            background:url('/static/img/home/cards.png')
+          }
+          &.blackjack, &.roulette, &.dice{
+            background-size:contain;
+            background-repeat:no-repeat;
+          }
+        }
+
+        .card-footer{
+          font-size:15px;
+          padding:5px;
+          background:none;
+          border:none;
+          font-family:roboto;
+          @include media-breakpoint-down(sm){
+            font-size:14px;
+          }
+        }
+
+      }
+    }
+
+}
+
+.home{
+  .carousel-caption{
+    padding:0;
+    top:0px;
+    height:100%;
+
+    @include media-breakpoint-down(sm){
+      background:rgba(0,0,0,0.5);
+    }
+
+    h3{
+      padding-top:15px;
+      text-shadow:none;
+      font-weight:500;
+      font-size:32px;
+      line-height:0.9;
+      text-shadow:0 0 7px black, 0 0 12px black;
+      small{
+        font-size:0.631em;
+      }
+
+      .bottom{
+        position:absolute;
+        bottom:35px;
+        left:0;
+        right:0;
+      }
+
+      @include media-breakpoint-down(sm){
+        font-size:26px;
+        line-height:0.775;
+        padding-top:15px;
+      }
+
+      @include media-breakpoint-down(xs){
+        font-size:22px;
+        line-height:0.7;
+        padding-top:13px;
+
+        .bottom{
+          position:absolute;
+          bottom:13px;
+          left:0;
+          right:0;
+        }
+      }
+
+    }
+  }
+
+  .carousel-control-next, .carousel-control-prev{
+    @include media-breakpoint-down(sm){
+      background:rgba(0,0,0,0.5);
+    }
+    opacity:1;
+  }
+
+  .carousel-control-next-icon, .carousel-control-prev-icon{
+    opacity:0;
+  }
+
+  .carousel-control-next:hover .carousel-control-next-icon, .carousel-control-prev:hover .carousel-control-prev-icon{
+    opacity:0.5;
+  }
+
+  .carousel-indicators{
+    bottom:0px;
+    li{
+      width:10px;
+      height:10px;
+      margin:0 5px;
+      border-radius:50%;
+      background:transparent;
+      box-shadow:0 0 0 1.5px rgba(255,255,255,0.3);
+      cursor:pointer;
+      &.active{
+        background:rgba(255,255,255,0.3);
+      }
+    }
+    @include media-breakpoint-down(xs){
+      display:none
+    }
+  }
+
+  .game-section{
+    padding-top:20px;
+    background-image:url('/static/img/home/gradient-fade.png');
+    background-repeat: repeat-x;
+  }
+}
+
+.nav{
+  font-weight:300;
+}
+
+.sidebar-nav{
+  font-weight:500;
+}
+
+.sidebar-nav, .nav{
+  font-family:roboto;
+}
+
+.sidebar-fixed{
+  //position:absolute;
+}
+
+.sidebar{
+  //position:absolute;
+  top:0;
+  z-index:9999;
+  height:100vh!important;
+
+  @include media-breakpoint-down(md){
+    top:45px;
+    height:calc(100vh - 45px)!important;
+
+  }
+}
+
+.menu-background{
+  width:100vw;
+  height:100vh;
+  background:transparentize(#2b3233,0.63);
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:99;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.2s ease-in-out;
+}
+
+@include media-breakpoint-down(md){
+  body.sidebar-mobile-show{
+    .menu-background{
+      opacity:1;
+      pointer-events:all;
+    }
+  }
+}
+
+.navbar-close{
+  position:absolute;
+  width:100%;
+  right:0;
+  top:4px;
+  font-size:24px;
+  cursor:pointer;
+  color:#eee;
+  text-align:right;
+  z-index:1;
+  @include media-breakpoint-down(md){
+    display:none;
+  }
+
+  &:hover{
+    color:#fff;
+  }
+}
+
+.sidebar{
+  z-index:$zindex-sticky + 1 !important;
+}
+
+.sidebar-nav .nav{
+  padding:0 18px;
+  padding-top:42px;
+  font-size:14px;
+  font-weight:500;
+
+  .nav-link{
+    transition:box-shadow 0.1s ease-in-out;
+    box-shadow:0 0 #d53939 inset !important;
+  }
+
+  .nav-link:hover{
+    box-shadow:6px 0 #d53939 inset !important;
+  }
+
+  .nav-dropdown-items{
+    li{
+      text-indent:10px;
+    }
+  }
+
+  .nav-item.nav-dropdown.open .nav-link.nav-dropdown-toggle{
+    box-shadow:6px 0 #d53939 inset !important;
+    i{
+      color:white;
+    }
+  }
+
+  i{ // Icons
+    font-size:24px;
+    margin-top:-24px;
+    width:30px;
+    position:relative;
+    &.fa{ // font-awesome icons have a different baseline than the other icons, need to be moved a different amount
+      top:4px;
+    }
+    &[class*='icon-']{
+      top:7px;
+    }
+  }
+
+  @include media-breakpoint-down(md){
+    padding:0 10px;
+    padding-top:12px;
+  }
+
+}
+
+.sidebar-nav .navbar-logo-container{
+  width:100%;
+  text-align:center;
+  >a.logo{
+    display:inline-block;
+    background:$navbar-brand-logo;
+    width:60%;
+    padding-top:17.5%;
+    background-repeat:no-repeat;
+    background-size:contain;
+    margin-bottom:34px;
+  }
+  @include media-breakpoint-down(md){
+    display:none;
+  }
+}
+@include media-breakpoint-down(sm){
+  .dropdown-toggle::after{
+    display:none;
+  }
+}
+
+.nudge-info{
+  width:0;
+  transition: width 0.1s ease-in-out;
+}
+
+@media screen
+and (min-width: 1200px){
+  body.sidebar-hidden .nudge-info{
+    width:200px;
+    height:2px;
+    display:inline-block;
+  }
+}
+
+@media screen
+and (min-width: 1400px){
+  .nudge-info{
+    width:200px;
+    height:2px;
+    display:inline-block;
+  }
+}

@@ -1,0 +1,37 @@
+.modal-header{
+  width: 100%;
+  height: 34px;
+  font-weight: 600;
+  background: $dark;
+  color: white;
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+
+  .close:hover {
+    background: rgba(255,0,0,0.75);
+  }
+
+  .close {
+    position: absolute;
+    right: 0;
+    background: rgba(255, 0, 0, 0.5);
+    font-family: FontAwesome;
+    width: 34px;
+    height: 34px;
+    color: white;
+    margin: 0;
+    top: 0;
+    padding: 0;
+    font-size: 1.3rem;
+  }
+}
+
+body.modal-show{
+  overflow: hidden;
+}

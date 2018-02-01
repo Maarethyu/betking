@@ -38,8 +38,8 @@ module.exports = (app) => {
   app.use(hotMiddleware)
 
   // serve pure static assets
-  var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
-  app.use(staticPath, express.static('./static'))
+  var staticPath = path.posix.join(config.dev.assetsPublicPath)
+  app.use(staticPath, express.static(path.join(__dirname, '..', 'static')))
 
   app.get('*', csrfProtection, function (req, res, next) {
     var filename = path.join(compiler.outputPath,'index.html');

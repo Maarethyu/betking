@@ -37,10 +37,10 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/static',
     proxyTable: {
-      '/api': {
-        target: 'http://localhost:3002',
-        changeOrigin: true
-      }
+      // '/api': {
+      //   target: 'http://localhost:3002',
+      //   changeOrigin: true
+      // }
     },
     autoOpenBrowser: true,
     errorOverlay: true,
