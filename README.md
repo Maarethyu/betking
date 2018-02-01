@@ -3,7 +3,7 @@
 ### Create Database
 1. Create Role = bk and database = bk2
     * For Windows, run `psql.exe -U postgres -f sql/db.sql`
-    * For Mac / Linux, run `psql -U {default-db-admin-role} postgres -f sql/db.sql`
+    * For Mac / Linux, run `psql -U {default-db-admin-role} -f sql/db.sql`
 2. With user and database created, create schema
     * For Windows, run `psql.exe -U bk -d bk2 -f sql/schema.sql`
     * For Mac / Linux, run `psql -U bk -d bk2 -f sql/schema.sql`
