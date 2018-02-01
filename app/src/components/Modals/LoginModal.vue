@@ -60,7 +60,6 @@ import bFormCheckboxGroup from 'bootstrap-vue/es/components/form-checkbox/form-c
 
 import Cookies from 'js-cookie';
 import api from 'src/api';
-import Fingerprint2 from 'fingerprintjs2';
 import {loadRecaptcha} from 'src/helpers';
 
 import {mapGetters} from 'vuex';

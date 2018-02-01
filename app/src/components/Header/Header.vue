@@ -28,8 +28,8 @@
     </b-navbar-nav>
 
     <b-navbar-nav class="ml-auto" v-if="isLoggedOut">
-      <b-button class='d-none d-sm-none d-md-inline-block' v-b-modal.registerModal variant="danger">Register</b-button>
-      <b-button style='margin-left:5px;' class='d-none d-sm-none d-md-inline-block' v-b-modal.loginModal variant="gray">Log In</b-button>
+      <b-button class='d-none d-sm-none d-lg-inline-block' v-b-modal.registerModal variant="danger">Register</b-button>
+      <b-button style='margin-left:5px;' class='d-none d-sm-none d-lg-inline-block' v-b-modal.loginModal variant="gray">Log In</b-button>
     </b-navbar-nav>
   </header>
 </template>

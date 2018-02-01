@@ -14,9 +14,7 @@ const routes = [
       {path: '', component: () => import('pages/Home/Home')},
 
       /* Pages which need user to be logged out */
-      {path: '/login', component: () => import('pages/Login'), meta: {requiresLoggedOut: true}},
       {path: '/forgot-password', component: () => import('pages/ForgotPassword'), meta: {requiresLoggedOut: true}},
-      {path: '/register', component: () => import('pages/Register'), meta: {requiresLoggedOut: true}},
 
       /* Pages which need user authentication */
       {path: 'settings', component: () => import('pages/Settings'), meta: {requiresAuth: true}},

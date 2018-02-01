@@ -7,14 +7,14 @@
         <div class='d-block d-sm-none'>
             <b-button class='btn-85 btn-padded-small btn-no-right' variant="gray" v-if="isAuthenticated">DEPOSIT</b-button>
             <b-button class='btn-85 btn-padded-small btn-no-left' variant="gray" v-if="isAuthenticated">WITHDRAW</b-button>
-            <b-button class='btn-85 btn-padded-small btn-no-right' variant="danger" v-if="isLoggedOut">REGISTER</b-button>
-            <b-button class='btn-85 btn-padded-small btn-no-left' variant="gray" v-if="isLoggedOut">LOG IN</b-button>
+            <b-button class='btn-85 btn-padded-small btn-no-right' v-b-modal.registerModal variant="danger" v-if="isLoggedOut">REGISTER</b-button>
+            <b-button class='btn-85 btn-padded-small btn-no-left' v-b-modal.loginModal variant="gray" v-if="isLoggedOut">LOG IN</b-button>
         </div>
         <div class='d-none d-sm-block'>
             <b-button class='btn-110 mobile-secondry-header__mrm' variant="gray" v-if="isAuthenticated">DEPOSIT</b-button>
             <b-button class='btn-110 mobile-secondry-header__mrm' variant="gray" v-if="isAuthenticated">WITHDRAW</b-button>
-            <b-button class='btn-110 mobile-secondry-header__mrm' variant="danger" v-if="isLoggedOut">REGISTER</b-button>
-            <b-button class='btn-110' variant="gray" v-if="isLoggedOut">LOG IN</b-button>
+            <b-button class='btn-110 mobile-secondry-header__mrm' v-b-modal.registerModal variant="danger" v-if="isLoggedOut">REGISTER</b-button>
+            <b-button class='btn-110' v-b-modal.loginModal variant="gray" v-if="isLoggedOut">LOG IN</b-button>
         </div>
     </div>
   </div>
@@ -36,6 +36,7 @@
 <script>
 import {mapGetters} from 'vuex';
 
+import vBModal from 'bootstrap-vue/es/directives/modal/modal';
 import bNavbarNav from 'bootstrap-vue/es/components/navbar/navbar-nav';
 import bButton from 'bootstrap-vue/es/components/button/button';
 
@@ -53,6 +54,9 @@ export default {
       isAuthenticated: 'isAuthenticated',
       isLoggedOut: 'isLoggedOut'
     }),
-  }
+  },
+  directives: {
+    'b-modal': vBModal
+  },
 };
 </script>
