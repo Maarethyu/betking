@@ -6,13 +6,16 @@ import BigNumber from 'bignumber.js';
 const state = {
   isReady: false, // Has currencies been fetched?
   currencies: [], // currency config from backend
-  activeCurrency: null
+  activeCurrency: 0,
+  activeCurrencyBalance: 0
 };
 
 // getters
 const getters = {
   currencies: state => state.currencies,
-  balances: state => state.balances
+  balances: state => state.balances,
+  activeCurrency: state => state.activeCurrency,
+  activeCurrencyBalance: state => state.activeCurrencyBalance
 };
 
 // actions
@@ -33,6 +36,10 @@ const actions = {
       .then(res => {
         commit(types.SET_ALL_BALANCES, res.data.balances);
       });
+  },
+
+  setActiveCurrency ({commit}, value) {
+    commit(types.SET_ACTIVE_CURRENCY, value);
   }
 };
 
@@ -75,6 +82,13 @@ const mutations = {
           .div(new BigNumber(10).pow(scale))
           .toString()
       );
+
+      /* Set balance for active currency */
+      if (row.currency === state.activeCurrency) {
+        state.activeCurrencyBalance = new BigNumber(row.balance)
+          .div(new BigNumber(10).pow(scale))
+          .toString();
+      }
     });
   },
 
@@ -95,6 +109,25 @@ const mutations = {
         .div(new BigNumber(10).pow(scale))
         .toNumber()
     );
+
+    if (currency === state.activeCurrency) {
+      state.activeCurrencyBalance = new BigNumber(balance)
+        .div(new BigNumber(10).pow(scale))
+        .toNumber();
+    }
+  },
+
+  [types.SET_ACTIVE_CURRENCY] (state, value) {
+    state.activeCurrency = value;
+
+    const currency = state.currencies.find(c => c.value === value);
+
+    if (!currency) {
+      console.error(`Active Currency not found in config: ${currency}`);
+      return;
+    }
+
+    state.activeCurrencyBalance = currency.balance;
   }
 };
 

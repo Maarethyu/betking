@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="loginModal" ref="modal" hide-footer>
+  <b-modal id="loginModal" ref="modal" hide-footer lazy>
     <template slot="modal-header-close"><i class="fa fa-close"/></template>
     <template slot="modal-title">Login</template>
 
@@ -102,7 +102,7 @@ export default {
   },
   methods: {
     closeModal () {
-      this.$refs.modal.hide();
+      this.$refs.modal && this.$refs.modal.hide();
     },
     onLogin (e) {
       e.preventDefault();

@@ -2,7 +2,7 @@
   <b-nav-item-dropdown left class='text-left currency-dropdown'>
     <template slot="button-content">
       <span class="d-none d-sm-inline-block d-md-inline-block d-lg-none d-xl-inline-block currency-dropdown__balance">
-        BALANCE: {{addCommas(formatAmount(activeCurrency.balance, activeCurrency.value))}}
+        BALANCE: {{addCommas(formatAmount(activeCurrencyBalance, activeCurrency))}}
       </span>
       <span><img src='/static/img/main/btc.png' width='13' height='13'></span>
     </template>
@@ -12,37 +12,37 @@
 
 <style lang="scss">
 .currency-dropdown {
-  border:1px solid rgba(255,255,255,0.3);
-  height:calc(1.5em + 8px);
-  padding:4px 8px;
-  padding-top:3px;
-  display:flex;
+  border: 1px solid rgba(255,255,255,0.3);
+  height: calc(1.5em + 8px);
+  padding: 4px 8px;
+  padding-top: 3px;
+  display: flex;
 
   &__balance {
     font-size: 0.75rem;
   }
 
   .nav-link {
-    height:1.5em;
-    padding:4px 8px;
-    padding:0;
+    height: 1.5em;
+    padding: 4px 8px;
+    padding: 0;
   }
   .dropdown-toggle::before{
-    content:'';
-    position:absolute;
-    right:18px;
-    top:-3px;
-    border-left:1px solid rgba(255,255,255,0.3);
-    height:calc(1.5em + 6px);
+    content: '';
+    position: absolute;
+    right: 28px;
+    top: 0px;
+    border-left: 1px solid rgba(255,255,255,0.3);
+    height: calc(1.5em + 6px);
   }
   .dropdown-toggle::after{
-    content:'';
-    position:relative;
-    top:0.2em;
-    margin-left:1em;
-    border-width:0.6em 0.4em 0 0.4em;
-    border-color:inherit transparent transparent transparent;
-    display:inline-block!important;
+    content: '';
+    position: relative;
+    top: 0.2em;
+    margin-left: 1em;
+    border-width: 0.6em 0.4em 0 0.4em;
+    border-color: inherit transparent transparent transparent;
+    display: inline-block!important;
   }
 }
 </style>
@@ -65,15 +65,9 @@
     computed: {
       ...mapGetters({
         currencies: 'currencies',
+        activeCurrency: 'activeCurrency',
+        activeCurrencyBalance: 'activeCurrencyBalance'
       })
-    },
-    data: () => {
-      return {
-        activeCurrency: {
-          balance: 0,
-          value: 0
-        }
-      };
     },
     mounted () {
       this.fetchBalances();
@@ -82,7 +76,7 @@
       addCommas,
       formatAmount,
       setActiveCurrency (value) {
-        this.activeCurrency = this.currencies.find(c => c.value === value);
+        this.$store.dispatch('setActiveCurrency', value);
       },
       fetchBalances () {
         this.$store.dispatch('fetchAllBalances');
