@@ -1,7 +1,7 @@
 <template>
   <b-nav-item-dropdown left class='text-left currency-dropdown'>
     <template slot="button-content">
-      <span class="d-none d-sm-inline-block d-md-inline-block d-lg-none d-xl-inline-block currency-dropdown__balance">
+      <span class="currency-dropdown__balance">
         BALANCE: {{addCommas(formatAmount(activeCurrencyBalance, activeCurrency))}}
       </span>
       <span><CurrencyIcon :value="activeCurrency" :width="13" /></span>
