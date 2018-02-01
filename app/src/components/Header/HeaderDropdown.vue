@@ -1,9 +1,9 @@
 <template>
   <b-nav-item-dropdown right>
     <template slot="button-content">
-      <Avatar username="nverdhan" :size="30" :backgroundColor="'#d53939'"
+      <Avatar :username="username" :size="30" :backgroundColor="'#d53939'"
         :color="'#fff'" :customStyle="{display: 'inline-block', position: 'relative', top: -3}"></Avatar>
-      <span class="d-md-down-none">nverdhan</span>
+      <span class="d-md-down-none">{{ username }}</span>
     </template>
     <b-dropdown-header tag="div" class="text-center"><strong>Profile</strong></b-dropdown-header>
     <b-dropdown-item :to="'settings'"><i class="fa fa-wrench"></i>Settings</b-dropdown-item>
@@ -35,11 +35,16 @@
 
   import Avatar from 'vue-avatar';
 
+  import {mapGetters} from 'vuex';
+
   export default {
     name: 'header-dropdown',
     data: () => {
       return {itemsCount: 42};
     },
+    computed: mapGetters({
+      username: 'username'
+    }),
     components: {
       Avatar,
       'b-nav-item-dropdown': bNavItemDropdown,
