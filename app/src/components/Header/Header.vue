@@ -26,9 +26,10 @@
       <div class='d-none d-lg-inline-block'>
       </div>
     </b-navbar-nav>
+
     <b-navbar-nav class="ml-auto" v-if="isLoggedOut">
       <b-button class='d-none d-sm-none d-md-inline-block' @click="$root.$emit('showModal', 'register')" variant="danger">Register</b-button>
-      <b-button style='margin-left:5px;' class='d-none d-sm-none d-md-inline-block' @click="$root.$emit('showModal', 'login')" variant="gray">Log In</b-button>
+      <b-button style='margin-left:5px;' class='d-none d-sm-none d-md-inline-block' v-b-modal.loginModal variant="gray">Log In</b-button>
     </b-navbar-nav>
   </header>
 </template>
@@ -71,6 +72,7 @@ import bButton from 'bootstrap-vue/es/components/button/button';
 import bNavItem from 'bootstrap-vue/es/components/nav/nav-item';
 import bNavbarNav from 'bootstrap-vue/es/components/navbar/navbar-nav';
 import bBadge from 'bootstrap-vue/es/components/badge/badge';
+import vBModal from 'bootstrap-vue/es/directives/modal/modal';
 
 import HeaderDropdown from './HeaderDropdown.vue';
 // import LanguageDropdown from './LanguageDropdown.vue'
@@ -89,6 +91,9 @@ export default {
     'b-nav-item': bNavItem,
     'b-badge': bBadge,
     'b-navbar-nav': bNavbarNav
+  },
+  directives: {
+    'b-modal': vBModal
   },
   computed: {
     ...mapGetters({

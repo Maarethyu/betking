@@ -13,6 +13,7 @@
       </main>
     </div>
     <Footer></Footer>
+    <CommonModals></CommonModals>
   </div>
 </template>
 
@@ -32,6 +33,7 @@ import InfoBar from '../Header/InfoBar';
 
 import Sidebar from '../Sidebar/Sidebar';
 import Footer from '../Footer';
+import CommonModals from '../Modals/CommonModals';
 
 import nav from './nav';
 
@@ -48,7 +50,8 @@ export default {
     MobileSecondaryHeader,
     InfoBar,
     Sidebar,
-    Footer
+    Footer,
+    CommonModals
   },
   methods: {
     toggleSideBar () {
