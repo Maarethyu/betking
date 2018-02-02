@@ -349,6 +349,14 @@ img.flag{
   }
 }
 
+.app-header.navbar {
+  .navbar-brand {
+    @include media-breakpoint-down(md) {
+      width: $navbar-brand-width;
+    }
+  }
+}
+
 .sidebar{
   z-index:$zindex-sticky + 1 !important;
 }
