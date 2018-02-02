@@ -1,0 +1,158 @@
+<template>
+  <b-modal id="withdrawalModal" v-model="showModal" ref="modal" @hide="onModalHide" hide-footer>
+    <template slot="modal-header-close"><i class="fa fa-close"/></template>
+    <template slot="modal-title">Withdraw {{formatCurrency(withdrawalModalCurrency, 'name')}}</template>
+
+    <div class="error">{{errors.global}}</div>
+
+    <b-container fluid>
+      <b-row>
+        <b-col cols="6">Available Balance</b-col>
+        <b-col>{{addCommas(formatAmount(balance, withdrawalModalCurrency))}}</b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="6">Withdrawal Fee</b-col>
+        <b-col>{{addCommas(formatAmount(wdFee, withdrawalModalCurrency))}}</b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="6">Minimum Withdrawal limit</b-col>
+        <b-col>{{addCommas(formatAmount(minWdLimit, withdrawalModalCurrency))}}</b-col>
+      </b-row>
+    </b-container>
+
+    <b-form v-on:submit.prevent="onSubmit" @reset="onModalHide">
+
+      <b-form-group label="amount" label-for="amount" :invalid-feedback="errors.amount"
+        :state="!errors.amount">
+        <b-form-input type="number" step="any" id="amount" placeholder="Amount" name="amount" />
+      </b-form-group>
+
+      <b-form-group label="address" label-for="address" :invalid-feedback="errors.address"
+        :state="!errors.address">
+        <b-form-input id="address" placeholder="Address" name="address" />
+      </b-form-group>
+
+      <b-form-group v-if="is2faEnabled" label="Two factor code" label-for="otp" :invalid-feedback="errors.otp"
+        :state="!errors.otp">
+        <b-form-input id="otpWdModal" placeholder="OTP" name="otp" />
+      </b-form-group>
+
+      <div class="submit-buttons">
+        <button class="btn btn-success" type="submit">Submit</button>
+        <button class="btn btn-danger" @click.prevent="hideModal">Cancel</button>
+      </div>
+    </b-form>
+  </b-modal>
+</template>
+
+<script>
+  import bModal from 'bootstrap-vue/es/components/modal/modal';
+  import bForm from 'bootstrap-vue/es/components/form/form';
+  import bFormGroup from 'bootstrap-vue/es/components/form-group/form-group';
+  import bFormInput from 'bootstrap-vue/es/components/form-input/form-input';
+  import bContainer from 'bootstrap-vue/es/components/layout/container';
+  import bRow from 'bootstrap-vue/es/components/layout/row';
+  import bCol from 'bootstrap-vue/es/components/layout/col';
+
+  import {formatCurrency, addCommas, formatAmount, toBigInt} from 'src/helpers';
+  import api from 'src/api';
+
+  import {mapGetters} from 'vuex';
+
+  export default {
+    name: 'WithdrawalModal',
+    components: {
+      'b-modal': bModal,
+      'b-form': bForm,
+      'b-form-group': bFormGroup,
+      'b-form-input': bFormInput,
+      'b-container': bContainer,
+      'b-row': bRow,
+      'b-col': bCol
+    },
+    data: () => ({
+      showModal: false,
+      errors: {}
+    }),
+    computed: {
+      ...mapGetters({
+        isWithdrawalModalVisible: 'isWithdrawalModalVisible',
+        withdrawalModalCurrency: 'withdrawalModalCurrency',
+        currencies: 'currencies',
+        is2faEnabled: 'is2faEnabled'
+      }),
+      currency () {
+        return this.currencies.find(c => c.value === this.withdrawalModalCurrency);
+      },
+      balance () {
+        return this.currency && this.currency.balance;
+      },
+      wdFee () {
+        return this.currency && this.currency.wdFee;
+      },
+      minWdLimit () {
+        return this.currency && this.currency.minWdLimit;
+      }
+    },
+    watch: {
+      isWithdrawalModalVisible (newValue) {
+        this.showModal = newValue;
+      }
+    },
+    methods: {
+      formatCurrency,
+      addCommas,
+      formatAmount,
+      toBigInt,
+      hideModal () {
+        this.$refs.modal && this.$refs.modal.hide();
+      },
+      onModalHide () {
+        this.errors = {};
+        this.$store.dispatch('hideWithdrawalModal');
+      },
+      onSubmit (e) {
+        const data = {
+          currency: this.withdrawalModalCurrency,
+          amount: this.toBigInt(e.target.elements.amount.value, this.currency.scale),
+          address: e.target.elements.address.value,
+          otp: e.target.elements.otpWdModal && e.target.elements.otpWdModal.value
+        };
+        api.withdrawCurrency(data)
+        .then(res => {
+          this.$store.dispatch('fetchAllBalances');
+          this.hideModal();
+        })
+        .catch(error => {
+          if (error.response) {
+            this.buildErrors(error.response);
+            return;
+          }
+
+          throw error;
+        });
+      },
+      buildErrors (response) {
+        if (response && response.status === 400) {
+          if (response.data.errors) {
+            const newErrors = {};
+
+            response.data.errors.forEach(error => {
+              newErrors[error.param] = newErrors[error.param]
+                ? `${newErrors[error.param]} / ${error.msg}` : error.msg;
+            });
+
+            this.errors = newErrors;
+            return;
+          }
+
+          if (response.data.error) {
+            this.errors = {
+              global: response.data.error
+            };
+          }
+        }
+      }
+    }
+  };
+</script>

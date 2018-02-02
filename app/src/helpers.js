@@ -48,7 +48,7 @@ export const formatBigAmount = function (amount, value) {
 };
 
 export const addCommas = (x) => {
-  if (parseFloat(x) === 0) {
+  if (!x || parseFloat(x) === 0) {
     return 0;
   }
 
@@ -72,4 +72,9 @@ export const formatCurrency = function (value, key) {
   }
 
   return currency[field];
+};
+
+export const toBigInt = function (value, scale) {
+  return new BigNumber(value).times(new BigNumber(10).pow(scale))
+          .toString();
 };

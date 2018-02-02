@@ -18,7 +18,7 @@
 
     <div class="cashierButtons" v-if="isAuthenticated">
       <b-button style='margin-right:3px;' class='btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">DEPOSIT</b-button>
-      <b-button @click="$root.$emit('showModal', 'withdraw')" class='btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">WITHDRAW</b-button>
+      <b-button @click="showWithdrawalModal" class='btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">WITHDRAW</b-button>
     </div>
 
     <b-navbar-nav class="ml-auto" v-if="isAuthenticated">
@@ -98,8 +98,14 @@ export default {
   computed: {
     ...mapGetters({
       isAuthenticated: 'isAuthenticated',
-      isLoggedOut: 'isLoggedOut'
+      isLoggedOut: 'isLoggedOut',
+      activeCurrency: 'activeCurrency'
     }),
+  },
+  methods: {
+    showWithdrawalModal () {
+      this.$store.dispatch('showWithdrawalModal', this.activeCurrency);
+    }
   }
 };
 </script>
