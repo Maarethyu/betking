@@ -49,7 +49,7 @@ export const formatBigAmount = function (amount, value) {
 
 export const addCommas = (x) => {
   if (!x || parseFloat(x) === 0) {
-    return 0;
+    return '0.00000000';
   }
 
   const parts = x.toString().split('.');

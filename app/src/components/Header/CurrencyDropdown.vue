@@ -1,10 +1,15 @@
 <template>
   <b-nav-item-dropdown left class='text-left currency-dropdown'>
     <template slot="button-content">
-      <span class="currency-dropdown__balance">
-        BALANCE: {{addCommas(formatAmount(activeCurrencyBalance, activeCurrency))}}
-      </span>
-      <span><CurrencyIcon :value="activeCurrency" :width="13" /></span>
+      <div class="currency-dropdown__balance-text">
+        BALANCE:
+      </div>
+      <div class="currency-dropdown__balance-amount">
+        {{addCommas(formatAmount(activeCurrencyBalance, activeCurrency))}}
+      </div>
+      <div class="currency-dropdown__balance-icon">
+        <CurrencyIcon :value="activeCurrency" :width="13" />
+      </div>
     </template>
     <b-dropdown-item v-for="currency in currencies" :key="currency.symbol"
       @click="setActiveCurrency(currency.value)" balance="currency.balance">
@@ -14,40 +19,74 @@
 </template>
 
 <style lang="scss">
-.currency-dropdown {
-  border: 1px solid rgba(255,255,255,0.3);
-  height: calc(1.5em + 8px);
-  padding: 4px 8px;
-  padding-top: 3px;
-  display: flex;
+  $currency-dropdown-width: 204px;
+  $currency-dropdown-height: 29px;
 
-  &__balance {
-    font-size: 0.75rem;
-  }
-
-  .nav-link {
-    height: 1.5em;
-    padding: 4px 8px;
+  .currency-dropdown {
+    border: 1px solid rgba(255,255,255,0.3);
     padding: 0;
+    height: $currency-dropdown-height;
+    display: flex;
+
+    &__balance-text {
+      font-size: 0.75rem;
+      font-family: roboto;
+      margin-right: 4px;
+    }
+
+    &__balance-amount {
+      font-size: 0.75rem;
+      font-family: roboto;
+      margin-right: 4px;
+    }
+
+    &__balance-icon {
+      margin-right: 4px;
+      width: 13px;
+      height: 13px;
+      display: flex;
+    }
+
+    .dropdown-menu {
+      width: $currency-dropdown-width;
+    }
+
+    .dropdown-item img {
+      margin-right: 5px;
+    }
+
+    .dropdown-toggle {
+      min-width: $currency-dropdown-width;
+      position: relative;
+      height: $currency-dropdown-height;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      justify-content: flex-start;
+      padding-right: 34px!important;
+      padding-left: 10px!important;
+
+      &::before{
+        content: '';
+        position: absolute;
+        right: 28px;
+        top: 0px;
+        border-left: 1px solid rgba(255,255,255,0.3);
+        height: 27px;
+      }
+
+      &::after{
+        content: '';
+        position: absolute;
+        top: 11px;
+        right: 9px;
+        margin-left: 1.1em;
+        border-width: 0.6em 0.4em 0 0.4em;
+        border-color: inherit transparent transparent transparent;
+        display: inline-block!important;
+      }
+    }
   }
-  .dropdown-toggle::before{
-    content: '';
-    position: absolute;
-    right: 28px;
-    top: 0px;
-    border-left: 1px solid rgba(255,255,255,0.3);
-    height: calc(1.5em + 6px);
-  }
-  .dropdown-toggle::after{
-    content: '';
-    position: relative;
-    top: 0.2em;
-    margin-left: 1em;
-    border-width: 0.6em 0.4em 0 0.4em;
-    border-color: inherit transparent transparent transparent;
-    display: inline-block!important;
-  }
-}
 </style>
 
 

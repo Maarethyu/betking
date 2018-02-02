@@ -1,5 +1,5 @@
 <template>
-  <img :src="src" :alt="symbol" :width="width" />
+  <img :class="className" :src="src" :alt="symbol" :width="width" />
 </template>
 
 <script>
@@ -18,6 +18,10 @@
       width: {
         default: 20,
         type: Number
+      },
+      className: {
+        default: '',
+        type: String
       }
     },
     computed: {
