@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import account from './modules/account';
 import funds from './modules/funds';
+import modals from './modules/modals';
 
 Vue.use(Vuex);
 
@@ -12,7 +13,9 @@ export default new Vuex.Store({
     /* User authentication */
     account,
     /* Monetory stuff */
-    funds
+    funds,
+    /* All modal states */
+    modals
   },
   strict: debug
 });
