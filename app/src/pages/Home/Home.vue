@@ -1,43 +1,7 @@
 <template>
   <div class="home animated fadeIn" style='overflow:hidden'>
     <div>
-      <b-carousel id="carousel1"
-                  style="overflow hidden;"
-                  controls
-                  indicators
-                  background="#ababab"
-                  :interval="4000">
-
-        <b-carousel-slide img-src="/static/img/home/slide.png">
-          <h3>
-            50 BITCOIN<br>
-            <small style='color:#eb1c24;'>PROGRESSIVE JACKPOT</small>
-            <div class='bottom'>
-              <button class='btn-danger btn padded btn-md'>PLAY NOW</button>
-            </div>
-          </h3>
-        </b-carousel-slide>
-
-        <b-carousel-slide img-src="/static/img/home/slide.png">
-          <h3>
-            50 BITCOIN<br>
-            <small style='color:#eb1c24;'>PROGRESSIVE JACKPOT</small>
-            <div class='bottom'>
-              <button class='btn-danger btn padded btn-md'>PLAY NOW</button>
-            </div>
-          </h3>
-        </b-carousel-slide>
-
-        <b-carousel-slide img-src="/static/img/home/slide.png">
-          <h3>
-            50 BITCOIN<br>
-            <small style='color:#eb1c24;'>PROGRESSIVE JACKPOT</small>
-            <div class='bottom'>
-              <button class='btn-danger btn padded btn-md'>PLAY NOW</button>
-            </div>
-          </h3>
-        </b-carousel-slide>
-      </b-carousel>
+      <Carousel />
     </div>
     <div class='game-section'>
       <div class="home-row game-cards">
@@ -86,16 +50,16 @@
 </template>
 
 <script>
-import bCard from 'bootstrap-vue/es/components/card/card';
-import bCarousel from 'bootstrap-vue/es/components/carousel/carousel';
-import bCarouselSlide from 'bootstrap-vue/es/components/carousel/carousel-slide';
+  import bCard from 'bootstrap-vue/es/components/card/card';
 
-export default {
-  name: 'home',
-  components: {
-    'b-card': bCard,
-    'b-carousel': bCarousel,
-    'b-carousel-slide': bCarouselSlide
-  }
-};
+  import Carousel from './Carousel';
+
+  export default {
+    name: 'home',
+    components: {
+      'b-card': bCard,
+
+      Carousel
+    }
+  };
 </script>

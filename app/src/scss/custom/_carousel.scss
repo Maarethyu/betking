@@ -1,0 +1,83 @@
+.home{
+  .carousel-caption{
+    padding:0;
+    top:0px;
+    height:100%;
+
+    @include media-breakpoint-down(sm){
+      background:rgba(0,0,0,0.5);
+    }
+
+    h3{
+      padding-top:25px;
+      text-shadow:none;
+      font-weight:500;
+      font-size:32px;
+      line-height:0.9;
+      text-shadow:0 0 7px black, 0 0 12px black;
+      small{
+        font-size:0.631em;
+      }
+
+      .bottom{
+        position:absolute;
+        bottom:35px;
+        left:0;
+        right:0;
+      }
+
+      @include media-breakpoint-down(sm){
+        font-size:26px;
+        line-height:0.775;
+        padding-top:35px;
+      }
+
+      @include media-breakpoint-down(xs){
+        font-size:22px;
+        line-height:0.7;
+
+        .bottom{
+          position:absolute;
+          bottom:13px;
+          left:0;
+          right:0;
+        }
+      }
+
+    }
+  }
+
+  .carousel-control-next, .carousel-control-prev{
+    @include media-breakpoint-down(sm){
+      background:rgba(0,0,0,0.5);
+    }
+    opacity:1;
+  }
+
+  .carousel-control-next-icon, .carousel-control-prev-icon{
+    opacity:0;
+  }
+
+  .carousel-control-next:hover .carousel-control-next-icon, .carousel-control-prev:hover .carousel-control-prev-icon{
+    opacity:0.5;
+  }
+
+  .carousel-indicators{
+    bottom:0px;
+    li{
+      width:10px;
+      height:10px;
+      margin:0 5px;
+      border-radius:50%;
+      background:transparent;
+      box-shadow:0 0 0 1.5px rgba(255,255,255,0.3);
+      cursor:pointer;
+      &.active{
+        background:rgba(255,255,255,0.3);
+      }
+    }
+    @include media-breakpoint-down(xs){
+      display:none
+    }
+  }
+}
