@@ -13,12 +13,14 @@ export default {
         {
           name: 'Blackjack',
           url: '/blackjack',
-          icon: 'icon-game-controller'
+          icon: 'icon-game-controller',
+          isComingSoon: true
         },
         {
           name: 'Roulette',
           url: '/roulette',
-          icon: 'icon-game-controller'
+          icon: 'icon-game-controller',
+          isComingSoon: true
         }
       ]
     },
