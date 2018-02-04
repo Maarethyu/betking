@@ -12,6 +12,7 @@ const routes = [
     children: [
       /* Pages which render for both user logged in or logged out state */
       {path: '', component: () => import('pages/Home/Home')},
+      {path: '/dice', component: () => import('pages/Dice/Dice')},
 
       /* Pages which need user to be logged out */
       {path: '/forgot-password', component: () => import('pages/ForgotPassword'), meta: {requiresLoggedOut: true}},
