@@ -8,6 +8,15 @@ export const loadRecaptcha = function (onload) {
   document.head.appendChild(recaptchaScript);
 };
 
+export const loadBootstrapTour = function (onload) {
+  const tourScript = document.createElement('script');
+  tourScript.setAttribute('src', '/static/js/bootstrap-tour-standalone.min.js');
+  document.head.appendChild(tourScript);
+
+  // const tourCss = document.createElement('link');
+  // link.setAttribute()
+};
+
 export const getUrlParams = function () {
   const search = location.search.substring(1);
   return search

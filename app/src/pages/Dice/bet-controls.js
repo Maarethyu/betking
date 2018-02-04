@@ -1,12 +1,4 @@
-// import toastr from 'toastr';
 import BigNumber from 'bignumber.js';
-// import {formatDecimal} from './helpers';
-// import {bus} from './bus';
-// import token from './token';
-// import {currencies} from './currencies';
-// import MinBetAmount from '../../../../Domain/src/MinBetAmount';
-
-// const currencyString = (value) => currencies.find(c => c.value === value).name;
 
 export const updateTargets = function () {
   let c;
@@ -57,45 +49,6 @@ export const updateChance = function () {
   this.updateProfit();
   this.updateTargets();
 };
-
-// export const bet = function (target) {
-//   if (token.isNotDefined()) {
-//     toastr.error('You must login to make a bet');
-//     return;
-//   }
-
-//   if (parseFloat(this.BetAmount) > this.Balance) {
-//     toastr.error('Balance too low');
-//     return;
-//   }
-
-//   if (this.BetProfit < 0.00000001) {
-//     toastr.error('Profit must be more than 0.00000001');
-//     return;
-//   }
-
-//   if (parseFloat(this.BetAmount) < MinBetAmount(this.Currency)) {
-//     toastr.error(`Minimum ${currencyString(this.Currency)} bet is ${MinBetAmount(this.Currency)}`);
-//     return;
-//   }
-
-//   if (!this.isPayoutValid || !this.isChanceValid) {
-//     toastr.error('Invalid payout or chance');
-//     return;
-//   }
-
-//   if (this.WaitingOnBetResult) {
-//     return;
-//   }
-
-//   if ([0, 1].indexOf(target) === -1) {
-//     toastr.error('Invalid bet target');
-//     return;
-//   }
-
-//   this.$store.dispatch('bet', {Chance: this.Chance, BetAmount: parseFloat(this.BetAmount), Target: target});
-//   return true;
-// };
 
 export const updatePayout = function () {
   try {
@@ -209,14 +162,6 @@ export const updateProfit = function () {
   }
 };
 
-// export const showProvablyFairDialog = function () {
-//   this.$store.dispatch('showProvablyFairDialog');
-// };
-
-// export const hideProvablyFairDialog = function () {
-//   this.$store.dispatch('hideProvablyFairDialog');
-// };
-
 export const updateBetAmount = function () {
   try {
     const betProfit = new BigNumber(this.betProfit);
@@ -299,93 +244,33 @@ export const maxBetAmount = function () {
   this.updateProfit();
 };
 
-// export const maxBetAmountClicked = function () {
-//   if (this.ShowMaxBetWarning) {
-//     this.MaxBetDialogVisible = true;
-//   } else {
-//     this.maxBetAmount();
-//   }
-// };
+export const maxBetAmountClicked = function () {
+  if (this.showMaxBetWarning) {
+    this.$root.$emit('bv::show::modal', 'maxBetModal');
+  } else {
+    this.maxBetAmount();
+  }
+};
 
-// export const activateShortcuts = function () {
-//   this.ShortcutsEnabled = !this.ShortcutsEnabled;
-//   bus.$emit('lock-chat', this.ShortcutsEnabled);
-// };
+export const activateShortcuts = function () {
+  this.shortcutsEnabled = !this.shortcutsEnabled;
+};
 
-// export const shortcutsButtonClass = function () {
-//   return this.ShortcutsEnabled ? 'active' : '';
-// };
-
-// export const keyUp = function (e) {
-//   if (this.ShortcutsEnabled) {
-//     const {key} = e;
-//     if (key === 'h') {
-//       this.bet(0);
-//     } else if (key === 'l') {
-//       this.bet(1);
-//     } else if (key === 'z') {
-//       this.minBetAmount();
-//     } else if (key === 'x') {
-//       this.halvedBetAmount();
-//     } else if (key === 'c') {
-//       this.doubleBetAmount();
-//     } else if (key === 'b') {
-//       this.maxBetAmountClicked();
-//     }
-//   }
-// };
-
-// export const onAutoBetResult = function (betResult) {
-//   this.RollCount++;
-
-//   if (parseFloat(this.AutoBetSettings.noOfRolls) !== 0 && this.RollCount >= parseFloat(this.AutoBetSettings.noOfRolls)) {
-//     this.stopAutoBet();
-//     return;
-//   }
-
-//   if (this.AutoBetSettings.stopIfBalanceGreaterThan !== '' && this.Balance > parseFloat(this.AutoBetSettings.stopIfBalanceGreaterThan)) {
-//     this.stopAutoBet();
-//     return;
-//   }
-
-//   if (this.AutoBetSettings.stopIfBalanceLessThan !== '' && this.Balance < parseFloat(this.AutoBetSettings.stopIfBalanceLessThan)) {
-//     this.stopAutoBet();
-//     return;
-//   }
-
-//   if (!this.AutoBetStarted) {
-//     return;
-//   }
-
-//   if (betResult.Profit > 0) {
-//     if (this.AutoBetSettings.onWinResetToBase) {
-//       this.BetAmount = this.AutoBetSettings.BetAmount;
-//     } else {
-//       this.BetAmount = (parseFloat(this.AutoBetSettings.onWinIncreaseBy) * parseFloat(this.BetAmount)).toFixed(8);
-//     }
-//   } else {
-//     if (this.AutoBetSettings.onLossResetToBase) {
-//       this.BetAmount = this.AutoBetSettings.BetAmount;
-//     } else {
-//       this.BetAmount = (parseFloat(this.AutoBetSettings.onLossIncreaseBy) * parseFloat(this.BetAmount)).toFixed(8);
-//     }
-//   }
-
-//   setTimeout(() => this.autoBet(), 300);
-// };
-
-// export const autoBet = function () {
-//   const isValidBet = this.bet(this.AutoBetSettings.Target);
-
-//   if (!isValidBet) {
-//     this.stopAutoBet();
-//   }
-// };
-
-// export const startAutoBetLoop = function () {
-//   this.Chance = this.AutoBetSettings.Chance;
-//   this.RollCount = 0;
-//   this.BetAmount = parseFloat(this.AutoBetSettings.BetAmount).toFixed(8);
-//   this.updateChance();
-//   this.autoBet();
-// };
+export const keyUp = function (e) {
+  if (this.shortcutsEnabled) {
+    const {key} = e;
+    if (key === 'h') {
+      this.bet(0);
+    } else if (key === 'l') {
+      this.bet(1);
+    } else if (key === 'z') {
+      this.minBetAmount();
+    } else if (key === 'x') {
+      this.halvedBetAmount();
+    } else if (key === 'c') {
+      this.doubleBetAmount();
+    } else if (key === 'b') {
+      this.maxBetAmountClicked();
+    }
+  }
+};
