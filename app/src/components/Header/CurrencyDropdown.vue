@@ -1,5 +1,5 @@
 <template>
-  <b-nav-item-dropdown left class='text-left currency-dropdown'>
+  <b-nav-item-dropdown left class='text-left currency-dropdown' id="currency-dropdown">
     <template slot="button-content">
       <div class="currency-dropdown__balance-text">
         BALANCE:
