@@ -17,7 +17,7 @@
     </b-navbar-nav>
 
     <div class="cashierButtons" v-if="isAuthenticated">
-      <b-button style='margin-right:3px;' class='btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">DEPOSIT</b-button>
+      <b-button @click="showDepositModal" style='margin-right:3px;' class='btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">DEPOSIT</b-button>
       <b-button @click="showWithdrawalModal" class='btn-90 btn-padded-small d-none d-md-none d-lg-inline-block' variant="gray">WITHDRAW</b-button>
     </div>
 
@@ -105,6 +105,9 @@ export default {
   methods: {
     showWithdrawalModal () {
       this.$store.dispatch('showWithdrawalModal', this.activeCurrency);
+    },
+    showDepositModal () {
+      this.$store.dispatch('showDepositModal', this.activeCurrency);
     }
   }
 };

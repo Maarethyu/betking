@@ -3,6 +3,7 @@
     <LoginModal />
     <RegisterModal />
     <WithdrawalModal />
+    <DepositModal />
   </div>
 </template>
 
@@ -10,13 +11,15 @@
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
 import WithdrawalModal from './WithdrawalModal';
+import DepositModal from './DepositModal';
 
 export default {
   name: 'CommonModals',
   components: {
     LoginModal,
     RegisterModal,
-    WithdrawalModal
+    WithdrawalModal,
+    DepositModal
   }
 };
 </script>
