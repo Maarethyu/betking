@@ -1,72 +1,74 @@
 <template>
-  <div>
-  	<h1>Login Attempts</h1>
+  <b-row>
+    <b-col cols="10" offset="1">
+      <h1>Login Attempts</h1>
 
-    <div class="error">{{ errorMessage }}</div>
-    <div class="success">{{ message }}</div>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Time Stamp</th>
-          <th>Browser</th>
-          <th>Ip</th>
-          <th>Finger Print</th>
-          <th>OS</th>
-          <th>Successful</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(attempt, index) of loginAttempts" :key="attempt.id">
-          <td>{{index + 1}}</td>
-          <td>{{formatDate(attempt.created_at)}}</td>
-          <td>{{getDeviceFromUserAgentString(attempt.user_agent)}}</td>
-          <td>{{attempt.ip_address}}</td>
-          <td>{{attempt.fingerprint}}</td>
-          <td>{{getOsFromUserAgentString(attempt.user_agent)}}</td>
-          <td>{{attempt.is_success}}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+      <b-table
+        id="login-attempts-table"
+        stacked="sm"
+        :items="getLoginAttempts"
+        :fields="fields"
+        :show-empty="true"
+        :no-provider-sorting="true"
+        empty-text="You haven't made any deposits"
+        responsive striped small outlined hover>
+      </b-table>
+    </b-col>
+  </b-row>
 </template>
 
 <script>
-import api from 'src/api';
-import parser from 'ua-parser-js';
-import moment from 'moment';
+  import bTable from 'bootstrap-vue/es/components/table/table';
+  import bRow from 'bootstrap-vue/es/components/layout/row';
+  import bCol from 'bootstrap-vue/es/components/layout/col';
+  import api from 'src/api';
+  import parser from 'ua-parser-js';
+  import moment from 'moment';
 
-export default {
-  name: 'LoginAttempts',
-  data: () => ({
-    loginAttempts: [],
-    message: '',
-    errorMessage: ''
-  }),
-  mounted () {
-    this.getLoginAttempts();
-  },
-  methods: {
-    getLoginAttempts () {
-      api.getLoginAttempts()
-        .then(res => {
-          this.loginAttempts = res.data.loginAttempts;
-        })
-        .catch(err => {
-          this.errorMessage = err.msg;
-        });
+  export default {
+    name: 'LoginAttempts',
+    components: {
+      'b-table': bTable,
+      'b-row': bRow,
+      'b-col': bCol
     },
-    getDeviceFromUserAgentString (ua) {
-      const browser = parser(ua).browser;
-      return `${browser.name} (${browser.version})`;
-    },
-    getOsFromUserAgentString (ua) {
-      const os = parser(ua).os;
-      return `${os.name}(${os.version})`;
-    },
-    formatDate (date) {
-      return moment(date).format('LLL');
+    data: () => ({
+      loginAttempts: [],
+      fields: [
+        {key: 'created_at', label: 'Date', formatter: 'formatDate'},
+        {key: 'user_agent', label: 'Device / OS', formatter: 'getDeviceAndOs'},
+        'ip_address',
+        'fingerprint',
+        {
+          key: 'is_success',
+          label: 'Successful?',
+          formatter: (value) => {
+            return value ? 'yes' : 'no';
+          }
+        }
+      ],
+      message: '',
+      errorMessage: ''
+    }),
+    methods: {
+      getLoginAttempts () {
+        return api.getLoginAttempts()
+          .then(res => {
+            return res.data.loginAttempts;
+          })
+          .catch(err => {
+            console.error(err);
+            return [];
+          });
+      },
+      getDeviceAndOs (ua) {
+        const browser = parser(ua).browser;
+        const os = parser(ua).os;
+        return `${browser.name} (${browser.version}) ${os.name}(${os.version})`;
+      },
+      formatDate (date) {
+        return moment(date).format('LLL');
+      }
     }
-  }
-};
+  };
 </script>
