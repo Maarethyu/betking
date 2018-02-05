@@ -3,7 +3,7 @@
     <template slot="modal-header-close"><i class="fa fa-close"/></template>
     <template slot="modal-title">Withdraw {{formatCurrency(withdrawalModalCurrency, 'name')}}</template>
 
-    <div class="error">{{errors.global}}</div>
+    <div class="alert alert-danger" v-if="errors.global">{{errors.global}}</div>
 
     <b-container fluid>
       <b-row>
@@ -22,12 +22,12 @@
 
     <b-form v-on:submit.prevent="onSubmit" @reset="onModalHide">
 
-      <b-form-group label="amount" label-for="amount" :invalid-feedback="errors.amount"
+      <b-form-group label="Amount" label-for="amount" :invalid-feedback="errors.amount"
         :state="!errors.amount">
         <b-form-input type="number" step="any" id="amount" placeholder="Amount" name="amount" />
       </b-form-group>
 
-      <b-form-group label="address" label-for="address" :invalid-feedback="errors.address"
+      <b-form-group label="Address" label-for="address" :invalid-feedback="errors.address"
         :state="!errors.address">
         <b-form-input id="address" placeholder="Address" name="address" />
       </b-form-group>

@@ -3,7 +3,7 @@
     <template slot="modal-header-close"><i class="fa fa-close"/></template>
     <template slot="modal-title">Register</template>
 
-    <div class="error">{{errors.global}}</div>
+    <div class="alert alert-danger" v-if="errors.global">{{errors.global}}</div>
 
     <b-form v-on:submit.prevent="onRegister">
 
