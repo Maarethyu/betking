@@ -1,6 +1,6 @@
 <template>
-  <router-link tag="li" class="nav-item nav-dropdown" :to="url" disabled>
-    <div class="nav-link nav-dropdown-toggle" @click="handleClick"><i :class="icon"></i> {{name}}</div>
+  <router-link tag="li" class="nav-item nav-dropdown" :class="{'open': isDropdownOpen}" :to="url" disabled>
+    <div class="nav-link nav-dropdown-toggle" @click.prevent="toggleSideBar"><i :class="icon"></i> {{name}}</div>
     <ul class="nav-dropdown-items">
       <slot></slot>
     </ul>
@@ -9,6 +9,9 @@
 
 <script>
 export default {
+  data: () => ({
+    isDropdownOpen: false
+  }),
   props: {
     name: {
       type: String,
@@ -24,9 +27,8 @@ export default {
     }
   },
   methods: {
-    handleClick (e) {
-      e.preventDefault();
-      e.target.parentElement.classList.toggle('open');
+    toggleSideBar () {
+      this.isDropdownOpen = !this.isDropdownOpen;
     }
   }
 };

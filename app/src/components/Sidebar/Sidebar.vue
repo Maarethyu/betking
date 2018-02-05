@@ -1,7 +1,5 @@
 <template>
   <div class="sidebar">
-    <!-- <SidebarHeader/> -->
-    <!-- <SidebarForm/> -->
     <nav class="sidebar-nav">
       <div slot="header"></div>
       <ul class="nav">
@@ -52,10 +50,6 @@
   </div>
 </template>
 <script>
-// import SidebarFooter from './SidebarFooter'
-// import SidebarForm from './SidebarForm'
-// import SidebarHeader from './SidebarHeader'
-import SidebarMinimizer from './SidebarMinimizer';
 import SidebarNavDropdown from './SidebarNavDropdown';
 import SidebarNavLink from './SidebarNavLink';
 import SidebarNavTitle from './SidebarNavTitle';
@@ -78,10 +72,6 @@ export default {
     }
   },
   components: {
-    // SidebarFooter,
-    // SidebarForm,
-    // SidebarHeader,
-    SidebarMinimizer,
     SidebarNavDropdown,
     SidebarNavLink,
     SidebarNavTitle,
