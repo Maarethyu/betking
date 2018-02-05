@@ -53,19 +53,19 @@
 
   export default {
     name: 'WhitelistedIps',
-      components: {
-        'b-table': bTable,
-        'b-row': bRow,
-        'b-col': bCol,
-        'b-button': bButton,
-        'b-form-input': bFormInput,
-        'b-form-invalid-feedback': bFormInvalidFeedback
-      },
+    components: {
+      'b-table': bTable,
+      'b-row': bRow,
+      'b-col': bCol,
+      'b-button': bButton,
+      'b-form-input': bFormInput,
+      'b-form-invalid-feedback': bFormInvalidFeedback
+    },
     data: () => ({
       errors: '',
       newIp: '',
       otp: '',
-        fields: ['ip_address', '+']
+      fields: ['ip_address', '+']
     }),
     mounted () {
       this.getWhitelistedIpAddresses();
@@ -80,14 +80,14 @@
         this.newIp = '';
       },
       getWhitelistedIpAddresses () {
-          return api.getWhitelistedIpAddresses()
-          .then(response => {
-              return response.data.ips;
-          })
-          .catch(error => {
-              console.error(error);
-              return [];
-          });
+        return api.getWhitelistedIpAddresses()
+        .then(response => {
+          return response.data.ips;
+        })
+        .catch(error => {
+          console.error(error);
+          return [];
+        });
       },
       deleteIp (ip) {
         if (this.is2faEnabled) {
