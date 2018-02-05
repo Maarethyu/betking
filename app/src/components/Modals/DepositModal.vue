@@ -1,7 +1,7 @@
 <template>
   <b-modal id="depositModal" v-model="showModal" ref="modal" @hide="onModalHide" hide-footer lazy>
     <template slot="modal-header-close"><i class="fa fa-close"/></template>
-    <template slot="modal-title">Withdraw {{formatCurrency(depositModalCurrency, 'name')}}</template>
+    <template slot="modal-title">Deposit {{formatCurrency(depositModalCurrency, 'name')}}</template>
 
     <div class="error">{{errors.global}}</div>
 

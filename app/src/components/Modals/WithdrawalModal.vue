@@ -56,6 +56,7 @@
 
   import {formatCurrency, addCommas, formatAmount, toBigInt} from 'src/helpers';
   import api from 'src/api';
+  import bus from 'src/bus';
 
   import {mapGetters} from 'vuex';
 
@@ -119,18 +120,19 @@
           otp: e.target.elements.otpWdModal && e.target.elements.otpWdModal.value
         };
         api.withdrawCurrency(data)
-        .then(res => {
-          this.$store.dispatch('fetchAllBalances');
-          this.hideModal();
-        })
-        .catch(error => {
-          if (error.response) {
-            this.buildErrors(error.response);
-            return;
-          }
+          .then(res => {
+            bus.$emit('WITHDRAWAL_REQUESTED');
+            this.$store.dispatch('fetchAllBalances');
+            this.hideModal();
+          })
+          .catch(error => {
+            if (error.response) {
+              this.buildErrors(error.response);
+              return;
+            }
 
-          throw error;
-        });
+            throw error;
+          });
       },
       buildErrors (response) {
         if (response && response.status === 400) {
