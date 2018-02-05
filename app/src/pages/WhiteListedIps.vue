@@ -22,7 +22,7 @@
         </template>
 
         <template slot="FOOT_ip_address" slot-scope="data">
-          <b-form-input v-model="newIp" placeholder="IP Address" :state="newIp && !errors.ip" />
+          <b-form-input size="sm" v-model="newIp" placeholder="IP Address" :state="newIp && !errors.ip" />
           <b-form-invalid-feedback>{{errors.ip}}</b-form-invalid-feedback>
         </template>
 
