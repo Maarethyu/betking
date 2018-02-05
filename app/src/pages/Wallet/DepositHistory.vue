@@ -2,14 +2,13 @@
   <div>
     <b-table
       id="wallet-deposit-history"
+      stacked="sm"
       :per-page="perPage"
       :current-page="currentPage"
       :items="fetchDepositHistory"
       :fields="fields"
       :show-empty="true"
       :no-provider-sorting="true"
-      :label-sort-asc="'ab'"
-      @sort-changed="sortingChanged"
       empty-text="You haven't made any deposits"
       responsive striped small outlined hover>
 
@@ -21,11 +20,11 @@
 
       <template slot="row-details" slot-scope="row">
         <b-row :no-gutters="true">
-          <b-col cols="2">Address:</b-col>
-          <b-col cols="10">{{ row.item.address }}</b-col>
+          <b-col cols="12" md="2">Address:</b-col>
+          <b-col cols="12" md="10">{{ row.item.address }}</b-col>
 
-          <b-col cols="2">Tx id:</b-col>
-          <b-col cols="10">{{ row.item.txid }}</b-col>
+          <b-col cols="12" md="2">Tx id:</b-col>
+          <b-col cols="12" md="10">{{ row.item.txid }}</b-col>
         </b-row>
       </template>
     </b-table>
@@ -81,10 +80,6 @@
       },
       formatDate (ts) {
         return moment(ts).format('LLL');
-      },
-      sortingChanged (ctx) {
-        console.log(ctx);
-        this.sortDesc = true;
       },
       fetchDepositHistory (ctx) {
         const offset = (ctx.currentPage - 1) * ctx.perPage;

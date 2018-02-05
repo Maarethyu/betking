@@ -1,15 +1,13 @@
 <template>
   <div>
     <b-table
-      id="abc"
+      stacked="sm"
       :per-page="perPage"
       :current-page="currentPage"
       :items="fetchPendingWithdrawals"
       :fields="fields"
       :show-empty="true"
-      :label-sort-asc="'ab'"
       ref="table"
-      @sort-changed="sortingChanged"
       empty-text="You don't have any pending withdrawals"
       responsive striped small outlined hover>
 
@@ -21,8 +19,8 @@
 
       <template slot="row-details" slot-scope="row">
         <b-row :no-gutters="true">
-          <b-col cols="2">Address:</b-col>
-          <b-col cols="10">{{ row.item.address }}</b-col>
+          <b-col cols="12" md="2">Address:</b-col>
+          <b-col cols="12" md="10">{{ row.item.address }}</b-col>
         </b-row>
       </template>
     </b-table>
@@ -86,10 +84,6 @@
       },
       formatDate (ts) {
         return moment(ts).format('LLL');
-      },
-      sortingChanged (ctx) {
-        console.log(ctx);
-        this.sortDesc = true;
       },
       fetchPendingWithdrawals (ctx) {
         const offset = (ctx.currentPage - 1) * ctx.perPage;
