@@ -5,6 +5,7 @@
     </b-form-checkbox>
 
     <b-table
+      stacked="sm"
       :per-page="perPage"
       :current-page="currentPage"
       :items="balances"

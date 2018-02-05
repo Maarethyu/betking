@@ -5,22 +5,22 @@
   	  <Balances />
     </b-col>
 
-    <b-col cols="5" offset="1">
+    <b-col cols="10" offset="1" md="5" offset-md="1">
       <h3>Pending Withdrawals</h3>
   	  <PendingWithdrawals />
     </b-col>
 
-    <b-col cols="5">
+    <b-col cols="10" offset="1" md="5" offset-md="0">
       <h3>Pending Deposits</h3>
   	  Coming soon
     </b-col>
 
-    <b-col cols="5" offset="1">
+    <b-col cols="10" offset="1" md="5" offset-md="1">
       <h3>Withdrawal History</h3>
   	  <WithdrawalHistory />
     </b-col>
 
-    <b-col cols="5">
+    <b-col cols="10" offset="1" md="5" offset-md="0">
       <h3>Deposit History</h3>
   	  <DepositHistory />
     </b-col>
