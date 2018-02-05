@@ -15,7 +15,7 @@
       </b-col>
 
       <b-col cols="6">
-        <b-form-group id="dice-fg-betprofit" label="Bet Profit" label-for="dice-betprofit">
+        <b-form-group id="dice-fg-betprofit" label="Potential Profit" label-for="dice-betprofit">
           <b-input-group>
             <input class="form-control" id="dice-betprofit" v-model="betProfit" @keyup="updateBetAmount" type="text"
               autocomplete="off" />

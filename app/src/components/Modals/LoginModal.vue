@@ -40,11 +40,10 @@
         <div id="g-recaptcha-login" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
       </b-form-group>
 
-      <div class="submit-buttons">
-        <button class="btn btn-success" type="submit">Login</button>
+      <div class="submit-buttons pull-right">
         <button class="btn btn-danger" @click.prevent="closeModal">Cancel</button>
+        <button class="btn btn-success" type="submit">Login</button>
       </div>
-
     </b-form>
   </b-modal>
 </template>

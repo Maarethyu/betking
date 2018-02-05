@@ -15,7 +15,7 @@
         <b-col>{{addCommas(formatAmount(wdFee, withdrawalModalCurrency))}}</b-col>
       </b-row>
       <b-row>
-        <b-col cols="6">Minimum Withdrawal limit</b-col>
+        <b-col cols="6">Minimum Withdrawal Amount</b-col>
         <b-col>{{addCommas(formatAmount(minWdLimit, withdrawalModalCurrency))}}</b-col>
       </b-row>
     </b-container>
@@ -28,6 +28,7 @@
                       placeholder="Amount"
                       name="amount"
                       v-model="withdrawAmount"
+                      autocomplete="off"
                       :state="isAmountValid"/>
       </b-form-group>
 
@@ -36,6 +37,7 @@
                       id="address"
                       placeholder="Address"
                       name="address"
+                      autocomplete="off"
                       v-model="withdrawAddress"
                       :state="isAddresValid"/>
       </b-form-group>
@@ -45,9 +47,9 @@
         <b-form-input id="otpWdModal" type="text" placeholder="OTP" name="otp" v-model="this.otp"/>
       </b-form-group>
 
-      <div class="submit-buttons">
-        <button class="btn btn-success" type="submit" :disabled="isSubmitDisabled">Submit</button>
+      <div class="submit-buttons pull-right">
         <button class="btn btn-danger" @click.prevent="hideModal">Cancel</button>
+        <button class="btn btn-success" type="submit" :disabled="isSubmitDisabled">Submit</button>
       </div>
     </b-form>
   </b-modal>
