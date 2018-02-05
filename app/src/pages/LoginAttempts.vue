@@ -8,9 +8,7 @@
         stacked="sm"
         :items="getLoginAttempts"
         :fields="fields"
-        :show-empty="true"
         :no-provider-sorting="true"
-        empty-text="You haven't made any deposits"
         responsive striped small outlined hover>
       </b-table>
     </b-col>
