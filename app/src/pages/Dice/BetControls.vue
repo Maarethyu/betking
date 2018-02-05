@@ -108,8 +108,11 @@
         <b-button size="sm" variant="primary" disabled>Auto</b-button>
       </b-col>
     </b-row>
-    <MaxBetWarningModal @maxbet="allowMaxBet"></MaxBetWarningModal>
-    <ProvablyFairModal></ProvablyFairModal>
+
+    <div class="dice__bet-controls--modals">
+      <MaxBetWarningModal @maxbet="allowMaxBet"></MaxBetWarningModal>
+      <ProvablyFairModal></ProvablyFairModal>
+    </div>
   </div>
 </template>
 
@@ -131,6 +134,11 @@
     text-align: center;
     position: relative;
     padding: 20px 30px;
+
+    &--modals {
+      color: initial;
+      text-align: initial;
+    }
 
     .form-control {
       border: 1px solid $bet-controls-bg;
