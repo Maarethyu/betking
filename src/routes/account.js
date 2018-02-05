@@ -328,6 +328,11 @@ router.get('/pending-withdrawals', async function (req, res, next) {
     .isIn(['amount', 'created_at'])
     .optional({checkFalsy: true});
 
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
   const {results, count} = await db.getPendingWithdrawals(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
 
   res.json({results, count});
@@ -349,6 +354,11 @@ router.get('/withdrawal-history', async function (req, res, next) {
     .isIn(['amount', 'created_at'])
     .optional({checkFalsy: true});
 
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
   const {results, count} = await db.getWithdrawalHistory(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
 
   res.json({results, count});
@@ -369,6 +379,11 @@ router.get('/deposit-history', async function (req, res, next) {
     .exists()
     .isIn(['amount', 'created_at'])
     .optional({checkFalsy: true});
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
 
   const {results, count} = await db.getDepositHistory(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
 
