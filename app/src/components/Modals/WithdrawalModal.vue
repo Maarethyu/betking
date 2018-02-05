@@ -22,23 +22,31 @@
 
     <b-form v-on:submit.prevent="onSubmit" @reset="onModalHide">
 
-      <b-form-group label="Amount" label-for="amount" :invalid-feedback="errors.amount"
-        :state="!errors.amount">
-        <b-form-input type="number" step="any" id="amount" placeholder="Amount" name="amount" />
+      <b-form-group label="Amount" label-for="amount" :invalid-feedback="errors.amount" :state="!errors.amount">
+        <b-form-input type="text"
+                      id="amount"
+                      placeholder="Amount"
+                      name="amount"
+                      v-model="withdrawAmount"
+                      :state="isAmountValid"/>
       </b-form-group>
 
-      <b-form-group label="Address" label-for="address" :invalid-feedback="errors.address"
-        :state="!errors.address">
-        <b-form-input id="address" placeholder="Address" name="address" />
+      <b-form-group label="Address" label-for="address" :invalid-feedback="errors.address" :state="!errors.address">
+        <b-form-input type="text"
+                      id="address"
+                      placeholder="Address"
+                      name="address"
+                      v-model="withdrawAddress"
+                      :state="isAddresValid"/>
       </b-form-group>
 
       <b-form-group v-if="is2faEnabled" label="Two factor code" label-for="otp" :invalid-feedback="errors.otp"
         :state="!errors.otp">
-        <b-form-input id="otpWdModal" placeholder="OTP" name="otp" />
+        <b-form-input id="otpWdModal" type="text" placeholder="OTP" name="otp" v-model="this.otp"/>
       </b-form-group>
 
       <div class="submit-buttons">
-        <button class="btn btn-success" type="submit">Submit</button>
+        <button class="btn btn-success" type="submit" :disabled="isSubmitDisabled">Submit</button>
         <button class="btn btn-danger" @click.prevent="hideModal">Cancel</button>
       </div>
     </b-form>
@@ -73,7 +81,10 @@
     },
     data: () => ({
       showModal: false,
-      errors: {}
+      errors: {},
+      withdrawAmount: '',
+      withdrawAddress: '',
+      otp: ''
     }),
     computed: {
       ...mapGetters({
@@ -93,6 +104,19 @@
       },
       minWdLimit () {
         return this.currency && this.currency.minWdLimit;
+      },
+      isAmountValid () {
+        if (!this.withdrawAmount) {
+          return null;
+        } else {
+          return !((isNaN(this.withdrawAmount) && this.withdrawAmount !== '') || parseFloat(this.withdrawAmount) < this.minWdLimit || this.withdrawAmount > (this.balance - this.wdFee));
+        }
+      },
+      isAddresValid () {
+        return this.withdrawAddress ? true : null;
+      },
+      isSubmitDisabled () {
+        return !this.withdrawAmount || !this.isAmountValid || !this.withdrawAddress;
       }
     },
     watch: {
@@ -110,14 +134,16 @@
       },
       onModalHide () {
         this.errors = {};
+        this.withdrawAmount = '';
+        this.withdrawAddress = '';
         this.$store.dispatch('hideWithdrawalModal');
       },
       onSubmit (e) {
         const data = {
           currency: this.withdrawalModalCurrency,
-          amount: this.toBigInt(e.target.elements.amount.value, this.currency.scale),
-          address: e.target.elements.address.value,
-          otp: e.target.elements.otpWdModal && e.target.elements.otpWdModal.value
+          amount: this.toBigInt(this.withdrawAmount, this.currency.scale),
+          address: this.withdrawAddress,
+          otp: this.otp
         };
         api.withdrawCurrency(data)
           .then(res => {
