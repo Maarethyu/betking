@@ -12,7 +12,7 @@
         <b-form-input id="username" placeholder="username" name="username" required/>
       </b-form-group>
 
-      <b-form-group label="email" label-for="email" :invalid-feedback="errors.email"
+      <b-form-group label="email (optional)" label-for="email" :invalid-feedback="errors.email"
         :state="!errors.email">
         <b-form-input id="email" placeholder="email" name="email" />
       </b-form-group>
@@ -31,9 +31,9 @@
         <div id="g-recaptcha-register" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
       </b-form-group>
 
-      <div class="submit-buttons">
-        <button class="btn btn-success" type="submit">Register</button>
+      <div class="submit-buttons pull-right">
         <button class="btn btn-danger" @click.prevent="closeModal">Cancel</button>
+        <button class="btn btn-success" type="submit">Register</button>
       </div>
 
     </b-form>

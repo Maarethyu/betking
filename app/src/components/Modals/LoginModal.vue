@@ -45,8 +45,8 @@
 
       <div class="submit-buttons mr-2">
         <button class="btn btn-danger" @click.prevent="closeModal">Cancel</button>
+        <button class="btn btn-success" type="submit">Login</button>
       </div>
-
     </b-form>
   </b-modal>
 </template>
