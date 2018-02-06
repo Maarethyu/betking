@@ -31,6 +31,8 @@
           <b-col class="text-danger">{{errorMessage}}</b-col>
         </b-row>
       </template>
+      <br />
+      <button class="btn btn-danger float-right" @click="onModalHide">Close</button>
     </b-container>
 
   </b-modal>
