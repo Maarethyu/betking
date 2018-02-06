@@ -15,6 +15,7 @@
             <img class="qr" v-if="depositAddressQr && depositAddressQr.length > 0" :src="depositAddressQr" />
           </b-col>
         </b-row>
+        <br />
         <b-row>
           <b-col class="deposit-address">
             <CopyToClipboard v-bind:text="depositAddress"></CopyToClipboard>
