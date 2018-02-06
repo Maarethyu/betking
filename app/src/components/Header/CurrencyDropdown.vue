@@ -13,7 +13,7 @@
     </template>
     <b-dropdown-item v-for="currency in currencies" :key="currency.symbol"
       @click="setActiveCurrency(currency.value)" balance="currency.balance">
-        <CurrencyIcon :value="currency.value" />{{currency.name}}
+        {{currency.name}}<CurrencyIcon :className="'float-right'" :value="currency.value" />
     </b-dropdown-item>
   </b-nav-item-dropdown>
 </template>

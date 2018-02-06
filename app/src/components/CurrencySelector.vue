@@ -5,7 +5,7 @@
     </template>
 
     <b-dropdown-item v-for="currency of currencies" :key="currency.value" @click="currencyChanged(currency)">
-      {{ currency.name }} <CurrencyIcon :value="currency.value" :width="15" />
+      {{ currency.name }} <CurrencyIcon :className="'float-right'" :value="currency.value" :width="15" />
     </b-dropdown-item>
   </b-dropdown>
 </template>
