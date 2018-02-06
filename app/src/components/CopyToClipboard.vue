@@ -37,15 +37,6 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
-  .copy-to-clipboard .btn-default {
-    background-color: #1B262D;
-  }
-  .copy-to-clipboard .btn-default:hover {
-    color: #ffffff;
-  }
-  .copy-to-clipboard .btn-default[disabled]:hover {
-    color: #333333;
-  }
 </style>
 <script>
   export default {
