@@ -321,7 +321,7 @@ app-root {
     background-color: $navbar-brand-bg;
     @include borders($navbar-brand-border);
 
-    .navbar-toggler {
+    .navbar-toggler, .navbar-toggler-alt {
       @if (lightness( $navbar-brand-bg ) > 40) {
         color: $navbar-color;
       } @else {
