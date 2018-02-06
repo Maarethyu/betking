@@ -32,7 +32,7 @@
           <b-form-group label="Code from Google authenticator" label-for="code">
             <b-form-input id="code" placeholder="Code" name="otp" v-model="otp" :state="!error && otp" />
           </b-form-group>
-          <b-button variant="success" type="submit">Enable</b-button>
+          <b-button class="float-right" variant="success" type="submit">Enable</b-button>
         </b-form>
       </template>
     </b-col>

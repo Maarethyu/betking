@@ -18,7 +18,8 @@
         <b-form-input type="password" id="password2" placeholder="Confirm Password" name="password2" v-model="passwordForm.password2" :state="!errors.password2 && passwordForm.password2" />
       </b-form-group>
 
-      <b-button type="submit" variant="success">Change Password</b-button>
+      <b-button class="float-right" type="submit" variant="success">Change Password</b-button>
+      <b-button class="float-right mr-2" @click.prevent="closeModal" variant="danger">Cancel</b-button>
     </b-form>
   </b-modal>
 </template>

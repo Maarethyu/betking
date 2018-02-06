@@ -41,12 +41,8 @@
       </b-form-group>
 
       <button class="btn btn-success float-right" type="submit">Login</button>
+      <button class="btn btn-danger float-right mr-2" @click.prevent="closeModal">Cancel</button>
       <button class="btn btn-primary" @click.prevent="openForgotPasswordModal">Forgot Password?</button>
-
-      <div class="submit-buttons mr-2">
-        <button class="btn btn-danger" @click.prevent="closeModal">Cancel</button>
-        <button class="btn btn-success" type="submit">Login</button>
-      </div>
     </b-form>
   </b-modal>
 </template>
