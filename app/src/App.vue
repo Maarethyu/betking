@@ -37,6 +37,7 @@ export default {
   $simple-line-font-path: '~simple-line-icons/fonts/';
   @import '~simple-line-icons/css/simple-line-icons.css';
   @import '~bootstrap-vue/dist/bootstrap-vue.css';
+  @import '~toastr/toastr';
 
   @import './scss/style';
 </style>

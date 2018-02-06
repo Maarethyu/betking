@@ -64,6 +64,7 @@
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
 
+  import toastr from 'toastr';
   import {formatCurrency, addCommas, formatAmount, toBigInt} from 'src/helpers';
   import api from 'src/api';
   import bus from 'src/bus';
@@ -149,6 +150,7 @@
         };
         api.withdrawCurrency(data)
           .then(res => {
+            toastr.success(`Withdrawal request for ${this.withdrawAmount} ${this.currency.name} submitted`);
             bus.$emit('WITHDRAWAL_REQUESTED');
             this.$store.dispatch('fetchAllBalances');
             this.hideModal();
