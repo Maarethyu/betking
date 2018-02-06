@@ -12,9 +12,10 @@
         </b-row>
         <b-row>
           <b-col class="text-center">
-            <img v-if="depositAddressQr && depositAddressQr.length > 0" :src="depositAddressQr" />
+            <img class="qr" v-if="depositAddressQr && depositAddressQr.length > 0" :src="depositAddressQr" />
           </b-col>
         </b-row>
+        <br />
         <b-row>
           <b-col class="deposit-address">
             <CopyToClipboard v-bind:text="depositAddress"></CopyToClipboard>
@@ -35,7 +36,11 @@
 
   </b-modal>
 </template>
-
+<style>
+  img.qr {
+    width: 300px;
+  }
+</style>
 <script>
   import bModal from 'bootstrap-vue/es/components/modal/modal';
   import bContainer from 'bootstrap-vue/es/components/layout/container';
