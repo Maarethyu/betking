@@ -75,7 +75,6 @@ import bBadge from 'bootstrap-vue/es/components/badge/badge';
 import vBModal from 'bootstrap-vue/es/directives/modal/modal';
 
 import HeaderDropdown from './HeaderDropdown.vue';
-// import LanguageDropdown from './LanguageDropdown.vue'
 import CurrencyDropdown from './CurrencyDropdown.vue';
 
 export default {
