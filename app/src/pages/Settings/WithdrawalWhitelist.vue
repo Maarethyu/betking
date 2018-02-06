@@ -5,13 +5,14 @@
     <b-table
       ref="table"
       class="whitelisted-address"
+      stacked="md"
       :items="fetchWhitelistedAddresses"
       :fields="fields"
       :show-empty="true"
       :foot-clone="true"
       :no-provider-sorting="true"
       empty-text="You don't have any whitelisted addresses"
-      responsive striped small outlined fixed hover>
+      striped small outlined fixed hover>
 
       <template slot="+" slot-scope="row">
         <b-button variant="default" size="sm" @click="removeWhitelistedAddress(row.item.currency)">
@@ -39,8 +40,11 @@
 
 <style lang="scss">
   .whitelisted-address {
+    tfoot {
+      display: table-footer-group!important;
+    }
     &__currency {
-      width: 20%;
+      width: 25%;
     }
   }
 </style>
@@ -113,7 +117,7 @@
               toastr.success(`Removed whitelisted address for ${currencyConfig.name}`);
             }
 
-            this.refreshTable()
+            this.refreshTable();
           })
           .catch(error => {
             if (error.response) {
