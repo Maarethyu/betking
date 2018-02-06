@@ -16,8 +16,8 @@
     <br>
 
     <div class="submit-buttons">
-      <button class="btn btn-success" @click="maxBet">Yes</button>
-      <button class="btn btn-danger" @click="closeModal">No</button>
+      <button class="btn btn-success float-right" @click="maxBet">Yes</button>
+      <button class="btn btn-danger float-right mr-2" @click="closeModal">No</button>
     </div>
   </b-modal>
 </template>
