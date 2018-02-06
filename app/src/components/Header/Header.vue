@@ -1,12 +1,12 @@
 <template>
-  <header class="bk-header app-header navbar fixed-top">
+  <header class="bk-header app-header navbar" id="navbar">
 
     <button class="navbar-toggler-alt bk-header__sidebar-toggle--mobile d-lg-none"
       @click="toggleMobileSideBar">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <b-link class="navbar-brand navbar-toggler" to="/"></b-link>
+    <b-link class="navbar-brand" to="/"></b-link>
 
     <button class="navbar-toggler-alt bk-header__sidebar-toggle d-md-down-none" @click="toggleSideBar">
       <span class="navbar-toggler-icon"></span>
@@ -38,6 +38,7 @@
   .app-header.bk-header {
     color: #fff;
     padding-right: 15px;
+    transition: none;
 
     .navbar-brand {
       bottom: 10px;
@@ -102,12 +103,36 @@ export default {
       activeCurrency: 'activeCurrency'
     }),
   },
+  mounted () {
+    this.$root.$on('bv::modal::show', this.fixNavBarAlignment);
+    this.$root.$on('bv::modal::hidden', this.resetNavBarAlignment);
+  },
   methods: {
     showWithdrawalModal () {
       this.$store.dispatch('showWithdrawalModal', this.activeCurrency);
     },
     showDepositModal () {
       this.$store.dispatch('showDepositModal', this.activeCurrency);
+    },
+    getScrollWidth () {
+      if (document.getElementsByTagName('body')[0].scrollHeight > window.innerHeight) {
+        const scrollDiv = document.createElement('div');
+        scrollDiv.className = 'modal-scrollbar-measure';
+        document.body.appendChild(scrollDiv);
+        const scrollbarWidth = scrollDiv.getBoundingClientRect().width - scrollDiv.clientWidth;
+        document.body.removeChild(scrollDiv);
+        return scrollbarWidth;
+      } else {
+        return 0;
+      }
+    },
+    fixNavBarAlignment () {
+      const el = document.getElementById('navbar');
+      el.style.width = `calc(100% - ${this.getScrollWidth()}px)`;
+    },
+    resetNavBarAlignment () {
+      const el = document.getElementById('navbar');
+      el.style.width = '100%';
     }
   }
 };
