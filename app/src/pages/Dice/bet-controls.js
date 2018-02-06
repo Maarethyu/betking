@@ -80,7 +80,7 @@ export const updatePayout = function () {
       const calculatedPayout = new BigNumber(99)
         .dividedBy(this.chance);
 
-      if (!calculatedPayout.eq(fp) && (calculatedPayout.gte(1.00010102) || calculatedPayout.lte(990000))) {
+      if (!calculatedPayout.eq(fp) && calculatedPayout.gte(1.00010102) && calculatedPayout.lte(990000)) {
         this.showPayoutWarning = 3;
         this.timerId = window.setTimeout(() => {
           this.payout = calculatedPayout.toFixed(8, BigNumber.ROUND_DOWN);
