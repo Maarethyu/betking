@@ -47,9 +47,9 @@
         <b-form-input id="otpWdModal" type="text" placeholder="OTP" name="otp" v-model="this.otp"/>
       </b-form-group>
 
-      <div class="submit-buttons">
-        <button class="btn btn-success float-right" type="submit" :disabled="isSubmitDisabled">Submit</button>
-        <button class="btn btn-danger float-right mr-2" @click.prevent="hideModal">Cancel</button>
+      <div class="submit-buttons pull-right">
+        <button class="btn btn-danger" type="button" @click.prevent="hideModal">Cancel</button>
+        <button class="btn btn-success" type="submit" :disabled="isSubmitDisabled">Submit</button>
       </div>
     </b-form>
   </b-modal>

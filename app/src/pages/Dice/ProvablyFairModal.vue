@@ -11,7 +11,7 @@
 
     <br>
 
-    <button class="btn btn-danger float-right" @click="closeModal">Close</button>
+    <button class="btn btn-danger pull-right" @click="closeModal">Close</button>
   </b-modal>
 </template>
 

@@ -31,9 +31,9 @@
         <div id="g-recaptcha-register" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
       </b-form-group>
 
-      <div class="submit-buttons">
-        <button class="btn btn-success float-right" type="submit">Register</button>
-        <button class="btn btn-danger float-right mr-2" @click.prevent="closeModal">Cancel</button>
+      <div class="submit-buttons pull-right">
+        <button class="btn btn-danger" type="button" @click.prevent="closeModal">Cancel</button>
+        <button class="btn btn-success" type="submit">Register</button>
       </div>
 
     </b-form>
