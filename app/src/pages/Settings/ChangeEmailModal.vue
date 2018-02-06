@@ -22,6 +22,7 @@
   import bFormInput from 'bootstrap-vue/es/components/form-input/form-input';
   import bButton from 'bootstrap-vue/es/components/button/button';
 
+  import toastr from 'toastr';
   import api from 'src/api';
 
   export default {
@@ -52,6 +53,7 @@
 
         api.changeEmail(data)
           .then(res => {
+            toastr.success('Email changed successfully');
             this.$emit('email-changed');
             this.closeModal();
           })

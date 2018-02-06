@@ -31,6 +31,7 @@
   import bButton from 'bootstrap-vue/es/components/button/button';
 
   import api from 'src/api';
+  import toastr from 'toastr';
 
   export default {
     name: 'ChangePasswordModal',
@@ -66,6 +67,7 @@
 
         api.changePassword(data)
           .then(res => {
+            toastr.success('Password changed successfully');
             this.$emit('password-changed');
             this.closeModal();
           })

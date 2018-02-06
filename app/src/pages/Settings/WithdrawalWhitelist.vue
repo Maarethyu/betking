@@ -52,6 +52,7 @@
   import bFormInput from 'bootstrap-vue/es/components/form-input/form-input';
   import bFormInvalidFeedback from 'bootstrap-vue/es/components/form/form-invalid-feedback';
   import {mapGetters} from 'vuex';
+  import toastr from 'toastr';
   import api from 'src/api';
   import {formatCurrency} from 'src/helpers';
 
@@ -105,7 +106,15 @@
         }
 
         api.removeWhitelistedAddress(currency, this.otp)
-          .then(() => this.refreshTable())
+          .then(() => {
+            const currencyConfig = this.currencies.find(c => c.value === currency);
+
+            if (currencyConfig) {
+              toastr.success(`Removed whitelisted address for ${currencyConfig.name}`);
+            }
+
+            this.refreshTable()
+          })
           .catch(error => {
             if (error.response) {
               this.buildErrors(error.response);
@@ -122,7 +131,15 @@
         }
 
         api.addWhitelistedAddress(this.activeCurrency, this.activeAddress, this.otp)
-          .then(() => this.refreshTable())
+          .then(() => {
+            const currency = this.currencies.find(c => c.value === this.activeCurrency);
+
+            if (currency) {
+              toastr.success(`Added whitelisted address for ${currency.name}`);
+            }
+
+            this.refreshTable();
+          })
           .catch(error => {
             if (error.response) {
               this.buildErrors(error.response);
