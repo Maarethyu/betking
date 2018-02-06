@@ -32,7 +32,7 @@
       </b-form-group>
 
       <div class="submit-buttons pull-right">
-        <button class="btn btn-danger" @click.prevent="closeModal">Cancel</button>
+        <button class="btn btn-danger" type="button" @click.prevent="closeModal">Cancel</button>
         <button class="btn btn-success" type="submit">Register</button>
       </div>
 

@@ -15,9 +15,9 @@
 
     <br>
 
-    <div class="submit-buttons">
-      <button class="btn btn-success" @click="maxBet">Yes</button>
+    <div class="submit-buttons pull-right">
       <button class="btn btn-danger" @click="closeModal">No</button>
+      <button class="btn btn-success" @click="maxBet">Yes</button>
     </div>
   </b-modal>
 </template>

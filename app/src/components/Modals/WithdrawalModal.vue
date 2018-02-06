@@ -49,7 +49,7 @@
       </b-form-group>
 
       <div class="submit-buttons pull-right">
-        <button class="btn btn-danger" @click.prevent="hideModal">Cancel</button>
+        <button class="btn btn-danger" type="button" @click.prevent="hideModal">Cancel</button>
         <button class="btn btn-success" type="submit" :disabled="isSubmitDisabled">Submit</button>
       </div>
     </b-form>
