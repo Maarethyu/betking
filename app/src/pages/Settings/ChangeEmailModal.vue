@@ -10,7 +10,8 @@
         <b-form-input id="new-email" placeholder="Email" name="email" v-model="newEmail" :state="!errors.email && newEmail" />
       </b-form-group>
 
-      <b-button type="submit" variant="success">Change Email</b-button>
+      <b-button class="float-right" type="submit" variant="success">Change Email</b-button>
+      <b-button class="float-right mr-2" variant="danger" @click.prevent="closeModal">Cancel</b-button>
     </b-form>
   </b-modal>
 </template>

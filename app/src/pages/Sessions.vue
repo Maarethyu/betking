@@ -1,92 +1,109 @@
 <template>
-  <div>
-  	<h1>Sessions</h1>
+  <b-row>
+    <b-col cols="8" offset="2">
+  	  <h3>Sessions</h3>
 
-    <div class="error">{{ errors.id }}</div>
-    <div class="success">{{ message }}</div>
+      <br>
 
-    <button v-on:click="logoutCurrent()">Logout Current</button>
-    <button v-on:click="logoutAll()">Logout All</button>
+      <b-button variant="danger" v-on:click="logoutCurrent()">Logout Current</b-button>
+      <b-button variant="danger" v-on:click="logoutAll()">Logout All</b-button>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Session Id</th>
-          <th>Created At</th>
-          <th></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="session of sessions" :key="session.id">
-          <td>{{session.id}}</td>
-          <td>{{formatDate(session.created_at)}}</td>
-          <td v-if="!session.is_current">
-            <button v-on:click="logoutOne(session.id)">Logout</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <br>
+      <br>
 
-  </div>
+      <b-table
+        id="sessions-table"
+        stacked="sm"
+        :items="getSessions"
+        :fields="fields"
+        ref="table"
+        :no-provider-sorting="true"
+        responsive striped small outlined hover>
+
+        <template slot="x"  slot-scope="row">
+          <b-button v-if="!row.item.is_current" size="sm" variant="danger" @click="logoutOne(row.item.id)">Logout</b-button>
+          <b-badge v-if="row.item.is_current" variant="success">Current</b-badge>
+        </template>
+      </b-table>
+    </b-col>
+  </b-row>
 </template>
 
 <script>
-import api from 'src/api';
-import moment from 'moment';
+  import bRow from 'bootstrap-vue/es/components/layout/row';
+  import bCol from 'bootstrap-vue/es/components/layout/col';
+  import bButton from 'bootstrap-vue/es/components/button/button';
+  import bTable from 'bootstrap-vue/es/components/table/table';
+  import bBadge from 'bootstrap-vue/es/components/badge/badge';
+  import api from 'src/api';
+  import moment from 'moment';
+  import toastr from 'toastr';
 
-export default {
-  name: 'Sessions',
-  data: () => ({
-    sessions: [],
-    message: '',
-    errors: ''
-  }),
-  mounted () {
-    this.getSessions();
-  },
-  methods: {
-    getSessions () {
-      api.getSessions()
-        .then(response => {
-          this.sessions = response.data.sessions;
-        });
+  export default {
+    name: 'Sessions',
+    components: {
+      'b-row': bRow,
+      'b-col': bCol,
+      'b-button': bButton,
+      'b-table': bTable,
+      'b-badge': bBadge
     },
-    logoutOne (id) {
-      const data = {id};
+    data: () => ({
+      message: '',
+      errors: '',
+      fields: [
+        'id',
+        {key: 'created_at', label: 'Date', formatter: 'formatDate'},
+        'x'
+      ]
+    }),
+    mounted () {
+      this.getSessions();
+    },
+    methods: {
+      refreshTable () {
+        this.$refs.table.refresh();
+      },
+      getSessions () {
+        return api.getSessions()
+          .then(response => {
+            return response.data.sessions;
+          });
+      },
+      logoutOne (id) {
+        const data = {id};
 
-      api.logoutOne(data)
-        .then(response => {
-          this.message = 'Successfully logged out one session';
-          this.error = '';
-          this.getSessions();
-        })
-        .catch(error => {
-          this.showErrors(error.response);
-        });
-    },
-    logoutCurrent () {
-      this.$store.dispatch('logout');
-    },
-    logoutAll () {
-      this.$store.dispatch('logoutAll');
-    },
-    formatDate (date) {
-      return moment(date).format('LLL');
-    },
-    showErrors (response) {
-      if (response && response.status === 400) {
-        const newErrors = {};
+        api.logoutOne(data)
+          .then(response => {
+            toastr.success('Session logged out');
+            this.refreshTable();
+          })
+          .catch(error => {
+            this.showErrors(error.response);
+          });
+      },
+      logoutCurrent () {
+        this.$store.dispatch('logout');
+      },
+      logoutAll () {
+        this.$store.dispatch('logoutAll');
+      },
+      formatDate (date) {
+        return moment(date).format('LLL');
+      },
+      showErrors (response) {
+        if (response && response.status === 400) {
+          const newErrors = {};
 
-        response.data.errors.forEach(error => {
-          newErrors[error.param] = newErrors[error.param]
-            ? `${newErrors[error.param]} / ${error.msg}` : error.msg;
-        });
+          response.data.errors.forEach(error => {
+            newErrors[error.param] = newErrors[error.param]
+              ? `${newErrors[error.param]} / ${error.msg}` : error.msg;
+          });
 
-        this.errors = newErrors;
-        this.message = '';
-      }
-    },
-  }
-};
+          this.errors = newErrors;
+          this.message = '';
+        }
+      },
+    }
+  };
 </script>

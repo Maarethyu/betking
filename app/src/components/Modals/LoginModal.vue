@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="loginModal" ref="modal" hide-footer lazy>
+  <b-modal id="loginModal" ref="modal" hide-footer lazy @hide="onModalHide">
     <template slot="modal-header-close"><i class="fa fa-close"/></template>
     <template slot="modal-title">Login</template>
 
@@ -40,10 +40,9 @@
         <div id="g-recaptcha-login" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
       </b-form-group>
 
-      <div class="submit-buttons pull-right">
-        <button class="btn btn-danger" @click.prevent="closeModal">Cancel</button>
-        <button class="btn btn-success" type="submit">Login</button>
-      </div>
+      <button class="btn btn-success float-right" type="submit">Login</button>
+      <button class="btn btn-danger float-right mr-2" @click.prevent="closeModal">Cancel</button>
+      <button class="btn btn-primary" @click.prevent="openForgotPasswordModal">Forgot Password?</button>
     </b-form>
   </b-modal>
 </template>
@@ -56,6 +55,7 @@ import bFormSelect from 'bootstrap-vue/es/components/form-select/form-select';
 import bFormInput from 'bootstrap-vue/es/components/form-input/form-input';
 import bFormCheckbox from 'bootstrap-vue/es/components/form-checkbox/form-checkbox';
 import bFormCheckboxGroup from 'bootstrap-vue/es/components/form-checkbox/form-checkbox-group';
+import vBModal from 'bootstrap-vue/es/directives/modal/modal';
 
 import Cookies from 'js-cookie';
 import api from 'src/api';
@@ -73,6 +73,9 @@ export default {
     'b-form-input': bFormInput,
     'b-form-checkbox': bFormCheckbox,
     'b-form-checkbox-group': bFormCheckboxGroup
+  },
+  directives: {
+    'b-modal': vBModal
   },
   data: () => ({
     captchaId: null,
@@ -102,6 +105,14 @@ export default {
   methods: {
     closeModal () {
       this.$refs.modal && this.$refs.modal.hide();
+    },
+    onModalHide () {
+      this.errors = {};
+      this.captchaId = null;
+      this.usernameOrEmail = 'Username';
+    },
+    openForgotPasswordModal () {
+      this.$root.$emit('bv::show::modal', 'forgotPasswordModal');
     },
     onLogin (e) {
       e.preventDefault();
