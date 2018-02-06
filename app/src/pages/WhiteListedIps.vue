@@ -50,6 +50,7 @@
 
   import api from 'src/api';
   import {mapGetters} from 'vuex';
+  import toastr from 'toastr';
 
   export default {
     name: 'WhitelistedIps',
@@ -96,6 +97,7 @@
         }
         api.deleteIp(ip, this.otp)
           .then(response => {
+            toastr.success('IP removed from whitelist');
             this.refreshTable();
           })
           .catch(error => {
@@ -105,6 +107,7 @@
       addIp (ip) {
         api.addIp(ip)
           .then(response => {
+            toastr.success('IP added to whitelist');
             this.refreshTable();
           })
           .catch(error => {

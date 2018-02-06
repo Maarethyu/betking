@@ -48,6 +48,7 @@
   import bButton from 'bootstrap-vue/es/components/button/button';
   import CopyToClipboard from 'components/CopyToClipboard';
   import {mapGetters} from 'vuex';
+  import toastr from 'toastr';
   import api from 'src/api';
 
   export default {
@@ -106,6 +107,7 @@
         api.enable2fa(this.otp)
           .then(() => {
             this.fetchUser();
+            toastr.success('Two factor authentication enabled');
             this.error = '';
             this.otp = '';
           })
@@ -120,6 +122,7 @@
       disableTwoFactorAuth () {
         api.disable2fa(this.otp)
           .then(() => {
+            toastr.success('Two factor authentication disabled');
             this.fetchUser();
             this.error = '';
             this.otp = '';

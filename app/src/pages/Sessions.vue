@@ -75,7 +75,7 @@
 
         api.logoutOne(data)
           .then(response => {
-            toastr.info('Session logged out');
+            toastr.success('Session logged out');
             this.refreshTable();
           })
           .catch(error => {
