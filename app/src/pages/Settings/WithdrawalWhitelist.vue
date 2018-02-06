@@ -74,7 +74,7 @@
       successMessage: '',
       otp: null,
       fields: [
-        {key: 'currency', label: 'Currency', formatter: 'showCurrencySymbol', class:'whitelisted-address__currency'},
+        {key: 'currency', label: 'Currency', formatter: 'showCurrencySymbol', class: 'whitelisted-address__currency'},
         {key: 'address', label: 'Address'},
         '+'
       ]

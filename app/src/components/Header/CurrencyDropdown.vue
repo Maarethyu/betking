@@ -6,14 +6,14 @@
       </div>
       <div class="currency-dropdown__balance-amount">
         {{addCommas(formatAmount(activeCurrencyBalance, activeCurrency))}}
-      </div>
-      <div class="currency-dropdown__balance-icon">
         <CurrencyIcon :value="activeCurrency" :width="13" />
       </div>
     </template>
     <b-dropdown-item v-for="currency in currencies" :key="currency.symbol"
       @click="setActiveCurrency(currency.value)" balance="currency.balance">
-        {{currency.name}}<CurrencyIcon :className="'float-right'" :value="currency.value" />
+        <span class="float-left">{{currency.name}}</span>
+        <CurrencyIcon :className="'float-right'" :value="currency.value" />
+        <div class="clearfix" />
     </b-dropdown-item>
   </b-nav-item-dropdown>
 </template>
@@ -38,13 +38,11 @@
       font-size: 0.75rem;
       font-family: roboto;
       margin-right: 4px;
-    }
 
-    &__balance-icon {
-      margin-right: 4px;
-      width: 13px;
-      height: 13px;
-      display: flex;
+      img {
+        position: relative;
+        top: -1px;
+      }
     }
 
     .dropdown-menu {
@@ -62,7 +60,7 @@
       display: flex;
       flex-flow: row nowrap;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: space-between;
       padding-right: 34px!important;
       padding-left: 10px!important;
 
