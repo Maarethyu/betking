@@ -124,6 +124,8 @@
   $error-color-dark: #a94442;
 
   @import url('/static/css/bootstrap-tour-standalone.min.css');
+  @import '../../scss/custom/btn';
+
 
   .dice__bet-controls {
     width: 100%;

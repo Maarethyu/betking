@@ -43,18 +43,6 @@
   &.btn-md{
     height:38px;
     font-size:0.95rem;
-    @include media-breakpoint-down(sm){
-      height:32px;
-      font-size:0.825rem;
-    }
-    @include media-breakpoint-down(xs){
-      height:26px;
-      width:125px;
-      text-align:center;
-      padding:0;
-      line-height:12px;
-      font-size:0.8rem;
-    }
   }
 
   &.btn-no-right{
