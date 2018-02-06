@@ -1,14 +1,14 @@
 <template>
-  <header class="bk-header app-header navbar">
+  <header class="bk-header app-header navbar fixed-top">
 
-    <button class="navbar-toggler bk-header__sidebar-toggle--mobile d-lg-none"
+    <button class="navbar-toggler-alt bk-header__sidebar-toggle--mobile d-lg-none"
       @click="toggleMobileSideBar">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <b-link class="navbar-brand" to="/"></b-link>
+    <b-link class="navbar-brand navbar-toggler" to="/"></b-link>
 
-    <button class="navbar-toggler bk-header__sidebar-toggle d-md-down-none" @click="toggleSideBar">
+    <button class="navbar-toggler-alt bk-header__sidebar-toggle d-md-down-none" @click="toggleSideBar">
       <span class="navbar-toggler-icon"></span>
     </button>
 
