@@ -14,13 +14,14 @@
   align-items: center;
 
   .close:hover {
-    background: rgba(255,0,0,0.75);
+    background: #bf2929;
   }
 
   .close {
     position: absolute;
     right: 0;
-    background: rgba(255, 0, 0, 0.5);
+    opacity: 1;
+    background: #d53939;
     font-family: FontAwesome;
     width: 34px;
     height: 34px;

@@ -13,7 +13,7 @@
     </div>
     <div class='logged-in nudge-info'></div>
     <div class="ml-auto">
-      <button class="navbar-toggler aside-menu-toggler" type="button" @click="toggleChat">
+      <button class="navbar-toggler-alt aside-menu-toggler" type="button" @click="toggleChat">
         <span class="icon-bubble"></span>
       </button>
     </div>

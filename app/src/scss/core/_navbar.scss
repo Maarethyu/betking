@@ -5,7 +5,7 @@
 
   @include media-breakpoint-down(md) {
     height: $navbar-height - 15px;
-    
+
   }
 
   padding: 0;
@@ -18,12 +18,12 @@
     display: inline-block;
     width: $navbar-brand-width;
     height: 50px;
-    
+
     @include media-breakpoint-down(md) {
       width: $navbar-brand-width * 30 / 50;
       height:30px;
     }
-    
+
     padding: $navbar-padding-y $navbar-padding-x;
     margin-right: 0;
     background-color: $navbar-brand-bg;
@@ -37,7 +37,7 @@
     margin:auto;
   }
 
-  .navbar-toggler {
+  .navbar-toggler, .navbar-toggler-alt {
     min-width: 70px;
     padding: $navbar-toggler-padding-y 0;
     color: #fff;
@@ -90,7 +90,7 @@
         @include media-breakpoint-down(md) {
           height: $navbar-height - 35px;
           margin: 0 5px;
-          
+
         }
       }
     }
