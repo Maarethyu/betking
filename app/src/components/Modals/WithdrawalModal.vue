@@ -29,7 +29,8 @@
                       name="amount"
                       v-model="withdrawAmount"
                       autocomplete="off"
-                      :state="isAmountValid"/>
+                      :state="isAmountValid"
+                      @input="handleAmountChange"/>
       </b-form-group>
 
       <b-form-group label="Address" label-for="address" :invalid-feedback="errors.address" :state="!errors.address">
@@ -181,6 +182,13 @@
               global: response.data.error
             };
           }
+        }
+      },
+      handleAmountChange (value) {
+        if (value > (this.balance - this.wdFee)) {
+          this.errors = {amount: 'balance too low'};
+        } else {
+          this.errors = {amount: null};
         }
       }
     }
