@@ -4,13 +4,14 @@
 
     <b-table
       ref="table"
+      class="whitelisted-address"
       :items="fetchWhitelistedAddresses"
       :fields="fields"
       :show-empty="true"
       :foot-clone="true"
       :no-provider-sorting="true"
       empty-text="You don't have any whitelisted addresses"
-      responsive striped small outlined hover>
+      responsive striped small outlined fixed hover>
 
       <template slot="+" slot-scope="row">
         <b-button variant="default" size="sm" @click="removeWhitelistedAddress(row.item.currency)">
@@ -35,6 +36,15 @@
     </b-table>
   </div>
 </template>
+
+<style lang="scss">
+  .whitelisted-address {
+    &__currency {
+      width: 20%;
+    }
+  }
+</style>
+
 
 <script>
   import bTable from 'bootstrap-vue/es/components/table/table';
@@ -64,7 +74,7 @@
       successMessage: '',
       otp: null,
       fields: [
-        {key: 'currency', label: 'Currency', formatter: 'showCurrencySymbol'},
+        {key: 'currency', label: 'Currency', formatter: 'showCurrencySymbol', class:'whitelisted-address__currency'},
         {key: 'address', label: 'Address'},
         '+'
       ]
