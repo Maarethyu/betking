@@ -116,7 +116,7 @@ export default {
     },
     getScrollWidth () {
       if (document.getElementsByTagName('body')[0].scrollHeight > window.innerHeight) {
-        var scrollDiv = document.createElement('div');
+        const scrollDiv = document.createElement('div');
         scrollDiv.className = 'modal-scrollbar-measure';
         document.body.appendChild(scrollDiv);
         const scrollbarWidth = scrollDiv.getBoundingClientRect().width - scrollDiv.clientWidth;
