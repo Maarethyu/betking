@@ -45,7 +45,7 @@
 
       <b-form-group v-if="is2faEnabled" label="Two factor code" label-for="otp" :invalid-feedback="errors.otp"
         :state="!errors.otp">
-        <b-form-input id="otpWdModal" type="text" placeholder="OTP" name="otp" v-model="this.otp"/>
+        <b-form-input id="otpWdModal" type="text" placeholder="OTP" name="otp" v-model="otp"/>
       </b-form-group>
 
       <div class="submit-buttons pull-right">
