@@ -54,6 +54,16 @@ router.post('/change-email', async function (req, res, next) {
   res.end();
 });
 
+router.post('/resend-verification-link', async function (req, res, next) {
+  if (!req.currentUser.email) {
+    return res.status(400).json({error: 'Email not found'});
+  }
+
+  const verifyEmailToken = await db.createVerifyEmailToken(req.currentUser.id, req.currentUser.email);
+  mailer.sendVerificationEmail(req.currentUser.username, req.currentUser.email, verifyEmailToken.id);
+  res.end();
+});
+
 router.post('/change-password', async function (req, res, next) {
   req.check('existingPassword', 'Invalid existing password').exists()
     .trim()

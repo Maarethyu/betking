@@ -22,6 +22,7 @@
         </template>
         <template v-else>
           <b-badge variant="danger">Not verified</b-badge>
+          <a href="javascript:void(0);" @click="sendVerificationLink">(resend link?)</a>
         </template>
         <b-button size="sm" variant="default" v-b-modal.changeEmailModal>Change</b-button>
       </b-col>
@@ -39,7 +40,7 @@
 
 <style lang="scss">
   .user-profile {
-    max-width: 500px;
+    max-width: 700px;
   }
 </style>
 
@@ -51,12 +52,15 @@
   import bBadge from 'bootstrap-vue/es/components/badge/badge';
   import bButton from 'bootstrap-vue/es/components/button/button';
   import vBModal from 'bootstrap-vue/es/directives/modal/modal';
+  import toastr from 'toastr';
 
   import {mapGetters} from 'vuex';
   import moment from 'moment';
 
   import ChangeEmailModal from './ChangeEmailModal';
   import ChangePasswordModal from './ChangePasswordModal';
+
+  import api from 'src/api';
 
   export default {
     name: 'Settings',
@@ -81,6 +85,12 @@
       },
       fetchMe () {
         this.$store.dispatch('fetchUser');
+      },
+      sendVerificationLink () {
+        api.sendVerificationLink()
+          .then(() => {
+            toastr.success('Verification email successfully sent');
+          });
       }
     }
   };
