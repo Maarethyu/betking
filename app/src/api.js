@@ -74,6 +74,9 @@ export default {
   getLoginAttempts () {
     return get('/api/account/get-login-attempts');
   },
+  sendVerificationLink () {
+    return post('/api/account/resend-verification-link');
+  },
   verifyEmail (data) {
     return post('/api/verify-email', data);
   },
