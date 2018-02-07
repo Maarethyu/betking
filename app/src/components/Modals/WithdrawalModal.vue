@@ -18,6 +18,10 @@
         <b-col cols="6">Minimum Withdrawal Amount</b-col>
         <b-col>{{addCommas(formatAmount(minWdLimit, withdrawalModalCurrency))}}</b-col>
       </b-row>
+      <b-row v-if="isAmountValid">
+        <b-col cols="6">Amount Received</b-col>
+        <b-col>{{addCommas(formatAmount(amountReceived, withdrawalModalCurrency))}}</b-col>
+      </b-row>
     </b-container>
 
     <b-form v-on:submit.prevent="onSubmit" @reset="onModalHide">
@@ -64,6 +68,7 @@
   import bContainer from 'bootstrap-vue/es/components/layout/container';
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
+  import BigNumber from 'bignumber.js';
 
   import toastr from 'toastr';
   import {formatCurrency, addCommas, formatAmount, toBigInt} from 'src/helpers';
@@ -113,7 +118,7 @@
         if (!this.withdrawAmount) {
           return null;
         } else {
-          return !((isNaN(this.withdrawAmount) && this.withdrawAmount !== '') || parseFloat(this.withdrawAmount) < this.minWdLimit || this.withdrawAmount > (this.balance - this.wdFee));
+          return this.isWithdrawalAmountGreaterThanMinimum && this.isWithdrawalAmountLessThanBalance;
         }
       },
       isAddresValid () {
@@ -121,6 +126,20 @@
       },
       isSubmitDisabled () {
         return !this.withdrawAmount || !this.isAmountValid || !this.withdrawAddress;
+      },
+      amountReceived () {
+        if (!this.isAmountValid) {
+          return null;
+        } else {
+          return new BigNumber(this.withdrawAmount).minus(new BigNumber(this.wdFee))
+            .toString();
+        }
+      },
+      isWithdrawalAmountGreaterThanMinimum() {
+        return new BigNumber(this.withdrawAmount).gte(new BigNumber(this.minWdLimit));
+      },
+      isWithdrawalAmountLessThanBalance() {
+        return new BigNumber(this.withdrawAmount).lte(new BigNumber(this.balance));
       }
     },
     watch: {
@@ -187,7 +206,7 @@
         }
       },
       handleAmountChange (value) {
-        if (value > (this.balance - this.wdFee)) {
+        if (this.withdrawAmount && !this.isWithdrawalAmountLessThanBalance) {
           this.errors = {amount: 'balance too low'};
         } else {
           this.errors = {amount: null};

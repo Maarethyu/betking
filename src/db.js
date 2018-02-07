@@ -235,16 +235,17 @@ const getAllBalancesForUser = async (userId) => {
 
 const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) => {
   // TODO: totalFee should be calculated inside the query.
-  const totalFee = new BigNumber(wdFee).plus(new BigNumber(amount))
+  const amountDeducted = new BigNumber(amount).toString();
+  const amountReceived = new BigNumber(amount).minus(wdFee)
     .toString();
   await db.tx(t => {
     /* Check if user has sufficient balance in the account */
-    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [totalFee, userId, currency])
+    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amountDeducted, userId, currency])
       .then(res => {
         if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
-        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, status, address) VALUES ($1, $2, $3, $4, $5, $6)', [uuidV4(), userId, currency, amount, 'pending', address]);
+        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address) VALUES ($1, $2, $3, $4, $5, $6, $7)', [uuidV4(), userId, currency, amountReceived, wdFee, 'pending', address]);
       });
   });
 };
