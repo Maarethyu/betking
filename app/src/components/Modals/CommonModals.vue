@@ -5,6 +5,7 @@
     <WithdrawalModal />
     <DepositModal />
     <ForgotPasswordModal />
+    <ValidateTwoFactorModal />
   </div>
 </template>
 
@@ -14,6 +15,7 @@ import RegisterModal from './RegisterModal';
 import WithdrawalModal from './WithdrawalModal';
 import DepositModal from './DepositModal';
 import ForgotPasswordModal from './ForgotPasswordModal';
+import ValidateTwoFactorModal from './ValidateTwoFactorModal';
 
 export default {
   name: 'CommonModals',
@@ -22,7 +24,8 @@ export default {
     RegisterModal,
     WithdrawalModal,
     DepositModal,
-    ForgotPasswordModal
+    ForgotPasswordModal,
+    ValidateTwoFactorModal
   }
 };
 </script>

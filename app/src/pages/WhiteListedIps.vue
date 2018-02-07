@@ -47,7 +47,8 @@
   import bButton from 'bootstrap-vue/es/components/button/button';
   import bFormInput from 'bootstrap-vue/es/components/form-input/form-input';
   import bFormInvalidFeedback from 'bootstrap-vue/es/components/form/form-invalid-feedback';
-
+  
+  import {getSecondFactorAuth} from 'src/helpers';
   import api from 'src/api';
   import {mapGetters} from 'vuex';
   import toastr from 'toastr';
@@ -75,6 +76,7 @@
       is2faEnabled: 'is2faEnabled'
     }),
     methods: {
+      getSecondFactorAuth,
       refreshTable () {
         this.$refs.table.refresh();
         this.errors = {};
@@ -90,11 +92,9 @@
           return [];
         });
       },
-      deleteIp (ip) {
-        if (this.is2faEnabled) {
-          // TODO: Write a proper vue component for modal
-          this.otp = prompt('Enter the otp');
-        }
+      async deleteIp (ip) {
+        this.otp = await this.getSecondFactorAuth();
+
         api.deleteIp(ip, this.otp)
           .then(response => {
             toastr.success('IP removed from whitelist');

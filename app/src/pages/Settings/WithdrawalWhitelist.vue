@@ -58,7 +58,7 @@
   import {mapGetters} from 'vuex';
   import toastr from 'toastr';
   import api from 'src/api';
-  import {formatCurrency} from 'src/helpers';
+  import {formatCurrency, getSecondFactorAuth} from 'src/helpers';
 
   import CurrencySelector from 'components/CurrencySelector';
 
@@ -89,6 +89,7 @@
       is2faEnabled: 'is2faEnabled'
     }),
     methods: {
+      getSecondFactorAuth,
       formatCurrency,
       showCurrencySymbol (value) {
         return this.formatCurrency(value);
@@ -103,11 +104,8 @@
             return res.data.whitelistedAddresses;
           });
       },
-      removeWhitelistedAddress (currency) {
-        if (this.is2faEnabled) {
-          // TODO: Write a proper vue component for modal
-          this.otp = prompt('Enter two factor otp');
-        }
+      async removeWhitelistedAddress (currency) {
+        this.otp = await this.getSecondFactorAuth();
 
         api.removeWhitelistedAddress(currency, this.otp)
           .then(() => {
@@ -128,11 +126,8 @@
             throw error;
           });
       },
-      addWhitelistedAddress () {
-        if (this.is2faEnabled) {
-          // TODO: Write a proper vue component for modal
-          this.otp = prompt('Enter two factor otp');
-        }
+      async addWhitelistedAddress () {
+        this.otp = await this.getSecondFactorAuth();
 
         api.addWhitelistedAddress(this.activeCurrency, this.activeAddress, this.otp)
           .then(() => {
