@@ -12,7 +12,7 @@
 
     <b-col cols="10" offset="1" md="5" offset-md="0">
       <h3>Pending Deposits</h3>
-  	  Coming soon
+  	  <PendingDeposits />
     </b-col>
 
     <b-col cols="10" offset="1" md="5" offset-md="1">
@@ -35,6 +35,7 @@
   import PendingWithdrawals from './PendingWithdrawals';
   import WithdrawalHistory from './WithdrawalHistory';
   import DepositHistory from './DepositHistory';
+  import PendingDeposits from './PendingDeposits';
 
   export default {
     name: 'UserWallet',
@@ -44,7 +45,8 @@
       Balances,
       PendingWithdrawals,
       DepositHistory,
-      WithdrawalHistory
+      WithdrawalHistory,
+      PendingDeposits
     }
   };
 </script>

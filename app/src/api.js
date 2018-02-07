@@ -101,6 +101,10 @@ export default {
   fetchDepositHistory (limit, skip, sort) {
     return get(`/api/account/deposit-history?limit=${limit}&skip=${skip}&sort=${sort}`);
   },
+  fetchPendingDeposits (limit, skip, sort) {
+    // TODO: Pending deposits from backend;
+    return Promise.resolve({data: {results: [], count: 0}});
+  },
   fetchWhitelistedAddresses () {
     return get('/api/account/whitelisted-address');
   },

@@ -135,10 +135,10 @@
             .toString();
         }
       },
-      isWithdrawalAmountGreaterThanMinimum() {
+      isWithdrawalAmountGreaterThanMinimum () {
         return new BigNumber(this.withdrawAmount).gte(new BigNumber(this.minWdLimit));
       },
-      isWithdrawalAmountLessThanBalance() {
+      isWithdrawalAmountLessThanBalance () {
         return new BigNumber(this.withdrawAmount).lte(new BigNumber(this.balance));
       }
     },
