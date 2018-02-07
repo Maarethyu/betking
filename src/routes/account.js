@@ -9,6 +9,7 @@ const mailer = require('../mailer');
 const currencies = require('../currencies');
 
 router.use(mw.requireLoggedIn);
+router.use(mw.requireWhitelistedIp);
 
 router.post('/logout', async function (req, res, next) {
   await db.logoutSession(req.currentUser.id, req.cookies.session);
@@ -82,7 +83,7 @@ router.post('/change-password', async function (req, res, next) {
 
   const isPasswordCorrect = await bcrypt.compare(req.body.existingPassword, req.currentUser.password);
   if (!isPasswordCorrect) {
-    return res.status(401).json({error: 'Invalid existing password'});
+    return res.status(400).json({error: 'Invalid existing password'});
   }
 
   const newPasswordHash = await bcrypt.hash(req.body.password2, 10);
@@ -206,6 +207,7 @@ router.post('/add-whitelisted-ip', async function (req, res, next) {
   const ip = req.body.ip || helpers.getIp(req);
 
   await db.addIpInWhitelist(ip, req.currentUser.id);
+  await db.logoutAllSessionsWithoutWhitelistedIps(req.currentUser.id);
 
   res.end();
 });

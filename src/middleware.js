@@ -67,6 +67,7 @@ const requireWhitelistedIp = async (req, res, next) => {
 
   const isIpWhitelisted = await db.isIpWhitelisted(ip, req.currentUser.id);
   if (!isIpWhitelisted) {
+    await db.logoutAllSessionsWithoutWhitelistedIps(req.currentUser.id);
     return res.status(401).json({error: 'IP not whitelisted'});
   }
 

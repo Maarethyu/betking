@@ -76,6 +76,10 @@ const actions = {
       });
   },
 
+  clearAuthState ({commit}) {
+    commit(types.UPDATE_AUTHSTATE, false);
+  },
+
   logoutAll ({commit}) {
     return api.logoutAll()
       .then(() => {

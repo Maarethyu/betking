@@ -173,19 +173,15 @@ const getWhitelistedIps = async (userId) => {
 };
 
 const isIpWhitelisted = async (ip, userId) => {
-  return db.task('check-whitelisted-ip', t => {
-    // Check if there are any whitelisted ip Addresses added for user
-    return t.one('SELECT COUNT(*) FROM whitelisted_ips WHERE user_id = $1', userId)
-      .then(row => {
-        // If user hasn't added any ips to whitelist, return true
-        if (parseInt(row.count, 10) === 0) {
-          return true;
-        };
-        // If count > 0, check if current ip is in whitelist
-        return t.oneOrNone('SELECT ip_address FROM whitelisted_ips WHERE ip_address = $1 AND user_id = $2', [ip, userId]);
-      })
-      .then(result => !!result);
-  });
+  /* Return true if user has no whitelisted ip entry OR if whitelisted ip matches ip, else false */
+  const result = await db.oneOrNone('SELECT ip_address = $1 as whitelisted FROM whitelisted_ips WHERE user_id = $2', [ip, userId])
+    .then(row => (!row || row.whitelisted));
+
+  return result;
+};
+
+const logoutAllSessionsWithoutWhitelistedIps = async (userId) => {
+  await db.none('UPDATE sessions set logged_out_at = NOW() FROM whitelisted_ips WHERE sessions.user_id = whitelisted_ips.user_id AND sessions.ip_address != whitelisted_ips.ip_address AND sessions.user_id = $1 AND sessions.logged_out_at IS NULL', userId);
 };
 
 const logError = async (msg, stack, reqId, userId, source, query, code) => {
@@ -405,6 +401,7 @@ module.exports = {
   removeIpFromWhitelist,
   getWhitelistedIps,
   isIpWhitelisted,
+  logoutAllSessionsWithoutWhitelistedIps,
   lockUserAccount,
   logError,
   logEmailError,
