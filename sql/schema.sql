@@ -135,6 +135,7 @@ CREATE TABLE user_withdrawals (
   user_id bigint NOT NULL REFERENCES users(id),
   currency integer NOT NULL,
   amount numeric (36, 0) NOT NULL,
+  fee numeric (36, 0) NOT NULL,
   status text NOT NULL,
   address text NOT NULL,
   created_at timestamp with time zone NOT NULL  DEFAULT NOW()
