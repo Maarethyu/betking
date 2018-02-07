@@ -238,16 +238,45 @@ const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) =
   const amountDeducted = new BigNumber(amount).toString();
   const amountReceived = new BigNumber(amount).minus(wdFee)
     .toString();
-  await db.tx(t => {
+
+  const result = await db.tx(t => {
     /* Check if user has sufficient balance in the account */
     return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amountDeducted, userId, currency])
       .then(res => {
         if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
-        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address) VALUES ($1, $2, $3, $4, $5, $6, $7)', [uuidV4(), userId, currency, amountReceived, wdFee, 'pending', address]);
+
+        /* Check if user has enabled confirm withdrawals by email */
+        return t.one('SELECT confirm_wd from users where id = $1', userId);
+      })
+      .then(res => {
+        const wdStatus = res.confirm_wd ? 'pending_email_verification' : 'pending';
+        const verificationToken = res.confirm_wd ? uuidV4() : null;
+
+        return t.one('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *', [uuidV4(), userId, currency, amountReceived, wdFee, wdStatus, address, verificationToken]);
       });
   });
+
+  return result;
+};
+
+const setConfirmWithdrawalByEmail = async (userId, confirmWd) => {
+  await db.oneOrNone('UPDATE users SET confirm_wd = $1 WHERE id = $2 AND email IS NOT NULL AND email_verified = true RETURNING *', [confirmWd, userId])
+    .then(row => {
+      if (!row) {
+        throw new Error('VALID_USER_NOT_FOUND');
+      }
+    });
+};
+
+const confirmWdByToken = async (token) => {
+  await db.oneOrNone('UPDATE user_withdrawals SET status = $1, verified_at = NOW() WHERE verification_token = $2 AND status = $3 RETURNING *', ['pending', token, 'pending_email_verification'])
+    .then(row => {
+      if (!row) {
+        throw new Error('INVALID_TOKEN');
+      }
+    });
 };
 
 const addDeposit = async (currency, amount, address, txid) => {
@@ -330,8 +359,8 @@ const getDepositAddress = async (userId, currency) => {
 };
 
 const getPendingWithdrawals = async (userId, limit, skip, sort) => {
-  const results = await db.any('SELECT * FROM user_withdrawals WHERE user_id = $1 AND status IN ($2, $3, $4) ORDER BY $5~ DESC LIMIT $6 OFFSET $7', [userId, 'pending', 'pennding_email', 'processing', sort, limit, skip]);
-  const total = await db.one('SELECT COUNT(*) FROM user_withdrawals WHERE user_id = $1 AND status IN ($2, $3, $4)', [userId, 'pending', 'pending_email', 'processing']);
+  const results = await db.any('SELECT * FROM user_withdrawals WHERE user_id = $1 AND status IN ($2, $3, $4) ORDER BY $5~ DESC LIMIT $6 OFFSET $7', [userId, 'pending', 'pending_email_verification', 'processing', sort, limit, skip]);
+  const total = await db.one('SELECT COUNT(*) FROM user_withdrawals WHERE user_id = $1 AND status IN ($2, $3, $4)', [userId, 'pending', 'pending_email_verification', 'processing']);
 
   return {results, count: total.count};
 };
@@ -422,5 +451,7 @@ module.exports = {
   getWhitelistedAddresses,
   removeWhitelistedAddress,
   addWhitelistedAddress,
-  isAddressWhitelisted
+  isAddressWhitelisted,
+  setConfirmWithdrawalByEmail,
+  confirmWdByToken
 };

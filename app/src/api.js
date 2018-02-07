@@ -92,6 +92,12 @@ export default {
   getDepositAddress (currency) {
     return get(`/api/account/deposit-address?currency=${currency}`);
   },
+  toggleEmailWithdrawalConfirmation (confirmWd, otp) {
+    return post('/api/account/set-confirm-wd-by-email', {confirmWd, otp});
+  },
+  confirmWd (token) {
+    return post('/api/confirm-wd', {token});
+  },
   fetchPendingWithdrawals (limit, skip, sort) {
     return get(`/api/account/pending-withdrawals?limit=${limit}&skip=${skip}&sort=${sort}`);
   },

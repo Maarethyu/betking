@@ -24,6 +24,7 @@ router.get('/me', async function (req, res, next) {
     email: req.currentUser.email,
     isEmailVerified: req.currentUser.email_verified,
     is2faEnabled: !!req.currentUser.mfa_key,
+    confirmWithdrawals: req.currentUser.confirm_wd,
     dateJoined: req.currentUser.date_joined
   });
 });
@@ -288,6 +289,11 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
     return res.status(400).json({errors: validationResult.array()});
   }
 
+  /* Check if user has confirmWd enabled and a verified email id on profile */
+  if (req.currentUser.confirm_wd && (!req.currentUser.email || !req.currentUser.email_verified)) {
+    return res.status(400).json({error: 'You have asked to confirm withdrawals by email but you do not have a verified email id added to profile'});
+  }
+
   const currency = currencies.find(c => c.value === req.body.currency);
 
   /* Check if withdrawal amount is in permissible limit */
@@ -304,13 +310,24 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
 
   /* Create a withdrwal entry in db and reduce user balance */
   try {
-    await db.createWithdrawalEntry(
+    const wdTx = await db.createWithdrawalEntry(
       req.currentUser.id,
       req.body.currency,
       wdFee,
       req.body.amount,
       req.body.address
     );
+
+    if (wdTx.status === 'pending_email_verification') {
+      mailer.sendWdConfirmationEmail(
+        req.currentUser.username,
+        req.currentUser.email,
+        wdTx.verification_token,
+        currency.symbol,
+        new BigNumber(wdTx.amount).div(new BigNumber(10).pow(currency.scale)),
+        wdTx.address
+      );
+    }
 
     res.end();
   } catch (e) {
@@ -321,6 +338,38 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
     throw e;
   }
 });
+
+router.post('/set-confirm-wd-by-email',
+  async function (req, res, next) {
+    req.checkBody('confirmWd', 'Invalid confirm withdrawal option').exists()
+      .isBoolean();
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    /* Require 2fa if confirm wd by email is being disabled */
+    if (!req.body.confirmWd) {
+      mw.require2fa(req, res, next);
+    } else {
+      next();
+    }
+  },
+  async function (req, res, next) {
+    try {
+      await db.setConfirmWithdrawalByEmail(req.currentUser.id, req.body.confirmWd);
+
+      res.end();
+    } catch (e) {
+      if (e.message === 'VALID_USER_NOT_FOUND') {
+        return res.status(400).send({error: e.message});
+      }
+
+      throw e;
+    }
+  }
+);
 
 router.get('/pending-withdrawals', async function (req, res, next) {
   req.checkQuery('limit', 'Invalid limit param')

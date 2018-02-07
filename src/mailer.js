@@ -64,6 +64,16 @@ const templates = {
     <a href="${config.get('MAILER_HOST')}/verify-email?token=${token}">
       ${config.get('MAILER_HOST')}/verify-email?token=${token}
     </a>
+  `,
+
+  wdConfirmationEmail: (username, token, amount, currencySymbol, address) => `
+    <p>Dear ${username}</p>
+    <p>You have requested to withdraw ${amount} ${currencySymbol} to ${address}</p>
+    <p>To confirm this withdrawal, click the following link</p>
+    <br>
+    <a href="${config.get('MAILER_HOST')}/confirm-withdrawal?token=${token}">
+      ${config.get('MAILER_HOST')}/confirm-withdrawal?token=${token}
+    </a>
   `
 };
 
@@ -103,9 +113,19 @@ const sendVerificationEmail = function (username, email, token) {
     .catch(logEmailErrors(email, 'verify email'));
 };
 
+const sendWdConfirmationEmail = function (username, email, token, currencySymbol, amount, address) {
+  return sendMail(
+    email,
+    `${config.get('PROJECT_NAME')} | Verify your withdrawal of ${amount} ${currencySymbol}`,
+    templates.wdConfirmationEmail(username, token, amount, currencySymbol, address)
+  )
+    .catch(logEmailErrors(email, 'wd confirmation'));
+};
+
 module.exports = {
   sendResetPasswordEmail,
   sendNewLoginEmail,
   sendWelcomeEmail,
-  sendVerificationEmail
+  sendVerificationEmail,
+  sendWdConfirmationEmail
 };

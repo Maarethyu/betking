@@ -8,6 +8,7 @@ CREATE TABLE users (
   mfa_key text NULL,
   temp_mfa_key text NULL,
   affiliate_id text NULL,
+  confirm_wd boolean NOT NULL DEFAULT false,
   app_id int NOT NULL DEFAULT 0,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW(),
   locked_at timestamp with time zone NULL
@@ -138,10 +139,12 @@ CREATE TABLE user_withdrawals (
   fee numeric (36, 0) NOT NULL,
   status text NOT NULL,
   address text NOT NULL,
-  created_at timestamp with time zone NOT NULL  DEFAULT NOW()
+  verification_token uuid NULL,
+  created_at timestamp with time zone NOT NULL  DEFAULT NOW(),
+  verified_at timestamp with time zone NULL
 );
 
-CREATE INDEX user_withdrawals_reated_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
+CREATE INDEX user_withdrawals_created_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
 -- deposit_addresses table
 CREATE TABLE user_addresses (

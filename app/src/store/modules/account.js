@@ -14,7 +14,8 @@ const state = {
   isEmailVerified: null,
   dateJoined: null,
   is2faEnabled: null,
-  fingerprint: null
+  fingerprint: null,
+  confirmWithdrawals: null
 };
 
 // getters
@@ -26,7 +27,8 @@ const getters = {
     username: state.username,
     email: state.email,
     isEmailVerified: state.isEmailVerified,
-    dateJoined: state.dateJoined
+    dateJoined: state.dateJoined,
+    confirmWithdrawals: state.confirmWithdrawals
   }),
   username: state => state.username,
   userId: state => state.id,
@@ -112,6 +114,7 @@ const mutations = {
       state.isEmailVerified = null;
       state.dateJoined = null;
       state.is2faEnabled = null;
+      state.confirmWithdrawals = null;
     }
   },
 
@@ -122,6 +125,7 @@ const mutations = {
     state.dateJoined = user.dateJoined;
     state.isEmailVerified = user.isEmailVerified;
     state.is2faEnabled = user.is2faEnabled;
+    state.confirmWithdrawals = user.confirmWithdrawals;
   },
 
   [types.SET_FINGERPRINT] (state, fingerprint) {
