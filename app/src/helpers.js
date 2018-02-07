@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import bus from './bus';
 
 export const loadRecaptcha = function (onload) {
   window.onRecaptchaLoad = onload;
@@ -86,4 +87,25 @@ export const formatCurrency = function (value, key) {
 export const toBigInt = function (value, scale) {
   return new BigNumber(value).times(new BigNumber(10).pow(scale))
           .toString();
+};
+
+export const getSecondFactorAuth = function () {
+  return new Promise((resolve) => {
+    if (this.is2faEnabled) {
+      this.$root.$emit('bv::show::modal', 'validateSecondFactorAuthModal');
+
+      bus.$once('authenticate-second-factor', (code) => {
+        bus.$off('cancel-second-factor-auth');
+        this.$root.$emit('bv::hide::modal', 'validateSecondFactorAuthModal');
+        resolve(code);
+      });
+
+      bus.$once('cancel-second-factor-auth', () => {
+        bus.$off('authenticate-second-factor');
+        resolve(null);
+      });   
+    } else {
+      resolve(null);
+    }
+  });
 };
