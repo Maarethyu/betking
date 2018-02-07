@@ -17,10 +17,10 @@
       <b-col cols="3">Email:</b-col>
       <b-col cols="9">
         {{profile.email}}
-        <template v-if="profile.isEmailVerified">
+        <template v-if="profile.email && profile.isEmailVerified">
           <b-badge variant="success">Verified</b-badge>
         </template>
-        <template v-else>
+        <template v-if="profile.email && !profile.isEmailVerified">
           <b-badge variant="danger">Not verified</b-badge>
           <a href="javascript:void(0);" @click="sendVerificationLink">(resend link?)</a>
         </template>

@@ -146,7 +146,8 @@ router.post('/login', async function (req, res, next) {
     email: user.email,
     isEmailVerified: user.email_verified,
     dateJoined: user.date_joined,
-    is2faEnabled: !!user.mfa_key
+    is2faEnabled: !!user.mfa_key,
+    confirmWithdrawals: user.confirm_wd
   });
 });
 
@@ -219,7 +220,8 @@ router.post('/register', apiLimiter, async function (req, res, next) {
       email: user.email,
       isEmailVerified: user.email_verified,
       dateJoined: user.date_joined,
-      is2faEnabled: !!user.mfa_key
+      is2faEnabled: !!user.mfa_key,
+      confirmWithdrawals: user.confirm_wd
     });
   } else {
     res.status(500)
@@ -310,6 +312,28 @@ router.get('/config/currencies', async function (req, res, next) {
   const currencies = require('../currencies');
 
   res.json({currencies});
+});
+
+router.post('/confirm-wd', async function (req, res, next) {
+  req.checkBody('token').exists()
+    .isUUID(4);
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({error: 'INVALID_TOKEN'});
+  }
+
+  try {
+    await db.confirmWdByToken(req.body.token);
+
+    res.end();
+  } catch (e) {
+    if (e.message === 'INVALID_TOKEN') {
+      return res.status(400).json({error: e.message});
+    }
+
+    throw e;
+  }
 });
 
 module.exports = router;

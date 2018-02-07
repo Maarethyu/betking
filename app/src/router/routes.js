@@ -28,6 +28,7 @@ const routes = [
   /* Pages which do not need user session to be fetched */
   {path: '/reset-password', component: () => import('pages/ResetPassword')},
   {path: '/verify-email', component: () => import('pages/VerifyEmail')},
+  {path: '/confirm-withdrawal', component: () => import('pages/ConfirmWithdrawal')},
 
   /* Shows PageNotFound component in dev mode, redirects to /404 route in prod */
   {path: '*', component: () => import('pages/PageNotFound')}
