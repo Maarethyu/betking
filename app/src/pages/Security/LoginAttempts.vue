@@ -2,7 +2,7 @@
   <b-row>
     <b-col cols="10" offset="1">
       <h1>Login Attempts</h1>
-
+      <br />
       <b-table
         id="login-attempts-table"
         stacked="sm"
