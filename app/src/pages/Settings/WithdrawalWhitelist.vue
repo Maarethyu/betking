@@ -113,7 +113,7 @@
               toastr.success(`Removed whitelisted address for ${currencyConfig.name}`);
             }
 
-            this.refreshTable()
+            this.refreshTable();
           })
           .catch(error => {
             if (error.response) {
