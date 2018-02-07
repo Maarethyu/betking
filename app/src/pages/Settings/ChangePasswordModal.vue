@@ -56,7 +56,11 @@
         this.$refs.modal.hide();
       },
       onModalHide () {
-        this.newEmail = '';
+        this.passwordForm =  {
+          existingPassword: '',
+          password: '',
+          password2: ''
+        };
         this.errors = {};
       },
       changePassword (e) {
@@ -77,7 +81,7 @@
           });
       },
       showErrors (response) {
-        if (response && response.status === 400) {
+        if (response && response.status === 400 && response.data.errors) {
           const newErrors = {};
 
           response.data.errors.forEach(error => {
@@ -89,7 +93,7 @@
           return;
         }
 
-        if (response && response.status === 401) {
+        if (response && response.status === 400 && response.data.error) {
           this.errors = {
             changePasswordError: response.data.error,
           };

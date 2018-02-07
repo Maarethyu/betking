@@ -1,12 +1,24 @@
 import axios from 'axios';
+import store from 'src/store';
+import router from 'src/router';
 
 const csrfToken = () => {
   const el = document.getElementById('csrfToken');
   return el && el.value;
 };
 
+const errorHandler = function (error) {
+  if (error.response && error.response.status === 401) {
+    store.dispatch('clearAuthState');
+    router.replace('/');
+  }
+
+  throw error;
+};
+
 const get = function (uri, headers = {}) {
-  return axios.get(uri, headers);
+  return axios.get(uri, headers)
+    .catch(errorHandler);
 };
 
 const post = function (uri, data = {}, newHeaders = {}) {
@@ -16,7 +28,8 @@ const post = function (uri, data = {}, newHeaders = {}) {
     }, newHeaders)
   };
 
-  return axios.post(uri, data, headers);
+  return axios.post(uri, data, headers)
+    .catch(errorHandler);
 };
 
 export default {
