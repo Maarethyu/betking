@@ -2,7 +2,7 @@
   <b-row>
     <b-col cols="10" offset="1">
     <h1>Whitelisted IPs</h1>
-
+    <br>
       <b-table
         id="whitelisted-ips-table"
         stacked="sm"

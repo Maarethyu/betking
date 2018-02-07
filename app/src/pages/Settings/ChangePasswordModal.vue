@@ -56,7 +56,7 @@
         this.$refs.modal.hide();
       },
       onModalHide () {
-        this.passwordForm =  {
+        this.passwordForm = {
           existingPassword: '',
           password: '',
           password2: ''

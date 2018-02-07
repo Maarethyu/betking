@@ -1,7 +1,7 @@
 <template>
   <b-row>
-    <b-col cols="8" offset="2">
-  	  <h3>Sessions</h3>
+    <b-col cols="10" offset="1">
+  	  <h1>Sessions</h1>
 
       <br>
 

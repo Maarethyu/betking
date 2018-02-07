@@ -24,6 +24,17 @@
       <h3>Deposit History</h3>
   	  <DepositHistory />
     </b-col>
+
+    <b-col cols="10" offset="1" md="5" offset-md="1">
+      <h3>Withdrawal Whitelist</h3>
+      <WithdrawalWhitelist />
+    </b-col>
+
+    <b-col cols="10" offset="1" md="5" offset-md="0">
+      <h3>Confirm Withdrawals by Email</h3>
+      <ConfirmWithdrawalByEmail />
+    </b-col>
+
   </b-row>
 </template>
 
@@ -36,6 +47,8 @@
   import WithdrawalHistory from './WithdrawalHistory';
   import DepositHistory from './DepositHistory';
   import PendingDeposits from './PendingDeposits';
+  import WithdrawalWhitelist from './WithdrawalWhitelist';
+  import ConfirmWithdrawalByEmail from './ConfirmWithdrawalByEmail';
 
   export default {
     name: 'UserWallet',
@@ -46,7 +59,9 @@
       PendingWithdrawals,
       DepositHistory,
       WithdrawalHistory,
-      PendingDeposits
+      PendingDeposits,
+      WithdrawalWhitelist,
+      ConfirmWithdrawalByEmail
     }
   };
 </script>

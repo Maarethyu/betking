@@ -1,7 +1,7 @@
 <template>
   <b-row>
-    <b-col cols="8" offset="2">
-      <h3>Two factor authentication</h3>
+    <b-col cols="10" offset="1">
+      <h1>Two factor authentication</h1>
 
       <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
