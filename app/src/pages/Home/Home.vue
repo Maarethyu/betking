@@ -25,19 +25,6 @@
           </b-card>
         </router-link>
         <div class='break-lg'></div>
-        <router-link to='slots' class="card-container">
-          <b-card header="SLOTS">
-            <div class='game-image blackjack'></div>
-            <div class='card-footer'>Play exclusive dice lorem consectetuer adi scing elit</div>
-          </b-card>
-        </router-link>
-        <div class='break-sm'></div>
-        <router-link to='craps' class="card-container">
-          <b-card header="CRAPS">
-            <div class='game-image roulette'></div>
-            <div class='card-footer'>Play exclusive dice lorem consectetuer adi scing elit</div>
-          </b-card>
-        </router-link>
         <router-link to='poker' class="card-container">
           <b-card header="POKER">
             <div class='game-image dice'></div>
