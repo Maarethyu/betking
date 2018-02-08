@@ -8,22 +8,23 @@ const cookieParser = require('cookie-parser');
 const expressValidator = require('express-validator');
 const fs = require('fs');
 const csrfProtection = require('csurf')({cookie: true});
-
-const app = express();
+const db = require('./db');
 const helpers = require('./helpers');
 const mw = require('./middleware');
+
+const app = express();
 require('./middleware-wrapper');
 
 /* We should ideally never land up having uncaught exceptions / rejections. */
 process.on('unhandledRejection', (reason, p) => {
-  require('./db').logError(reason, p, null, null, 'unhandledRejection');
+  db.logError(reason, p, null, null, 'unhandledRejection');
   console.log('Unhandled Rejection at:', p, 'reason:', reason);
 
   // TODO: process.exit(); ?
 });
 
 process.on('uncaughtException', (err) => {
-  require('./db').logError(err.message, err.stack, null, null, 'uncaughtException');
+  db.logError(err.message, err.stack, null, null, 'uncaughtException');
   console.log('Uncaught Exception', err);
 
   // TODO: process.exit(); ?
@@ -58,15 +59,6 @@ router.use('/admin', require('./routes/admin'));
 router.use('', csrfProtection, require('./routes/index'));
 app.use('/api', router);
 
-/*
-  TODO:
-  * Fetch frontend routes array from (app/src/router/routes)
-  and create route map for valid routes based on frontend.
-  * For all other routes send 404 status code
-
-  Is it necessary or the current system would work?
-*/
-
 const frontendStaticPath = require('path').join(__dirname, '..', 'app/dist');
 
 if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
@@ -78,14 +70,8 @@ app.get('/404', function (req, res) {
 });
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-  /** Development mode
-   * Start webpack-dev-middleware
-   * Mount app at *
-   * Add csrf protection
-   */
   require(require('path').join(__dirname, '..', 'app/build/express-server'))(app);
 } else {
-  /* Production Mode */
   app.get('*', csrfProtection, function (req, res) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
@@ -96,16 +82,15 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 }
 
 app.use(function (error, req, res, next) {
-  /* KNOWN ERRORS */
-  /* 1. Check if error due to csrf token */
   if (error.code === 'EBADCSRFTOKEN') {
     return res.status(403).send('csrf protection failed');
   }
+  
   const query = error.query ? error.query.toString() : null;
   const code = error.code || null;
   const source = error.DB_ERROR ? 'DB_ERROR' : 'API_ERROR';
 
-  require('./db').logError(error.message, error.stack, req.id, req.currentUser && req.currentUser.id, source, query, code);
+  db.logError(error.message, error.stack, req.id, req.currentUser && req.currentUser.id, source, query, code);
 
   console.log(source, error);
 

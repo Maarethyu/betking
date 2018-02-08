@@ -4,7 +4,6 @@ const helpers = require('./helpers');
 
 const attachCurrentUserToRequest = async (req, res, next) => {
   const sessionId = req.cookies.session;
-  // validate sessionid is uuid
 
   if (sessionId && helpers.isValidUuid(sessionId)) {
     const user = await db.getUserBySessionId(sessionId);

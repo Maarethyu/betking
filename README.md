@@ -1,4 +1,4 @@
-# Crypto-boilerplate
+# BetKing
 
 ### Create Database
 1. Create Role = bk and database = bk2
