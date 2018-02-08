@@ -60,29 +60,35 @@ img.flag{
     text-decoration:none;
 
     &:hover{
-      .game-image::before{
-        content:'PLAY NOW';
-        position:absolute;
-        left:0;
-        right:0;
-        top:0;
-        bottom:0;
-        margin:auto;
-        width:61%;
-        height:42px;
-        color:white;
-        background:#d53939;
-        border:1px solid darken(#d53939,2%);
-        border-radius:4px;
-        line-height:42px;
-        font-size:0.9rem;
-        z-index:101;
-        background-image:linear-gradient(rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 40%, rgba(0,0,0,0) 100%);
-        text-shadow:0 -1px rgba(0,0,0,0.33);
-        font-family:roboto;
-        font-weight:500;
-        box-shadow:0 1px 1px 0 rgba(0,0,0,0.5);
-
+      .game-image {
+        &::before {
+          content:'PLAY NOW';
+          position:absolute;
+          left:0;
+          right:0;
+          top:0;
+          bottom:0;
+          margin:auto;
+          width:61%;
+          height:42px;
+          color:white;
+          background:#d53939;
+          border:1px solid darken(#d53939,2%);
+          border-radius:4px;
+          line-height:42px;
+          font-size:0.9rem;
+          z-index:101;
+          background-image:linear-gradient(rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 40%, rgba(0,0,0,0) 100%);
+          text-shadow:0 -1px rgba(0,0,0,0.33);
+          font-family:roboto;
+          font-weight:500;
+          box-shadow:0 1px 1px 0 rgba(0,0,0,0.5);
+        }
+        &--coming-soon {
+          &::before {
+            content:'COMING SOON';
+          }
+        }
       }
       .game-image::after{
         content:'';
