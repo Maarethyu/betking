@@ -11,19 +11,19 @@
             <div class='card-footer'>Play exclusive dice lorem consectetuer adi scing elit</div>
           </b-card>
         </router-link>
-        <router-link to='blackjack' class="card-container">
+        <a href="javascript:void(0)" class="card-container">
           <b-card header="BLACKJACK">
-            <div class='game-image blackjack'></div>
+            <div class='game-image game-image--coming-soon blackjack'></div>
             <div class='card-footer'>Play exclusive dice lorem consectetuer adi scing elit</div>
           </b-card>
-        </router-link>
+        </a>
         <div class='break-sm'></div>
-        <router-link to='roulette' class="card-container">
+        <a href="javascript:void(0)" class="card-container">
           <b-card header="ROULETTE">
-            <div class='game-image roulette'></div>
+            <div class='game-image game-image--coming-soon roulette'></div>
             <div class='card-footer'>Play exclusive dice lorem consectetuer adi scing elit</div>
           </b-card>
-        </router-link>
+        </a>
         <div class='break-lg'></div>
         <router-link to='poker' class="card-container">
           <b-card header="POKER">
