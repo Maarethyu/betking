@@ -22,6 +22,7 @@
 
   import {mapGetters} from 'vuex';
   import api from 'src/api';
+  import {getSecondFactorAuth} from 'src/helpers';
 
   export default {
     name: 'ConfirmWithdrawalByEmail',
@@ -36,11 +37,11 @@
       is2faEnabled: 'is2faEnabled'
     }),
     methods: {
-      toggleEmailWithdrawalConfirmation (option) {
+      getSecondFactorAuth,
+      async toggleEmailWithdrawalConfirmation (option) {
         let otp = null;
-        if (!option && this.is2faEnabled) {
-          // TODO: Write a proper vue component for modal
-          otp = prompt('Enter 2fa otp');
+        if (!option) {
+          otp = await this.getSecondFactorAuth();
         }
 
         api.toggleEmailWithdrawalConfirmation(option, otp)
