@@ -18,11 +18,8 @@ const routes = [
 
       /* Pages which need user authentication */
       {path: 'settings', component: () => import('pages/Settings/Settings'), meta: {requiresAuth: true}},
-      {path: 'sessions', component: () => import('pages/Sessions'), meta: {requiresAuth: true}},
-      {path: 'two-factor', component: () => import('pages/Set2fa'), meta: {requiresAuth: true}},
-      {path: 'whitelisted-ips', component: () => import('pages/WhitelistedIps'), meta: {requiresAuth: true}},
-      {path: 'login-attempts', component: () => import('pages/LoginAttempts'), meta: {requiresAuth: true}},
-      {path: 'wallet', component: () => import('pages/Wallet/Wallet'), meta: {requiresAuth: true}}
+      {path: 'wallet', component: () => import('pages/Wallet/Wallet'), meta: {requiresAuth: true}},
+      {path: 'security', component: () => import('pages/Security/Security'), meta: {requiresAuth: true}}
     ]
   },
   /* Pages which do not need user session to be fetched */
@@ -31,7 +28,7 @@ const routes = [
   {path: '/confirm-withdrawal', component: () => import('pages/ConfirmWithdrawal')},
 
   /* Shows PageNotFound component in dev mode, redirects to /404 route in prod */
-  {path: '*', component: () => import('pages/PageNotFound')}
+  {path: '/404', component: () => import('pages/PageNotFound'), alias: '*'},
 ];
 
 export default routes;

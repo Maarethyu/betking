@@ -6,16 +6,11 @@
         :customStyle="{display: 'inline-block', position: 'relative', 'margin-right': '5px'}"></Avatar>
       <span class="d-md-down-none">{{ username }}</span>
     </template>
-    <b-dropdown-header tag="div" class="text-center"><strong>Profile</strong></b-dropdown-header>
     <b-dropdown-item :to="'settings'"><i class="fa fa-wrench"></i>Settings</b-dropdown-item>
-    <b-dropdown-item :to="'wallet'"><i class="fa fa-wrench"></i> Wallet</b-dropdown-item>
-    <b-dropdown-item :to="'sessions'"><i class="fa fa-laptop"></i>Sessions</b-dropdown-item>
-    <b-dropdown-header tag="div" class="text-center"><strong>Security</strong></b-dropdown-header>
-    <b-dropdown-item :to="'two-factor'"><i class="fa fa-shield"></i>Two factor Auth</b-dropdown-item>
-    <b-dropdown-item :to="'whitelisted-ips'"><i class="fa fa-comments"></i>Whitelisted IPs</b-dropdown-item>
-    <b-dropdown-item :to="'login-attempts'"><i class="fa fa-user"></i> Login Attempts</b-dropdown-item>
+    <b-dropdown-item :to="'wallet'"><i class="fa fa-bitcoin"></i> Wallet</b-dropdown-item>
+    <b-dropdown-item :to="'security'"><i class="fa fa-lock"></i> Security</b-dropdown-item>
     <b-dropdown-divider></b-dropdown-divider>
-    <b-dropdown-item @click="logout"><i class="fa fa-lock"></i> Logout</b-dropdown-item>
+    <b-dropdown-item @click="logout"><i class="fa fa-power-off"></i> Logout</b-dropdown-item>
   </b-nav-item-dropdown>
 </template>
 
