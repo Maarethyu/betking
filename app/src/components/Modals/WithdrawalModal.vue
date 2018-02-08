@@ -22,41 +22,45 @@
         <b-col cols="6">Amount Received</b-col>
         <b-col>{{addCommas(formatAmount(amountReceived, withdrawalModalCurrency))}}</b-col>
       </b-row>
+
+      <b-row>
+        <b-col cols="12">
+          <b-form v-on:submit.prevent="onSubmit" @reset="onModalHide">
+
+            <b-form-group label="Amount" label-for="amount" :invalid-feedback="errors.amount" :state="!errors.amount">
+              <b-form-input type="text"
+                            id="amount"
+                            placeholder="Amount"
+                            name="amount"
+                            v-model="withdrawAmount"
+                            autocomplete="off"
+                            :state="isAmountValid"
+                            @input="handleAmountChange"/>
+            </b-form-group>
+
+            <b-form-group label="Address" label-for="address" :invalid-feedback="errors.address" :state="!errors.address">
+              <b-form-input type="text"
+                            id="address"
+                            placeholder="Address"
+                            name="address"
+                            autocomplete="off"
+                            v-model="withdrawAddress"
+                            :state="isAddresValid"/>
+            </b-form-group>
+
+            <b-form-group v-if="is2faEnabled" label="Two factor code" label-for="otp" :invalid-feedback="errors.otp"
+              :state="!errors.otp">
+              <b-form-input id="otpWdModal" type="text" placeholder="OTP" name="otp" v-model="otp"/>
+            </b-form-group>
+
+            <div class="submit-buttons pull-right">
+              <button class="btn btn-danger" type="button" @click.prevent="hideModal">Cancel</button>
+              <button class="btn btn-success" type="submit" :disabled="isSubmitDisabled">Submit</button>
+            </div>
+          </b-form>
+        </b-col>
+      </b-row>
     </b-container>
-
-    <b-form v-on:submit.prevent="onSubmit" @reset="onModalHide">
-
-      <b-form-group label="Amount" label-for="amount" :invalid-feedback="errors.amount" :state="!errors.amount">
-        <b-form-input type="text"
-                      id="amount"
-                      placeholder="Amount"
-                      name="amount"
-                      v-model="withdrawAmount"
-                      autocomplete="off"
-                      :state="isAmountValid"
-                      @input="handleAmountChange"/>
-      </b-form-group>
-
-      <b-form-group label="Address" label-for="address" :invalid-feedback="errors.address" :state="!errors.address">
-        <b-form-input type="text"
-                      id="address"
-                      placeholder="Address"
-                      name="address"
-                      autocomplete="off"
-                      v-model="withdrawAddress"
-                      :state="isAddresValid"/>
-      </b-form-group>
-
-      <b-form-group v-if="is2faEnabled" label="Two factor code" label-for="otp" :invalid-feedback="errors.otp"
-        :state="!errors.otp">
-        <b-form-input id="otpWdModal" type="text" placeholder="OTP" name="otp" v-model="otp"/>
-      </b-form-group>
-
-      <div class="submit-buttons pull-right">
-        <button class="btn btn-danger" type="button" @click.prevent="hideModal">Cancel</button>
-        <button class="btn btn-success" type="submit" :disabled="isSubmitDisabled">Submit</button>
-      </div>
-    </b-form>
   </b-modal>
 </template>
 
