@@ -73,10 +73,6 @@ if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
   app.use('/static', express.static(`${frontendStaticPath}/static`));
 }
 
-app.get('/404', function (req, res) {
-  res.status(404).send('Not found');
-});
-
 if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
   /** Development mode
    * Start webpack-dev-middleware

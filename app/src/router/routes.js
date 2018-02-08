@@ -28,7 +28,7 @@ const routes = [
   {path: '/confirm-withdrawal', component: () => import('pages/ConfirmWithdrawal')},
 
   /* Shows PageNotFound component in dev mode, redirects to /404 route in prod */
-  {path: '*', component: () => import('pages/PageNotFound')}
+  {path: '/404', component: () => import('pages/PageNotFound'), alias: '*'},
 ];
 
 export default routes;
