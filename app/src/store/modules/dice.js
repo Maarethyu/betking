@@ -58,12 +58,15 @@ const actions = {
   },
 
   diceBet ({commit}, {betAmount, currency, target, chance}) {
+    commit(types.DISABLE_DICE_BETTING);
+
     api.diceBet(betAmount, currency, target, chance)
       .then(res => {
         const {id, date, bet_amount, currency, roll, profit, chance, target, balance, nextNonce} = res.data;
         commit(types.ADD_DICE_BET, {id, date, bet_amount, currency, roll, profit, chance, target});
         commit(types.SET_BALANCE, {currency, balance});
         commit(types.SET_DICE_NONCE, nextNonce);
+        commit(types.ENABLE_DICE_BETTING);
 
         bus.$emit('dice-bet-result', {currency, roll, profit});
       })
@@ -115,6 +118,10 @@ const mutations = {
 
   [types.DISABLE_DICE_BETTING] (state) {
     state.isBettingDisabled = true;
+  },
+
+  [types.ENABLE_DICE_BETTING] (state) {
+    state.isBettingDisabled = false;
   },
 
   [types.ADD_DICE_BET] (state, bet) {
