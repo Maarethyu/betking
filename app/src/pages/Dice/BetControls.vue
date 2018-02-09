@@ -240,7 +240,6 @@
   import {template, createSteps} from './diceTour';
 
   import {
-    // bet,
     updateTargets,
     updateChance,
     updatePayout,
