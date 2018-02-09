@@ -8,13 +8,14 @@ const attachCurrentUserToRequest = async (req, res, next) => {
   if (sessionId && helpers.isValidUuid(sessionId)) {
     const user = await db.getUserBySessionId(sessionId);
     if (user) {
-      req.currentUser = user; // TODO don't show exact one
+      req.currentUser = user; // TODO - make sure this is not available client side
     }
   }
 
   next();
 };
 
+// TODO - review the comments
 const requireLoggedIn = async (req, res, next) => {
   if (!req.currentUser) {
     // this should maybe return login url?
@@ -61,12 +62,11 @@ const require2fa = async (req, res, next) => {
 };
 
 const requireWhitelistedIp = async (req, res, next) => {
-  // check if not a whitelisted Ip
   const ip = helpers.getIp(req);
 
   const isIpWhitelisted = await db.isIpWhitelisted(ip, req.currentUser.id);
   if (!isIpWhitelisted) {
-    await db.logoutAllSessionsWithoutWhitelistedIps(req.currentUser.id);
+    await db.logoutAllSessionsWithoutWhitelistedIps(req.currentUser.id); // TODO should we just logout all sessions?
     return res.status(401).json({error: 'IP not whitelisted'});
   }
 

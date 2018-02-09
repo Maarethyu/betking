@@ -2,7 +2,7 @@ const request = require('request-promise');
 const db = require('./db');
 const config = require('config');
 
-const sendMail = function (To, Subject, HtmlBody) {
+const sendMail = function (address, subject, htmlBody) {
   return request({
     uri: 'https://api.postmarkapp.com/email',
     method: 'POST',
@@ -11,13 +11,13 @@ const sendMail = function (To, Subject, HtmlBody) {
       'Content-Type': 'application/json',
       'X-Postmark-Server-Token': config.get('MAILER_SERVER_TOKEN')
     },
-    body: JSON.stringify({From: config.get('MAILER_SENDER_EMAIL'), To, Subject, HtmlBody})
+    body: JSON.stringify({From: config.get('MAILER_SENDER_EMAIL'), address, subject, htmlBody})
   });
 };
 
-const logEmailErrors = (toEmail, info) => (e) => {
-  db.logEmailError(e.message, e.stack, toEmail, info);
-  console.log('MAIL_ERROR', toEmail, info, e);
+const logEmailErrors = (address, msg) => (e) => {
+  db.logEmailError(e.message, e.stack, address, msg);
+  console.log('MAIL_ERROR', address, msg, e);
 };
 
 const templates = {
@@ -66,7 +66,7 @@ const templates = {
     </a>
   `,
 
-  wdConfirmationEmail: (username, token, amount, currencySymbol, address) => `
+  withdrawConfirmationEmail: (username, token, amount, currencySymbol, address) => `
     <p>Dear ${username}</p>
     <p>You have requested to withdraw ${amount} ${currencySymbol} to ${address}</p>
     <p>To confirm this withdrawal, click the following link</p>
@@ -113,11 +113,11 @@ const sendVerificationEmail = function (username, email, token) {
     .catch(logEmailErrors(email, 'verify email'));
 };
 
-const sendWdConfirmationEmail = function (username, email, token, currencySymbol, amount, address) {
+const sendWithdrawConfirmationEmail = function (username, email, token, currencySymbol, amount, address) {
   return sendMail(
     email,
     `${config.get('PROJECT_NAME')} | Verify your withdrawal of ${amount} ${currencySymbol}`,
-    templates.wdConfirmationEmail(username, token, amount, currencySymbol, address)
+    templates.withdrawConfirmationEmail(username, token, amount, currencySymbol, address)
   )
     .catch(logEmailErrors(email, 'wd confirmation'));
 };
@@ -127,5 +127,5 @@ module.exports = {
   sendNewLoginEmail,
   sendWelcomeEmail,
   sendVerificationEmail,
-  sendWdConfirmationEmail
+  sendWithdrawConfirmationEmail
 };

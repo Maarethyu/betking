@@ -321,7 +321,7 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
     );
 
     if (wdTx.status === 'pending_email_verification') {
-      mailer.sendWdConfirmationEmail(
+      mailer.sendWithdrawConfirmationEmail(
         req.currentUser.username,
         req.currentUser.email,
         wdTx.verification_token,
