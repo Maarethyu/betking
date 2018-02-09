@@ -24,8 +24,6 @@
   import {mapGetters} from 'vuex';
   import {formatBigAmount} from 'src/helpers';
 
-  BigNumber.config({DECIMAL_PLACES: 4, ROUNDING_MODE: BigNumber.ROUND_DOWN});
-
   export default {
     name: 'DiceBetResults',
     components: {
@@ -88,9 +86,11 @@
         return `<span class="${className}">${amount}</span>`;
       },
       chanceToPayout (chance) {
-        const payout = new BigNumber(99)
+        const payoutFixed = new BigNumber(99)
           .dividedBy(chance)
-          .toString();
+          .toFixed(4, BigNumber.ROUND_DOWN);
+
+        const payout = new BigNumber(payoutFixed).toString();
 
         return `${payout}x`;
       },
@@ -99,8 +99,9 @@
       },
       formatTarget (target, key, item) {
         const sign = target === 0 ? '<' : '>';
+        const chance = new BigNumber(item.chance).toFixed(4, BigNumber.ROUND_DOWN);
 
-        return `${sign} ${item.chance}`;
+        return `${sign} ${chance}`;
       },
       darkenZero (x) {
         const parts = x.split('.');
