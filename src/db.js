@@ -193,6 +193,22 @@ const logError = async (msg, stack, reqId, userId, source, query, code) => {
     });
 };
 
+const logUnhandledRejectionError = async (msg, stack) => {
+  await db.none('INSERT INTO error_logs (msg, stack, req_id, user_id, source, db_query, db_code) VALUES ($1, $2, $3, $4, $5, $6, $7)', [msg, stack, null, null, 'unhandledRejection', null, null])
+    .catch(error => {
+      // Do not throw error from here to prevent infinite loop
+      console.log('Error writing to error logs', error);
+    });
+};
+
+const logUncaughtExceptionError = async (msg, stack) => {
+  await db.none('INSERT INTO error_logs (msg, stack, req_id, user_id, source, db_query, db_code) VALUES ($1, $2, $3, $4, $5, $6, $7)', [msg, stack, null, null, 'uncaughtException', null, null])
+    .catch(error => {
+      // Do not throw error from here to prevent infinite loop
+      console.log('Error writing to error logs', error);
+    });
+};
+
 const logEmailError = async (msg, stack, toEmail, info) => {
   await db.none('INSERT INTO error_logs (msg, stack, to_email, mail_info, source) VALUES ($1, $2, $3, $4, $5)', [msg, stack, toEmail, info, 'MAIL_ERROR'])
     .catch(error => {
@@ -558,6 +574,8 @@ module.exports = {
   logoutAllSessionsWithoutWhitelistedIps,
   lockUserAccount,
   logError,
+  logUnhandledRejectionError,
+  logUncaughtExceptionError,
   logEmailError,
   getLoginAttempts,
   createVerifyEmailToken,

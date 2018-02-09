@@ -1,3 +1,4 @@
+const path = require('path');
 const config = require('config');
 const express = require('express');
 const logger = require('morgan');
@@ -15,19 +16,16 @@ const mw = require('./middleware');
 const app = express();
 require('./middleware-wrapper');
 
-/* We should ideally never land up having uncaught exceptions / rejections. */
-process.on('unhandledRejection', (reason, p) => {
-  db.logError(reason, p, null, null, 'unhandledRejection');
-  console.log('Unhandled Rejection at:', p, 'reason:', reason);
-
-  // TODO: process.exit(); ?
+// We should never have uncaught exceptions or rejections.
+// TODO - should these be before express is created?
+process.on('unhandledRejection', (reason, promise) => {
+  db.logUnhandledRejectionError(reason, promise);
+  console.log('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 process.on('uncaughtException', (err) => {
-  db.logError(err.message, err.stack, null, null, 'uncaughtException');
+  db.logUncaughtExceptionError(err.message, err.stack);
   console.log('Uncaught Exception', err);
-
-  // TODO: process.exit(); ?
 });
 
 // add uuid to each request
@@ -60,14 +58,15 @@ router.use('/dice', require('./routes/dice'));
 router.use('', csrfProtection, require('./routes/index'));
 app.use('/api', router);
 
-const frontendStaticPath = require('path').join(__dirname, '..', 'app/dist');
+// TODO - review
+const frontendStaticPath = path.join(__dirname, '..', 'app/dist');
 
 if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
   app.use('/static', express.static(`${frontendStaticPath}/static`));
 }
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-  require(require('path').join(__dirname, '..', 'app/build/express-server'))(app);
+  require(path.join(__dirname, '..', 'app/build/express-server'))(app);
 } else {
   app.get('*', csrfProtection, function (req, res) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -80,7 +79,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 
 app.use(function (error, req, res, next) {
   if (error.code === 'EBADCSRFTOKEN') {
-    return res.status(403).send('csrf protection failed');
+    return res.status(403).send('Invalid request token');
   }
 
   const query = error.query ? error.query.toString() : null;
