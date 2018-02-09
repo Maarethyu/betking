@@ -1,8 +1,8 @@
 const config = require('config');
 const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
-const helpers = require('./helpers');
 const BigNumber = require('bignumber.js');
+const helpers = require('./helpers');
 const dice = require('./games/dice');
 
 const initOptions = {
@@ -14,8 +14,6 @@ const initOptions = {
 
 const pgp = require('pg-promise')(initOptions);
 const db = pgp(config.get('DB_CONNECTION_STRING'));
-
-/* USER ACCOUNT */
 
 // Case-insensitive
 const isEmailAlreadyTaken = async (email) => {

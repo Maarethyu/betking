@@ -31,9 +31,9 @@ const getUserAgentString = function (req) {
   return req.headers['user-agent'];
 };
 
-const isValidUuid = function (sessionId) {
+const isValidUuid = function (id) {
   const uuidV4Regex = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-  return uuidV4Regex.test(sessionId);
+  return uuidV4Regex.test(id);
 };
 
 const addCsrfToken = function (csrfToken) {
@@ -51,7 +51,7 @@ const addCsrfToken = function (csrfToken) {
 };
 
 const getCurrencyToQueryFromAddressTable = function (currency) {
-  /* Check if currency is an eth token, if yes, get ethereum address */
+  // Check if currency is an eth token, if yes, get ethereum address
   let currencyToQuery = currency;
 
   const currencyConfig = currencies.find(c => c.value === currency);
