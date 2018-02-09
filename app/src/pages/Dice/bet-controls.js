@@ -1,39 +1,39 @@
 import BigNumber from 'bignumber.js';
-// import toastr from 'toastr';
+import toastr from 'toastr';
 
 export const diceBet = function (target) {
   let betAmount = new BigNumber(this.betAmount);
 
-  // if (!this.isAuthenticated) {
-  //   toastr.error('You must login to make a bet');
-  //   return;
-  // }
+  if (!this.isAuthenticated) {
+    toastr.error('You must login to make a bet');
+    return;
+  }
 
-  // if (betAmount.gt(this.balance)) {
-  //   toastr.error('Balance too low');
-  //   return;
-  // }
+  if (betAmount.gt(this.balance)) {
+    toastr.error('Balance too low');
+    return;
+  }
 
-  // // TODO: Ignoring betProfit <  0.00000001 check here, we might do it in backend from config
+  // TODO: Ignoring betProfit <  0.00000001 check here, we might do it in backend from config
 
-  // if (betAmount.lt(this.minBetAmount)) {
-  //   toastr.error(`Minimum ${this.currency.name} bet is ${this.minBetAmount}`);
-  //   return;
-  // }
+  if (betAmount.lt(this.minBetAmount)) {
+    toastr.error(`Minimum ${this.currency.name} bet is ${this.minBetAmount}`);
+    return;
+  }
 
-  // if (!this.isPayoutValid || !this.isChanceValid) {
-  //   toastr.error('Invalid payout or chance');
-  //   return;
-  // }
+  if (!this.isPayoutValid || !this.isChanceValid) {
+    toastr.error('Invalid payout or chance');
+    return;
+  }
 
-  // if (this.isBettingDisabled) {
-  //   return;
-  // }
+  if (this.isBettingDisabled) {
+    return;
+  }
 
-  // if ([0, 1].indexOf(target) === -1) {
-  //   toastr.error('Invalid bet target');
-  //   return;
-  // }
+  if ([0, 1].indexOf(target) === -1) {
+    toastr.error('Invalid bet target');
+    return;
+  }
 
   betAmount = betAmount
     .times(new BigNumber(10).pow(this.currency.scale))
