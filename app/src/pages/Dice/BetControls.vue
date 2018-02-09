@@ -63,23 +63,23 @@
     </b-row>
 
     <b-row class="dice__bet-controls__result">
-      <b-col cols="8" offset="2">
+      <b-col cols="8" offset="2" :class="`text-${winColour}`">
         {{ rollMessage }} <br>
         {{ winMessage }}
-        <CurrencyIcon  v-if="winCurrency !== null" :value="winCurrency" />
+        <CurrencyIcon  v-if="winCurrency !== null" :value="winCurrency" :color="winColour"  />
       </b-col>
     </b-row>
 
     <b-row class="dice__bet-controls__bet-buttons" id="dice-bet-buttons">
       <b-col sm="3" offset-sm="3" cols="6">
-        <b-button variant="danger" :disabled="bettingDisabled">
+        <b-button variant="danger" :disabled="bettingDisabled" @click="diceBet(1)">
           Hi<span class="shortcut" v-if="shortcutsEnabled">h</span><br>
           <small>&gt; {{ hiTarget }}</small>
         </b-button>
       </b-col>
 
       <b-col cols="3" sm="3">
-        <b-button variant="danger" :disabled="bettingDisabled">
+        <b-button variant="danger" :disabled="bettingDisabled" @click="diceBet(0)">
           Lo<span class="shortcut" v-if="shortcutsEnabled">l</span><br>
           <small>&lt; {{ loTarget }}</small>
         </b-button>
@@ -96,7 +96,7 @@
       <b-col cols="12" id="bet-amount-controls">
         <b-button size="sm" variant="primary" @click="halvedBetAmount">1/2<span class="shortcut" v-if="shortcutsEnabled">x</span></b-button>
         <b-button size="sm" variant="primary" @click="doubleBetAmount">x2<span class="shortcut" v-if="shortcutsEnabled">c</span></b-button>
-        <b-button size="sm" variant="primary" @click="minBetAmount">min<span class="shortcut" v-if="shortcutsEnabled">z</span></b-button>
+        <b-button size="sm" variant="primary" @click="setMinBetAmount">min<span class="shortcut" v-if="shortcutsEnabled">z</span></b-button>
         <b-button size="sm" variant="primary" @click="maxBetAmountClicked">max<span class="shortcut" v-if="shortcutsEnabled">b</span></b-button>
         <b-button size="sm" class="d-none d-sm-inline-block" variant="primary" @click="activateShortcuts">
           <i class="fa fa-keyboard-o"></i>
@@ -231,9 +231,11 @@
 
   // eslint-disable-next-line no-unused-vars
   import jQuery from 'jquery';
+  import BigNumber from 'bignumber.js';
   import CurrencyIcon from 'components/CurrencyIcon';
   import MaxBetWarningModal from './MaxBetWarningModal';
   import ProvablyFairModal from './ProvablyFairModal';
+  import bus from 'src/bus';
   import {loadBootstrapTour} from 'src/helpers';
   import {template, createSteps} from './diceTour';
 
@@ -248,11 +250,12 @@
     updateBetAmount,
     halvedBetAmount,
     doubleBetAmount,
-    minBetAmount,
-    maxBetAmount,
+    setMinBetAmount,
+    setMaxBetAmount,
     maxBetAmountClicked,
     activateShortcuts,
     keyUp,
+    diceBet
   } from './bet-controls';
 
   export default {
@@ -281,14 +284,13 @@
       isPayoutValid: true,
       isChanceValid: true,
       showPayoutWarning: 0,
-      waitingOnBetResult: false,
       demoModeOn: false,
-      maxWin: 10, // TODO: Get from computed / backend
       timerId: null,
       shortcutsEnabled: false,
       showMaxBetWarning: true,
       rollMessage: '',
       winMessage: '',
+      winColour: '',
       winCurrency: null
     }),
     created () {
@@ -306,16 +308,23 @@
     },
     computed: {
       ...mapGetters({
+        isAuthenticated: 'isAuthenticated',
         currencies: 'currencies',
         activeCurrency: 'activeCurrency',
-        balance: 'activeCurrencyBalance'
+        balance: 'activeCurrencyBalance',
+        maxWin: 'diceMaxWin',
+        minBetAmount: 'diceMinBetAmount',
+        isBettingDisabled: 'diceIsBettingDisabled'
       }),
       currency () {
         return this.currencies.find(c => c.value === this.activeCurrency);
       },
       bettingDisabled () {
-        return this.waitingOnBetResult || !this.isPayoutValid || !this.isChanceValid || this.demoModeOn;
+        return this.isBettingDisabled || !this.isPayoutValid || !this.isChanceValid || this.demoModeOn;
       }
+    },
+    mounted () {
+      bus.$on('dice-bet-result', this.showDiceBetResult);
     },
     methods: {
       updateProfit,
@@ -327,11 +336,12 @@
       updateTargets,
       halvedBetAmount,
       doubleBetAmount,
-      minBetAmount,
-      maxBetAmount,
+      setMinBetAmount,
+      setMaxBetAmount,
       activateShortcuts,
       keyUp,
       maxBetAmountClicked,
+      diceBet,
       countDownChanged (dismissCountDown) {
         this.showPayoutWarning = dismissCountDown;
       },
@@ -341,11 +351,30 @@
           Cookies.set('showMaxBetWarning', false, {expires: 1});
         }
 
-        this.maxBetAmount();
+        this.setMaxBetAmount();
         this.$root.$emit('bv::hide::modal', 'maxBetModal');
       },
       showProvablyFairDialog () {
         this.$root.$emit('bv::show::modal', 'diceProvablyFairModal');
+      },
+      showDiceBetResult (msg) {
+        if (msg.currency !== this.activeCurrency) {
+          return;
+        }
+
+        this.rollMessage = `Roll: ${msg.roll}`;
+        this.winCurrency = msg.currency;
+
+        const profit = new BigNumber(msg.profit)
+          .dividedBy(new BigNumber(10).pow(this.currency.scale));
+
+        if (profit.gt(0)) {
+          this.winColour = 'green';
+          this.winMessage = `You won ${profit.toFixed(this.currency.scale, BigNumber.ROUND_DOWN)}`;
+        } else {
+          this.winMessage = `You lost ${profit.times(-1).toFixed(this.currency.scale, BigNumber.ROUND_DOWN)}`;
+          this.winColour = 'red';
+        }
       },
       showDemo () {
         const steps = createSteps();

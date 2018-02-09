@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import account from './modules/account';
 import funds from './modules/funds';
 import modals from './modules/modals';
+import dice from './modules/dice';
 
 Vue.use(Vuex);
 
@@ -15,7 +16,9 @@ export default new Vuex.Store({
     /* Monetory stuff */
     funds,
     /* All modal states */
-    modals
+    modals,
+    /* Dice Game */
+    dice
   },
   strict: debug
 });

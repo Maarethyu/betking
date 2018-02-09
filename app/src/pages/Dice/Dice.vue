@@ -23,6 +23,9 @@
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
 
+  import uuid from 'uuid';
+  import {mapGetters} from 'vuex';
+
   export default {
     name: 'Dice',
     components: {
@@ -30,6 +33,29 @@
       'b-col': bCol,
       BetControls,
       BetResults
+    },
+    computed: mapGetters({
+      isAuthenticated: 'isAuthenticated',
+      activeCurrency: 'activeCurrency'
+    }),
+    mounted () {
+      this.loadDiceState();
+    },
+    watch: {
+      isAuthenticated () {
+        this.loadDiceState();
+      },
+      activeCurrency () {
+        this.loadDiceState();
+      }
+    },
+    methods: {
+      loadDiceState () {
+        if (this.isAuthenticated) {
+          const clientSeed = uuid.v4();
+          this.$store.dispatch('loadDiceState', {clientSeed, currency: this.activeCurrency});
+        }
+      }
     }
   };
 </script>

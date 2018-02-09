@@ -1,4 +1,47 @@
 import BigNumber from 'bignumber.js';
+// import toastr from 'toastr';
+
+export const diceBet = function (target) {
+  let betAmount = new BigNumber(this.betAmount);
+
+  // if (!this.isAuthenticated) {
+  //   toastr.error('You must login to make a bet');
+  //   return;
+  // }
+
+  // if (betAmount.gt(this.balance)) {
+  //   toastr.error('Balance too low');
+  //   return;
+  // }
+
+  // // TODO: Ignoring betProfit <  0.00000001 check here, we might do it in backend from config
+
+  // if (betAmount.lt(this.minBetAmount)) {
+  //   toastr.error(`Minimum ${this.currency.name} bet is ${this.minBetAmount}`);
+  //   return;
+  // }
+
+  // if (!this.isPayoutValid || !this.isChanceValid) {
+  //   toastr.error('Invalid payout or chance');
+  //   return;
+  // }
+
+  // if (this.isBettingDisabled) {
+  //   return;
+  // }
+
+  // if ([0, 1].indexOf(target) === -1) {
+  //   toastr.error('Invalid bet target');
+  //   return;
+  // }
+
+  betAmount = betAmount
+    .times(new BigNumber(10).pow(this.currency.scale))
+    .dividedToIntegerBy(1)
+    .toString();
+
+  this.$store.dispatch('diceBet', {betAmount, currency: this.activeCurrency, target, chance: this.chance});
+};
 
 export const updateTargets = function () {
   let c;
@@ -188,8 +231,8 @@ export const updateBetAmount = function () {
 export const halvedBetAmount = function () {
   let betAmount = new BigNumber(this.betAmount).dividedBy(2);
 
-  if (betAmount.lt(this.currency.minBetAmount)) {
-    betAmount = new BigNumber(this.currency.minBetAmount);
+  if (betAmount.lt(this.minBetAmount)) {
+    betAmount = new BigNumber(this.minBetAmount);
   }
 
   this.betAmount = betAmount.toFixed(this.currency.scale);
@@ -207,14 +250,14 @@ export const doubleBetAmount = function () {
   this.updateProfit();
 };
 
-export const minBetAmount = function () {
-  let s = new BigNumber(this.currency.minBetAmount);
+export const setMinBetAmount = function () {
+  let s = new BigNumber(this.minBetAmount);
   if (new BigNumber(this.payout).lt(2)) {
     const payoutInverseMultiplier = new BigNumber(1).dividedBy(new BigNumber(this.payout).minus(1));
     s = s.times(payoutInverseMultiplier.dividedToIntegerBy(1));
 
     if (payoutInverseMultiplier.mod(1).gt(0) && payoutInverseMultiplier.mod(1).lt(0.5)) {
-      s = s.add(this.currency.minBetAmount);
+      s = s.add(this.minBetAmount);
     }
   }
 
@@ -222,9 +265,12 @@ export const minBetAmount = function () {
   this.updateProfit();
 };
 
-export const maxBetAmount = function () {
+export const setMaxBetAmount = function () {
   let b = new BigNumber(this.balance);
   let p = b.times(this.payout).minus(b);
+
+  console.log(p.toString());
+  console.log(this.maxWin);
 
   if (p.isNaN() || p.lt(0)) {
     p = new BigNumber(0);
@@ -248,7 +294,7 @@ export const maxBetAmountClicked = function () {
   if (this.showMaxBetWarning) {
     this.$root.$emit('bv::show::modal', 'maxBetModal');
   } else {
-    this.maxBetAmount();
+    this.setMaxBetAmount();
   }
 };
 
@@ -264,7 +310,7 @@ export const keyUp = function (e) {
     } else if (key === 'l') {
       this.bet(1);
     } else if (key === 'z') {
-      this.minBetAmount();
+      this.setMinBetAmount();
     } else if (key === 'x') {
       this.halvedBetAmount();
     } else if (key === 'c') {

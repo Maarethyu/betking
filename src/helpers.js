@@ -71,6 +71,16 @@ const getAddressQr = async function (address) {
   return qr;
 };
 
+const getCurrencyField = function (currencyValue, field) {
+  const currency = currencies.find(c => c.value === currencyValue);
+
+  if (!currency) {
+    return null;
+  }
+
+  return currency[field];
+}
+
 module.exports = {
   getIp,
   getFingerPrint,
@@ -81,5 +91,6 @@ module.exports = {
   isOtpValid,
   addCsrfToken,
   getCurrencyToQueryFromAddressTable,
-  getAddressQr
+  getAddressQr,
+  getCurrencyField
 };

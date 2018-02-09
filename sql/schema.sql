@@ -181,6 +181,37 @@ CREATE TABLE whitelisted_addresses (
 CREATE UNIQUE INDEX unique_user_id_currency_idx ON whitelisted_addresses(user_id, currency);
 CREATE INDEX whitelisted_addresses_user_id_idx ON whitelisted_addresses USING btree(user_id);
 
+-- bankrolls table
+CREATE TABLE bankrolls (
+  id bigserial PRIMARY KEY,
+  currency integer NOT NULL,
+  max_win numeric (36, 0) NOT NULL,
+  min_bet_amount numeric (36, 0) NOT NULL
+);
+
+-- games table
+CREATE TABLE games (
+  id bigserial PRIMARY KEY,
+  player_id bigint NOT NULL REFERENCES users(id),
+  date timestamp with time zone NOT NULL  DEFAULT NOW(),
+  bet_amount numeric (36, 0) NOT NULL,
+  currency integer NOT NULL,
+  profit numeric (36, 0) NOT NULL,
+  game_type text NOT NULL,
+  game_details jsonb NOT NULL,
+  seed_details jsonb NOT NULL
+);
+
+-- dice seeds table
+CREATE TABLE dice_seeds (
+  id bigserial PRIMARY KEY,
+  player_id bigint NOT NULL REFERENCES users(id),
+  in_use boolean NOT NULL,
+  client_seed text NOT NULL,
+  server_seed text NOT NULL,
+  nonce integer NOT NULL default 0
+);
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO bk;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO bk;

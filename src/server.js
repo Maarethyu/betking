@@ -56,6 +56,7 @@ app.use(mw.attachCurrentUserToRequest);
 const router = express.Router();
 router.use('/account', csrfProtection, require('./routes/account'));
 router.use('/admin', require('./routes/admin'));
+router.use('/dice', require('./routes/dice'));
 router.use('', csrfProtection, require('./routes/index'));
 app.use('/api', router);
 
@@ -81,7 +82,7 @@ app.use(function (error, req, res, next) {
   if (error.code === 'EBADCSRFTOKEN') {
     return res.status(403).send('csrf protection failed');
   }
-  
+
   const query = error.query ? error.query.toString() : null;
   const code = error.code || null;
   const source = error.DB_ERROR ? 'DB_ERROR' : 'API_ERROR';

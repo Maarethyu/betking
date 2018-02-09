@@ -59,9 +59,6 @@ const mutations = {
       minTip: new BigNumber(c.minTip)
         .div(new BigNumber(10).pow(c.scale))
         .toNumber(),
-      minBetAmount: new BigNumber(c.minBetAmount)
-        .div(new BigNumber(10).pow(c.scale))
-        .toNumber(),
       balance: 0
     }));
     state.isReady = true;
