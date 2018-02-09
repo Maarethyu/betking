@@ -9,7 +9,7 @@ export const diceBet = function (target) {
     return;
   }
 
-  if (betAmount.gt(this.balance)) {
+  if (betAmount.gt(this.balance) || this.balance === 0) {
     toastr.error('Balance too low');
     return;
   }

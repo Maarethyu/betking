@@ -21,7 +21,7 @@ const calculateDiceRoll = function (serverSeed, clientSeed, nonce) {
   const ss = `${nonce}:${serverSeed}:${nonce}`;
 
   const hash = crypto.createHmac('sha512', ss).update(cs)
-                .digest('hex');
+    .digest('hex');
   let i = 0;
   let roll = -1;
 

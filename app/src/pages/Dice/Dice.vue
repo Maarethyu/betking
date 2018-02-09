@@ -23,7 +23,7 @@
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
 
-  import uuid from 'uuid';
+  import {getRandomAlphanumeric} from 'src/helpers';
   import {mapGetters} from 'vuex';
 
   export default {
@@ -52,7 +52,7 @@
     methods: {
       loadDiceState () {
         if (this.isAuthenticated) {
-          const clientSeed = uuid.v4();
+          const clientSeed = getRandomAlphanumeric(20);
           this.$store.dispatch('loadDiceState', {clientSeed, currency: this.activeCurrency});
         }
       }

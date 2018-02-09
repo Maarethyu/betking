@@ -14,7 +14,8 @@ router.use(mw.requireWhitelistedIp);
 router.get('/load-state', async function (req, res, next) {
   req.checkQuery('clientSeed', 'Invalid Client Seed')
     .exists()
-    .isUUID(4);
+    .isAlphanumeric()
+    .isLength({min: 1, max: 25});
 
   req.checkQuery('currency', 'Invalid currency')
     .exists()
@@ -55,7 +56,7 @@ router.post('/bet', async function (req, res, next) {
     .custom(value => {
       let isTargetValid = false;
 
-      Object.keys(dice.targets).map(target => {
+      Object.keys(dice.targets).forEach(target => {
         if (dice.targets[target] === value) {
           isTargetValid = true;
         }
@@ -75,7 +76,6 @@ router.post('/bet', async function (req, res, next) {
   if (!validationResult.isEmpty()) {
     /* Only send first error message */
     const errors = validationResult.array();
-    console.log(errors);
     const errorMsg = errors[0].msg;
 
     return res.status(400).json({error: errorMsg});
@@ -130,6 +130,38 @@ router.post('/bet', async function (req, res, next) {
 
     throw e;
   }
+});
+
+router.post('/set-client-seed', async function (req, res, next) {
+  req.checkBody('clientSeed', 'Invalid Client Seed')
+    .exists()
+    .isAlphanumeric()
+    .isLength({min: 1, max: 25});
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({error: 'Invalid client seed'});
+  }
+
+  const seed = await db.setNewDiceClientSeed(req.currentUser.id, req.body.clientSeed);
+
+  res.json(seed);
+});
+
+router.post('/generate-new-seed', async function (req, res, next) {
+  req.checkBody('clientSeed', 'Invalid Client Seed')
+    .exists()
+    .isAlphanumeric()
+    .isLength({min: 1, max: 25});
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({error: 'Invalid client seed'});
+  }
+
+  const result = await db.generateNewSeed(req.currentUser.id, req.body.clientSeed);
+
+  res.json(result);
 });
 
 module.exports = router;

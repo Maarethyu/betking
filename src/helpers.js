@@ -79,7 +79,7 @@ const getCurrencyField = function (currencyValue, field) {
   }
 
   return currency[field];
-}
+};
 
 module.exports = {
   getIp,

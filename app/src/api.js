@@ -139,5 +139,11 @@ export default {
   },
   diceBet (betAmount, currency, target, chance) {
     return post('/api/dice/bet', {betAmount, currency, target, chance});
+  },
+  setNewDiceClientSeed (clientSeed) {
+    return post('/api/dice/set-client-seed', {clientSeed});
+  },
+  generateNewDiceSeed (clientSeed) {
+    return post('/api/dice/generate-new-seed', {clientSeed});
   }
 };
