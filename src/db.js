@@ -3,6 +3,7 @@ const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
 const helpers = require('./helpers');
 const BigNumber = require('bignumber.js');
+const dice = require('./games/dice');
 
 const initOptions = {
   promiseLib: promise, // overriding the default (ES6 Promise);
@@ -403,6 +404,130 @@ const isAddressWhitelisted = async (userId, currency, address) => {
   return result;
 };
 
+/* DICE */
+const getLatestUserDiceBets = async (userId) => {
+  const result = await db.any('SELECT id, date, bet_amount, currency, profit, game_details->>\'roll\' as roll, game_details->>\'chance\' as chance, game_details->>\'target\' as target FROM games WHERE player_id = $1 AND game_type = $2 ORDER BY date desc LIMIT 50', [userId, 'dice']);
+  return result;
+};
+
+const getBankrollConfigForCurrency = async (currency) => {
+  const result = await db.one('SELECT * FROM bankrolls WHERE currency = $1', currency);
+  return result;
+};
+
+const getActiveDiceSeed = async (userId, newClientSeed) => {
+  const result = await db.tx(t => {
+    /* check if user has an active seed */
+    return t.oneOrNone('SELECT * from dice_seeds WHERE player_id = $1 AND in_use = $2', [userId, true])
+      .then(res => {
+        if (res) {
+          return res;
+        }
+        const serverSeed = dice.generateServerSeed();
+
+        return t.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, $2, $3, $4, $5) RETURNING *', [userId, true, newClientSeed, serverSeed, 0]);
+      })
+      .then(res => ({
+        clientSeed: res.client_seed,
+        serverSeedHash: dice.hashServerSeed(res.server_seed),
+        nonce: res.nonce
+      }));
+  });
+
+  return result;
+};
+
+const doDiceBet = async (userId, betAmount, currency, target, chance) => {
+  const result = await db.tx(t => {
+    /* Deduct balance and throw error if insufficient balance */
+    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [betAmount, userId, currency])
+      .then(res => {
+        if (!res) {
+          throw new Error('INSUFFICIENT_BALANCE');
+        }
+
+        /* Get user seed in use */
+        return t.one('SELECT * FROM dice_seeds WHERE player_id = $1 AND in_use = $2', [userId, true]);
+      })
+      .then(seed => {
+        /* Calculate dice roll and profit */
+        const roll = dice.calculateDiceRoll(seed.server_seed, seed.client_seed, seed.nonce);
+        const profit = dice.calculateProfit(roll, chance, betAmount, target);
+
+        /* Increment nonce and update games table */
+        return t.none('UPDATE dice_seeds SET nonce = nonce + 1 WHERE id = $1', seed.id)
+          .then(() => {
+            const gameDetails = {chance, roll, target};
+            const seedDetails = {seed_id: seed.id, nonce: seed.nonce};
+            return t.one('INSERT INTO games (player_id, date, bet_amount, currency, profit, game_type, game_details, seed_details) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7) RETURNING *', [userId, betAmount, currency, profit, 'dice', gameDetails, seedDetails]);
+          });
+      })
+      .then(bet => {
+        /* Now update balance */
+        const userProfit = new BigNumber(betAmount)
+          .add(bet.profit)
+          .toString();
+
+        return t.one('UPDATE user_balances SET balance = balance + $1 WHERE user_id = $2 AND currency = $3 RETURNING balance', [userProfit, userId, currency])
+          .then(res => {
+            return {
+              id: bet.id,
+              date: bet.date,
+              bet_amount: bet.bet_amount,
+              currency: bet.currency,
+              chance: bet.game_details.chance,
+              roll: bet.game_details.roll,
+              profit: bet.profit,
+              target: bet.game_details.target,
+              balance: res.balance,
+              nextNonce: bet.seed_details.nonce + 1
+            };
+          });
+      });
+  });
+
+  return result;
+};
+
+const setNewDiceClientSeed = async (userId, newClientSeed) => {
+  return db.tx(t => {
+    /* Set in_use = false for current active seed */
+    return t.one('UPDATE dice_seeds SET in_use = false WHERE player_id = $1 AND in_use = true RETURNING *', userId)
+      .then(seed => {
+        /* Create new seed with using old server seed and old nonce but new client seed */
+        return t.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, $2, $3, $4, $5) RETURNING client_seed', [userId, true, newClientSeed, seed.server_seed, seed.nonce]);
+      })
+      .then(res => ({
+        clientSeed: res.client_seed
+      }));
+  });
+};
+
+const generateNewSeed = async (userId, newClientSeed) => {
+  const result = await db.tx(t => {
+    /* Invalidate seeds in use */
+    return t.oneOrNone('UPDATE dice_seeds SET in_use = false WHERE player_id = $1 AND in_use = true RETURNING *', userId)
+      .then(oldSeed => {
+        /* Use old client seed if exists else use new client seed */
+        const clientSeed = oldSeed ? oldSeed.client_seed : newClientSeed;
+        const serverSeed = dice.generateServerSeed();
+
+        return t.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, $2, $3, $4, $5) RETURNING *', [userId, true, clientSeed, serverSeed, 0])
+          .then(res => ({
+            clientSeed: res.client_seed,
+            serverSeedHash: dice.hashServerSeed(res.server_seed),
+            nonce: res.nonce,
+            previousServerSeed: oldSeed.server_seed,
+            previousServerSeedHash: dice.hashServerSeed(oldSeed.server_seed),
+            previousClientSeed: oldSeed.client_seed,
+            previousNonce: oldSeed.nonce === 0 ? 0 : oldSeed.nonce - 1
+          }));
+      });
+  });
+
+  return result;
+};
+
 module.exports = {
   isEmailAlreadyTaken,
   isUserNameAlreadyTaken,
@@ -450,5 +575,12 @@ module.exports = {
   addWhitelistedAddress,
   isAddressWhitelisted,
   setConfirmWithdrawalByEmail,
-  confirmWdByToken
+  confirmWdByToken,
+  /* DICE */
+  getLatestUserDiceBets,
+  getBankrollConfigForCurrency,
+  getActiveDiceSeed,
+  doDiceBet,
+  setNewDiceClientSeed,
+  generateNewSeed
 };

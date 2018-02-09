@@ -1,5 +1,5 @@
 <template>
-  <b-table class="dice-bet-results" responsive striped small outlined hover fixed :items="results" :fields="fields">
+  <b-table id="dice-bet-results" class="dice-bet-results" responsive striped small outlined hover fixed :items="latestBets" :fields="fields">
     <template slot="currency" slot-scope="data">
       <CurrencyIcon :value="data.value" :width="15" />
     </template>
@@ -19,9 +19,12 @@
 
   import CurrencyIcon from 'components/CurrencyIcon';
   import moment from 'moment';
+  import BigNumber from 'bignumber.js';
 
   import {mapGetters} from 'vuex';
   import {formatBigAmount} from 'src/helpers';
+
+  BigNumber.config({DECIMAL_PLACES: 4, ROUNDING_MODE: BigNumber.ROUND_DOWN});
 
   export default {
     name: 'DiceBetResults',
@@ -30,7 +33,8 @@
       CurrencyIcon
     },
     computed: mapGetters({
-      currencies: 'currencies'
+      currencies: 'currencies',
+      latestBets: 'diceLatestBets'
     }),
     data: () => ({
       fields: [{
@@ -43,7 +47,7 @@
         formatter: 'formatTime',
         class: 'text-left'
       }, {
-        key: 'amount',
+        key: 'bet_amount',
         label: 'Bet',
         formatter: 'formatAmount',
         class: 'text-right'
@@ -52,13 +56,14 @@
         label: 'Currency',
         class: 'text-left'
       }, {
-        key: 'payout',
+        key: 'chance',
         label: 'Payout',
-        formatter: 'formatPayout',
+        formatter: 'chanceToPayout',
         class: 'text-right'
       }, {
         key: 'target',
         label: 'Target',
+        formatter: 'formatTarget',
         class: 'text-left'
       }, {
         key: 'roll',
@@ -69,11 +74,7 @@
         label: 'Profit',
         formatter: 'formatProfit',
         class: 'text-right'
-      }],
-      results: [
-        {id: '876692962', date: '2018-02-04T21:17:17.814Z', amount: '1000000', payout: 2, roll: 34.444, target: '< 49.5', profit: '1000000', currency: 0},
-        {id: '876692962', date: '2018-02-04T21:17:17.814Z', amount: '20000', payout: 2, roll: 34.444, target: '< 49.5', profit: '-20000', currency: 0}
-      ]
+      }]
     }),
     methods: {
       formatBigAmount,
@@ -86,11 +87,20 @@
 
         return `<span class="${className}">${amount}</span>`;
       },
-      formatPayout (value) {
-        return `${value}x`;
+      chanceToPayout (chance) {
+        const payout = new BigNumber(99)
+          .dividedBy(chance)
+          .toString();
+
+        return `${payout}x`;
       },
       formatTime (value) {
         return moment(value).format('mm:ss');
+      },
+      formatTarget (target, key, item) {
+        const sign = target === 0 ? '<' : '>';
+
+        return `${sign} ${item.chance}`;
       },
       darkenZero (x) {
         const parts = x.split('.');

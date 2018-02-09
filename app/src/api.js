@@ -132,5 +132,18 @@ export default {
   },
   addWhitelistedAddress (currency, address, otp) {
     return post('/api/account/whitelisted-address/add', {currency, address, otp});
+  },
+  // Dice
+  loadDiceState (clientSeed, currency) {
+    return get(`/api/dice/load-state?clientSeed=${clientSeed}&currency=${currency}`);
+  },
+  diceBet (betAmount, currency, target, chance) {
+    return post('/api/dice/bet', {betAmount, currency, target, chance});
+  },
+  setNewDiceClientSeed (clientSeed) {
+    return post('/api/dice/set-client-seed', {clientSeed});
+  },
+  generateNewDiceSeed (clientSeed) {
+    return post('/api/dice/generate-new-seed', {clientSeed});
   }
 };

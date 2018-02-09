@@ -103,9 +103,21 @@ export const getSecondFactorAuth = function () {
       bus.$once('cancel-second-factor-auth', () => {
         bus.$off('authenticate-second-factor');
         resolve(null);
-      });   
+      });
     } else {
       resolve(null);
     }
   });
+};
+
+export const getRandomAlphanumeric = (n) => {
+  // should just use crypto random instead? This is from Stack overflow
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < n; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+
+  return text;
 };
