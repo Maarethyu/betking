@@ -306,9 +306,9 @@ export const keyUp = function (e) {
   if (this.shortcutsEnabled) {
     const {key} = e;
     if (key === 'h') {
-      this.diceBet(0);
-    } else if (key === 'l') {
       this.diceBet(1);
+    } else if (key === 'l') {
+      this.diceBet(0);
     } else if (key === 'z') {
       this.setMinBetAmount();
     } else if (key === 'x') {
