@@ -7,12 +7,15 @@ const db = require('../db');
 const mailer = require('../mailer');
 const helpers = require('../helpers');
 
+const milliSecondsInYear = 31536000000;
+const milliSecondsInTwoWeeks = 1209600000;
+
 const createSession = async function (res, userId, rememberMe, ip, fingerprint) {
   const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks', ip, fingerprint);
 
   res.cookie('session', session.id,
     {
-      maxAge: rememberMe ? 365 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000,
+      maxAge: rememberMe ? milliSecondsInYear : milliSecondsInTwoWeeks,
       secure: config.get('SESSION_COOKIE_SECURE'),
       httpOnly: true
     });
@@ -55,43 +58,41 @@ router.post('/login', async function (req, res, next) {
     return res.status(400).json({errors});
   }
 
-  /* Fetch user on basis of login via option */
+  // Fetch user on basis of login via option
   let user = null;
   if (loginVia === 'username') {
     user = await db.getUserByName(req.body.username);
   } else if (loginVia === 'email') {
     user = await db.getUserByEmail(req.body.email);
   }
+
   if (!user) {
     return res.status(401).json({error: 'Login failed'});
   }
 
-  /* Handle captcha validation for failedAttempts > 3 */
+  // Handle captcha validation for failedAttempts > 3
   const failedAttempts = await db.getConsecutiveFailedLogins(user.id);
 
   const isCaptchaOk = failedAttempts < 3 ||
     await require('./validators/captchaValidator')(req.body['g-recaptcha-response']);
 
-  /* If user locked out, return */
+  // If user locked out, return
   if (user.locked_at) {
     return res.status(401).json({error: 'Account locked'});
   }
 
-  /* Check for password, log login attempt */
+  // Check for password, log login attempt
   const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
 
-  /* Check if ip whitelisted */
+  // Check if ip whitelisted
   // TODO: Should we let user know if his ip was not whitelisted?
   const isIpWhitelisted = await db.isIpWhitelisted(helpers.getIp(req), user.id);
 
-  /* Check for Two factor authentication */
   let isTwoFactorOk = false;
   if (user.mfa_key) {
-    /* If user has 2fa enabled, check if req.body.otp is valid */
     const isOtpValid = helpers.isOtpValid(user.mfa_key, req.body.otp);
 
     if (isOtpValid) {
-      /* Otp is valid, check if it hasn't been used before */
       try {
         await db.insertTwoFactorCode(user.id, req.body.otp);
         await db.log2faAttempt(user.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
@@ -110,7 +111,7 @@ router.post('/login', async function (req, res, next) {
       isTwoFactorOk = false;
     }
   } else {
-    /* If user has 2fa not enabled, isTwoFactorOk = true */
+    // If user has 2fa disabled, isTwoFactorOk = true
     isTwoFactorOk = true;
   }
 
@@ -206,10 +207,8 @@ router.post('/register', apiLimiter, async function (req, res, next) {
   if (user) {
     await createSession(res, user.id, false, helpers.getIp(req), helpers.getFingerPrint(req));
 
-    // Send welcome email if user added email to profile
     if (user.email) {
       mailer.sendWelcomeEmail(user.username, user.email);
-      /* Send mail for email id verification */
       const verifyEmailToken = await db.createVerifyEmailToken(user.id, user.email);
       mailer.sendVerificationEmail(user.username, user.email, verifyEmailToken.id);
     }
@@ -250,7 +249,7 @@ router.post('/forgot-password', async function (req, res, next) {
     return res.status(200).json({message: successMessage});
   }
 
-  /* If user has an active reset token, do not send email */
+  // If user has an active reset token, do not send email // TODO why?
   const activeToken = await db.findLatestActiveResetToken(user.id);
   if (activeToken) {
     return res.status(200).json({message: successMessage});
@@ -314,7 +313,7 @@ router.get('/config/currencies', async function (req, res, next) {
   res.json({currencies});
 });
 
-router.post('/confirm-wd', async function (req, res, next) {
+router.post('/confirm-withdraw', async function (req, res, next) {
   req.checkBody('token').exists()
     .isUUID(4);
 

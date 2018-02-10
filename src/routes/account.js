@@ -341,7 +341,7 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
   }
 });
 
-router.post('/set-confirm-wd-by-email',
+router.post('/set-confirm-withdraw-by-email',
   async function (req, res, next) {
     req.checkBody('confirmWd', 'Invalid confirm withdrawal option').exists()
       .isBoolean();
