@@ -34,11 +34,11 @@ export default {
       url: '/stats',
       icon: 'icon-chart'
     },
-    {
+   /*  {
       name: 'Promotions',
       url: '/promotions',
       icon: 'icon-diamond'
-    },
+    }, */
     {
       name: 'Affiliates',
       url: '/affiliates',
