@@ -17,7 +17,6 @@ router.post('/logout', async function (req, res, next) {
 });
 
 router.get('/me', async function (req, res, next) {
-  // todo should this header setting be here?
   res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
   res.json({
     id: req.currentUser.id,
@@ -41,7 +40,6 @@ router.post('/change-email', async function (req, res, next) {
     return res.status(400).json({errors});
   }
 
-  // TODO can this be a custom express-validator?
   const emailExists = await db.isEmailAlreadyTaken(req.body.email);
   if (emailExists) {
     return res.status(409).json({error: 'Email already exists'});
@@ -49,7 +47,6 @@ router.post('/change-email', async function (req, res, next) {
 
   await db.updateEmail(req.currentUser.id, req.body.email);
 
-  /* Send mail for email id verification */
   const verifyEmailToken = await db.createVerifyEmailToken(req.currentUser.id, req.body.email);
   mailer.sendVerificationEmail(req.currentUser.username, req.body.email, verifyEmailToken.id);
 
@@ -128,12 +125,11 @@ router.post('/logout-all-sessions', async function (req, res, next) {
 });
 
 router.get('/2fa-key', async function (req, res, next) {
-  /* If user has 2fa enabled, do not generate or send key */
   if (req.currentUser.mfa_key) {
     return res.status(400).send({error: 'Two factor authentication is already enabled'});
   }
 
-  /* Check if user already has a temp mfa secret, if yes return with secret */
+  // Check if user already has a temp mfa secret, if yes return with secret
   if (req.currentUser.temp_mfa_key) {
     return res.json({
       key: req.currentUser.temp_mfa_key,
@@ -141,7 +137,7 @@ router.get('/2fa-key', async function (req, res, next) {
     });
   }
 
-  /* User does not have temp secret: Generate new mfa_secret, write to temp field and send */
+  // User does not have temp secret: Generate new mfa_secret, write to temp field and send
   const newKey = await db.addTemp2faSecret(req.currentUser.id, helpers.getNew2faSecret());
 
   return res.json({
@@ -151,12 +147,10 @@ router.get('/2fa-key', async function (req, res, next) {
 });
 
 router.post('/enable-2fa', async function (req, res, next) {
-  /* Check if user has it already enabled, if yes return */
   if (req.currentUser.mfa_key) {
     return res.status(400).json({error: 'Two factor authentication is already enabled'});
   }
 
-  /* Check if two factor code is valid, if not return with error */
   req.check('otp').exists()
     .isInt()
     .isLength({min: 6, max: 6});
@@ -166,12 +160,10 @@ router.post('/enable-2fa', async function (req, res, next) {
     return res.status(400).json({error: 'Invalid two factor code'});
   }
 
-  /* Check if two factor code is correct, if not return with error */
   if (!helpers.isOtpValid(req.currentUser.temp_mfa_key, req.body.otp)) {
     return res.status(400).json({error: 'Invalid two factor code'});
   }
 
-  /* Two factor code is valid and correct, enable 2fa for user */
   await db.enableTwofactor(req.currentUser.id);
 
   /* Insert this code as a used code */
@@ -181,19 +173,16 @@ router.post('/enable-2fa', async function (req, res, next) {
 });
 
 router.post('/disable-2fa', mw.require2fa, async function (req, res, next) {
-  /* Check if user has it enabled, if no - return */
   if (!req.currentUser.mfa_key) {
     return res.status(400).json({error: 'Two factor authentication is not enabled for this account'});
   }
 
-  /* Two factor code was not used before. We can disable two factor auth now */
   await db.disableTwoFactor(req.currentUser.id);
 
   res.end();
 });
 
 router.post('/add-whitelisted-ip', async function (req, res, next) {
-  /* Requires req.body.ip to be a valid ip, if not provided, set current ip as whitelisted */
   req.check('ip', 'Invalid ip')
     .exists()
     .trim()
@@ -248,7 +237,6 @@ router.get('/balances', async function (req, res, next) {
 });
 
 router.get('/deposit-address', async function (req, res, next) {
-  /* Check if currency is valid and supported */
   req.checkQuery('currency', 'Invalid currency')
     .exists()
     .isInt()
@@ -259,7 +247,6 @@ router.get('/deposit-address', async function (req, res, next) {
     return res.status(400).json({errors: validationResult.array()});
   }
 
-  /* Fetch address for (currency, user_id) from db */
   const address = await db.getDepositAddress(req.currentUser.id, parseInt(req.query.currency, 10));
 
   if (!address) {
@@ -272,7 +259,6 @@ router.get('/deposit-address', async function (req, res, next) {
 
 // TODO: Add isCustomerAllowed middleware (check for CF-IPCountry ?)
 router.post('/withdraw', mw.require2fa, async function (req, res, next) {
-  /* Check if currency is valid and supported */
   req.checkBody('currency', 'Invalid currency')
     .exists()
     .isInt()
