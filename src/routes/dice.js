@@ -1,6 +1,5 @@
 const express = require('express');
 const BigNumber = require('bignumber.js');
-
 const db = require('../db');
 const mw = require('../middleware');
 const helpers = require('../helpers');
@@ -28,7 +27,7 @@ router.get('/load-state', async function (req, res, next) {
   }
 
   const diceSeed = await db.getActiveDiceSeed(req.currentUser.id, req.query.clientSeed);
-  const latestUserBets = await db.getLatestUserDiceBets(req.currentUser.id, 'dice');
+  const latestUserBets = await db.getLatestUserDiceBets(req.currentUser.id);
   const bankRoll = await db.getBankrollByCurrency(req.query.currency);
 
   res.json({
@@ -43,9 +42,6 @@ router.get('/load-state', async function (req, res, next) {
 });
 
 router.post('/bet', async function (req, res, next) {
-  /* Validations */
-
-  /* 1. Validate fields */
   req.checkBody('currency', 'Invalid currency')
     .exists()
     .isInt()
@@ -74,14 +70,13 @@ router.post('/bet', async function (req, res, next) {
 
   const validationResult = await req.getValidationResult();
   if (!validationResult.isEmpty()) {
-    /* Only send first error message */
+    // Only send first error message
     const errors = validationResult.array();
     const errorMsg = errors[0].msg;
 
     return res.status(400).json({error: errorMsg});
   }
 
-  /* Basic validation done, now fetch bankroll to validate potential profit and minBetAmount */
   const bankRoll = await db.getBankrollByCurrency(req.body.currency);
 
   const currency = parseInt(req.body.currency, 10);
@@ -91,17 +86,14 @@ router.post('/bet', async function (req, res, next) {
   const chance = new BigNumber(req.body.chance);
   const multiplier = new BigNumber(99).dividedBy(chance);
 
-  /* 2. Validate if bet amount is less than min bet amount */
   if (betAmount.lt(minBetAmount)) {
     const currencyName = helpers.getCurrencyField(currency, 'name');
     const minBetAmountFloat = minBetAmount.dividedBy(new BigNumber(10).pow(helpers.getCurrencyField(currency, 'scale')));
     return res.status(400).json({error: `Min bet amount for ${currencyName} is ${minBetAmountFloat}`});
   }
 
-  /* 3. Calculate potential profit, validate if it is > 0.00000001 and less than maxWin */
   const potentialProfit = betAmount.times(multiplier).minus(betAmount);
 
-  // TODO: Get potential profit per currency from bankroll table too?
   if (potentialProfit.lt(0.00000001)) {
     return res.status(400).json({error: 'Min profit too low'});
   }
@@ -110,9 +102,6 @@ router.post('/bet', async function (req, res, next) {
     return res.status(400).json({error: 'Profit greater than max'});
   }
 
-  /* 4. TODO: Validate if customer allowed */
-
-  /* DICE ROLL CALCULATION AND DICE BET */
   try {
     const result = await db.doDiceBet(
       req.currentUser.id,
