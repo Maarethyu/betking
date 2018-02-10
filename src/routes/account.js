@@ -277,14 +277,12 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
     return res.status(400).json({errors: validationResult.array()});
   }
 
-  /* Check if user has confirmWd enabled and a verified email id on profile */
   if (req.currentUser.confirm_wd && (!req.currentUser.email || !req.currentUser.email_verified)) {
     return res.status(400).json({error: 'You have asked to confirm withdrawals by email but you do not have a verified email id added to profile'});
   }
 
   const currency = currencies.find(c => c.value === req.body.currency);
 
-  /* Check if withdrawal amount is in permissible limit */
   if (new BigNumber(currency.minWdLimit).gt(new BigNumber(req.body.amount))) {
     return res.status(400).json({error: 'Requested amount is less than minimum withdrawal limit'});
   }
@@ -296,7 +294,6 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
 
   const wdFee = new BigNumber(currency.wdFee).toString();
 
-  /* Create a withdrwal entry in db and reduce user balance */
   try {
     const wdTx = await db.createWithdrawalEntry(
       req.currentUser.id,
@@ -337,7 +334,6 @@ router.post('/set-confirm-withdraw-by-email',
       return res.status(400).json({errors: validationResult.array()});
     }
 
-    /* Require 2fa if confirm wd by email is being disabled */
     if (!req.body.confirmWd) {
       mw.require2fa(req, res, next);
     } else {

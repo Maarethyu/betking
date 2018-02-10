@@ -1,4 +1,3 @@
--- users table
 CREATE TABLE users (
   id bigserial PRIMARY KEY,
   username text NOT NULL,
@@ -9,7 +8,6 @@ CREATE TABLE users (
   temp_mfa_key text NULL,
   affiliate_id text NULL,
   confirm_wd boolean NOT NULL DEFAULT false,
-  app_id int NOT NULL DEFAULT 0,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW(),
   locked_at timestamp with time zone NULL
 );
@@ -17,7 +15,6 @@ CREATE TABLE users (
 CREATE UNIQUE INDEX unique_username ON users USING btree (lower(username) text_pattern_ops);
 CREATE INDEX users_lower_email_idx ON users USING btree(lower(email));
 
--- sessions table
 CREATE TABLE sessions (
   id uuid PRIMARY KEY,
   user_id bigint REFERENCES users(id),
@@ -28,7 +25,6 @@ CREATE TABLE sessions (
   created_at timestamp with time zone  NOT NULL DEFAULT NOW()
 );
 
--- login_attempts table
 CREATE TABLE login_attempts (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
@@ -41,7 +37,6 @@ CREATE TABLE login_attempts (
 
 CREATE INDEX login_attempts_user_id_idx ON login_attempts USING btree(user_id);
 
--- mfa_attempts table
 CREATE TABLE mfa_attempts (
   id bigserial PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
@@ -54,14 +49,12 @@ CREATE TABLE mfa_attempts (
 
 CREATE INDEX mfa_attempts_user_id_idx ON mfa_attempts USING btree(user_id);
 
--- active_sessions view
 CREATE VIEW active_sessions AS
   SELECT *
   FROM sessions
   WHERE expired_at >= NOW()
   AND logged_out_at IS NULL;
 
--- reset_tokens table
 CREATE TABLE reset_tokens (
   id   uuid NOT NULL PRIMARY KEY,
   user_id bigint  NOT NULL  REFERENCES users(id),
@@ -72,7 +65,6 @@ CREATE TABLE reset_tokens (
 
 CREATE INDEX reset_tokens_user_id_idx ON reset_tokens(user_id, expired_at);
 
--- verify_emails_tokens table
 CREATE TABLE verify_email_tokens (
   id   uuid NOT NULL PRIMARY KEY,
   user_id bigint  NOT NULL  REFERENCES users(id),
@@ -84,7 +76,6 @@ CREATE TABLE verify_email_tokens (
 
 CREATE INDEX verify_email_tokens_user_id_idx ON verify_email_tokens(user_id, expired_at);
 
--- mfa passcodes
 CREATE TABLE mfa_passcodes (
   user_id     bigint                    NOT NULL,
   passcode    text                      NOT NULL,
@@ -93,7 +84,6 @@ CREATE TABLE mfa_passcodes (
 
 CREATE UNIQUE INDEX unique_mfa_user_passcodes_day ON mfa_passcodes(user_id, passcode, date_trunc('day', created_at AT TIME ZONE 'Etc/UTC'));
 
--- ip_whitelist table
 CREATE TABLE whitelisted_ips (
   id bigserial PRIMARY KEY,
   ip_address inet NOT NULL,
@@ -103,7 +93,6 @@ CREATE TABLE whitelisted_ips (
 
 CREATE INDEX whitelisted_ips_user_id_idx ON whitelisted_ips USING btree(user_id);
 
--- error_logs table
 CREATE TABLE error_logs (
   id bigserial PRIMARY KEY,
   created_at timestamp with time zone  NOT NULL DEFAULT NOW(),
@@ -118,7 +107,6 @@ CREATE TABLE error_logs (
   to_email text NULL
 );
 
--- user_balances table
 CREATE TABLE user_balances (
   id bigserial PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
@@ -129,8 +117,6 @@ CREATE TABLE user_balances (
 CREATE UNIQUE INDEX unique_user_id_currency ON user_balances(user_id, currency);
 CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
 
-
--- user_withdrawals table
 CREATE TABLE user_withdrawals (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
@@ -146,7 +132,6 @@ CREATE TABLE user_withdrawals (
 
 CREATE INDEX user_withdrawals_created_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
--- deposit_addresses table
 CREATE TABLE user_addresses (
   id bigserial PRIMARY KEY,
   user_id bigint NULL REFERENCES users(id),
@@ -156,7 +141,6 @@ CREATE TABLE user_addresses (
 
 CREATE INDEX user_addresses_user_id_currency_idx ON user_addresses(user_id, currency);
 
--- user_deposits table
 CREATE TABLE user_deposits (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
@@ -170,7 +154,6 @@ CREATE TABLE user_deposits (
 CREATE UNIQUE INDEX unique_user_id_txid ON user_deposits(user_id, txid);
 CREATE INDEX user_deposits_created_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
--- whitelisted_addresses table
 CREATE TABLE whitelisted_addresses (
   id bigserial PRIMARY KEY,
   user_id bigint NULL REFERENCES users(id),
@@ -181,7 +164,6 @@ CREATE TABLE whitelisted_addresses (
 CREATE UNIQUE INDEX unique_user_id_currency_idx ON whitelisted_addresses(user_id, currency);
 CREATE INDEX whitelisted_addresses_user_id_idx ON whitelisted_addresses USING btree(user_id);
 
--- bankrolls table
 CREATE TABLE bankrolls (
   id bigserial PRIMARY KEY,
   currency integer NOT NULL,
@@ -189,7 +171,6 @@ CREATE TABLE bankrolls (
   min_bet_amount numeric (36, 0) NOT NULL
 );
 
--- games table
 CREATE TABLE games (
   id bigserial PRIMARY KEY,
   player_id bigint NOT NULL REFERENCES users(id),
@@ -202,7 +183,6 @@ CREATE TABLE games (
   seed_details jsonb NOT NULL
 );
 
--- dice seeds table
 CREATE TABLE dice_seeds (
   id bigserial PRIMARY KEY,
   player_id bigint NOT NULL REFERENCES users(id),

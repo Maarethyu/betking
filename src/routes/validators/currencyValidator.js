@@ -1,11 +1,5 @@
 const currencies = require('../../currencies');
 
-/**
- * Accepts currency: int / string as argument
- * Returns true if currency supported
- * Returns false if not
- */
-
 module.exports = (currency) => {
   let value = currency;
 
