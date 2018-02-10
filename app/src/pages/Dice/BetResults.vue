@@ -11,6 +11,11 @@
     // width: 60%;
     margin: 0 auto;
   }
+
+  .dice-bet-results th{
+    text-align:center!important;
+  }
+
 </style>
 
 
@@ -38,40 +43,40 @@
       fields: [{
         key: 'id',
         label: 'Bet Id',
-        class: 'text-left'
+        class: 'text-center'
       }, {
         key: 'date',
         label: 'Time',
         formatter: 'formatTime',
-        class: 'text-left'
+        class: 'text-center'
       }, {
         key: 'bet_amount',
-        label: 'Bet',
+        label: 'Bet Amount',
         formatter: 'formatAmount',
         class: 'text-right'
-      }, {
-        key: 'currency',
-        label: 'Currency',
-        class: 'text-left'
       }, {
         key: 'chance',
         label: 'Payout',
         formatter: 'chanceToPayout',
-        class: 'text-right'
+        class: 'text-center'
       }, {
         key: 'target',
         label: 'Target',
         formatter: 'formatTarget',
-        class: 'text-left'
+        class: 'text-center'
       }, {
         key: 'roll',
         label: 'Roll',
-        class: 'text-right'
+        class: 'text-center'
       }, {
         key: 'profit',
         label: 'Profit',
         formatter: 'formatProfit',
         class: 'text-right'
+      }, {
+        key: 'currency',
+        label: 'Currency',
+        class: 'text-center'
       }]
     }),
     methods: {
