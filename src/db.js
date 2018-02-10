@@ -83,9 +83,7 @@ const lockUserAccount = async (userId) => {
 const updateEmail = async (userId, email) => {
   await db.tx(t => {
     return t.batch([
-      /* Change email */
       t.none('UPDATE users set email = $2, email_verified = false WHERE id = $1', [userId, email]),
-      /* Mark all previous reset password tokens as expired */
       t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', userId)
     ]);
   });
@@ -146,11 +144,8 @@ const createVerifyEmailToken = async (userId, email) => {
 
 const resetUserPasswordByToken = async (token, newPasswordHash) => {
   await db.tx(t => {
-    // Set current reset token as used and expired. If token not found, exit
     return t.one('UPDATE reset_tokens SET used = true, expired_at = NOW() where id = $1 AND used = false AND expired_at > NOW() RETURNING user_id', token)
-      // Change Password, return user
       .then(result => t.one('UPDATE users SET password = $1 WHERE id = $2 RETURNING *', [newPasswordHash, result.user_id]))
-      // Password changed now. Expire all other reset password requests and logout all sessions
       .then(user => t.batch([
         t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', user.id),
         t.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1', user.id)
@@ -207,8 +202,8 @@ const logUncaughtExceptionError = async (msg, stack) => {
     });
 };
 
-const logEmailError = async (msg, stack, toEmail, info) => {
-  await db.none('INSERT INTO error_logs (msg, stack, to_email, mail_info, source) VALUES ($1, $2, $3, $4, $5)', [msg, stack, toEmail, info, 'MAIL_ERROR'])
+const logEmailError = async (msg, stack, address, info) => {
+  await db.none('INSERT INTO error_logs (msg, stack, to_email, mail_info, source) VALUES ($1, $2, $3, $4, $5)', [msg, stack, address, info, 'MAIL_ERROR'])
     .catch(error => {
       // Do not throw error from here to prevent infinite loop
       console.log('Error writing to error logs', error);
@@ -222,17 +217,10 @@ const getLoginAttempts = async (userId) => {
 
 const markEmailAsVerified = async (token) => {
   await db.tx(t => {
-    // Return current email from users table
     return t.one('SELECT u.email, e.user_id FROM users AS u INNER JOIN verify_email_tokens AS e ON u.id = e.user_id WHERE e.id = $1', token)
-      // Set current verify-email token as used and expired. If token not found, exit
       .then(res => t.batch([
-        // Expire the current token, mark it as used
         t.one('UPDATE verify_email_tokens SET used = $1, expired_at = NOW() where id = $2 AND used = false AND expired_at > NOW() AND email = $3 RETURNING email', [true, token, res.email]),
-
-        // Verify user's email id
         t.none('UPDATE users SET email_verified = $1 WHERE id = $2', [true, res.user_id]),
-
-        // Expire all other verify email tokens
         t.none('UPDATE verify_email_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW() AND id != $2', [res.user_id, token])
       ]));
   });
@@ -251,14 +239,13 @@ const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) =
     .toString();
 
   const result = await db.tx(t => {
-    /* Check if user has sufficient balance in the account */
     return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amountDeducted, userId, currency])
       .then(res => {
         if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
 
-        /* Check if user has enabled confirm withdrawals by email */
+        // Check if user has enabled confirm withdrawals by email
         return t.one('SELECT confirm_wd from users where id = $1', userId);
       })
       .then(res => {
@@ -281,7 +268,7 @@ const setConfirmWithdrawalByEmail = async (userId, confirmWd) => {
     });
 };
 
-const confirmWdByToken = async (token) => {
+const confirmWithdrawByToken = async (token) => {
   await db.oneOrNone('UPDATE user_withdrawals SET status = $1, verified_at = NOW() WHERE verification_token = $2 AND status = $3 RETURNING *', ['pending', token, 'pending_email_verification'])
     .then(row => {
       if (!row) {
@@ -291,7 +278,7 @@ const confirmWdByToken = async (token) => {
 };
 
 const addDeposit = async (currency, amount, address, txid) => {
-  /* currencyToQuery is ETH if currency is an eth-token */
+  // currencyToQuery is ETH if currency is an eth-token
   const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
 
   await db.tx(t => {
@@ -303,7 +290,7 @@ const addDeposit = async (currency, amount, address, txid) => {
 
         const userId = row.user_id;
 
-        /* If tx already added, throw error */
+        // If tx already added, throw error
         return t.oneOrNone('SELECT COUNT(*) > 0 as tx_exists FROM user_deposits WHERE txid = $1 AND user_id = $2', [txid, userId])
           .then(row => {
             if (row && row.tx_exists) {
@@ -314,7 +301,7 @@ const addDeposit = async (currency, amount, address, txid) => {
           });
       })
       .then(userId => {
-        /* Add a tx entry in user_deposits */
+        // Add a tx entry in user_deposits
         return t.one('INSERT INTO user_deposits (id, user_id, currency, amount, address, txid) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [uuidV4(), userId, currency, amount, address, txid]);
       })
       .then(row => {
@@ -333,18 +320,17 @@ const addDeposit = async (currency, amount, address, txid) => {
 };
 
 const getDepositAddress = async (userId, currency) => {
-  /* currencyToQuery is ETH if currency is an eth-token */
+  // currencyToQuery is ETH if currency is an eth-token
   const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
 
   const result = await db.tx(t => {
-    /* Check if user has an address already assigned. If yes, return */
     return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currencyToQuery])
       .then(res => {
         if (res) {
           return res.address;
         }
 
-        /* Address not found in db. Find an available address */
+        // Address not found in db. Find an available address
         return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currencyToQuery)
           .then(res => {
             if (!res) {
@@ -352,7 +338,7 @@ const getDepositAddress = async (userId, currency) => {
               return null;
             }
 
-            /* Assign the available address to current user (revalidate that the address is free) and return address */
+            // Assign the available address to current user (revalidate that the address is free) and return address
             return t.oneOrNone('UPDATE user_addresses SET user_id = $1 WHERE id = $2 AND user_id IS NULL RETURNING address', [userId, res.id]);
           })
           .then(res => {
@@ -424,7 +410,7 @@ const getLatestUserDiceBets = async (userId) => {
   return result;
 };
 
-const getBankrollConfigForCurrency = async (currency) => {
+const getBankrollByCurrency = async (currency) => {
   const result = await db.one('SELECT * FROM bankrolls WHERE currency = $1', currency);
   return result;
 };
@@ -437,6 +423,8 @@ const getActiveDiceSeed = async (userId, newClientSeed) => {
         if (res) {
           return res;
         }
+
+        // generate new if they don't have a seed
         const serverSeed = dice.generateServerSeed();
 
         return t.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, $2, $3, $4, $5) RETURNING *', [userId, true, newClientSeed, serverSeed, 0]);
@@ -481,7 +469,6 @@ const doDiceBet = async (userId, betAmount, currency, target, chance) => {
         const userProfit = new BigNumber(betAmount)
           .add(bet.profit)
           .toString();
-
         return t.one('UPDATE user_balances SET balance = balance + $1 WHERE user_id = $2 AND currency = $3 RETURNING balance', [userProfit, userId, currency])
           .then(res => {
             return {
@@ -591,10 +578,10 @@ module.exports = {
   addWhitelistedAddress,
   isAddressWhitelisted,
   setConfirmWithdrawalByEmail,
-  confirmWdByToken,
+  confirmWithdrawByToken,
   /* DICE */
   getLatestUserDiceBets,
-  getBankrollConfigForCurrency,
+  getBankrollByCurrency,
   getActiveDiceSeed,
   doDiceBet,
   setNewDiceClientSeed,

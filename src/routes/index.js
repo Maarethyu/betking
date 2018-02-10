@@ -324,7 +324,7 @@ router.post('/confirm-wd', async function (req, res, next) {
   }
 
   try {
-    await db.confirmWdByToken(req.body.token);
+    await db.confirmWithdrawByToken(req.body.token);
 
     res.end();
   } catch (e) {

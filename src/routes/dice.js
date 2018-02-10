@@ -29,7 +29,7 @@ router.get('/load-state', async function (req, res, next) {
 
   const diceSeed = await db.getActiveDiceSeed(req.currentUser.id, req.query.clientSeed);
   const latestUserBets = await db.getLatestUserDiceBets(req.currentUser.id, 'dice');
-  const bankRoll = await db.getBankrollConfigForCurrency(req.query.currency);
+  const bankRoll = await db.getBankrollByCurrency(req.query.currency);
 
   res.json({
     clientSeed: diceSeed.clientSeed,
@@ -82,7 +82,7 @@ router.post('/bet', async function (req, res, next) {
   }
 
   /* Basic validation done, now fetch bankroll to validate potential profit and minBetAmount */
-  const bankRoll = await db.getBankrollConfigForCurrency(req.body.currency);
+  const bankRoll = await db.getBankrollByCurrency(req.body.currency);
 
   const currency = parseInt(req.body.currency, 10);
   const betAmount = new BigNumber(req.body.betAmount);
