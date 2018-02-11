@@ -1,5 +1,12 @@
 <template>
-  <b-table id="dice-bet-results" class="dice-bet-results" responsive striped small outlined hover fixed :items="latestBets" :fields="fields">
+  <b-table
+    id="dice-bet-results"
+    class="dice-bet-results"
+    responsive striped small outlined hover fixed
+    :items="latestBets"
+    :fields="fields"
+    :show-empty="true"
+    empty-text="You haven't placed any bets.">
     <template slot="currency" slot-scope="data">
       <CurrencyIcon :value="data.value" :width="15" />
     </template>
