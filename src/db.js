@@ -406,7 +406,7 @@ const isAddressWhitelisted = async (userId, currency, address) => {
 
 /* DICE */
 const getLatestUserDiceBets = async (userId) => {
-  const result = await db.any('SELECT id, date, bet_amount, currency, profit, game_details->>\'roll\' as roll, game_details->>\'chance\' as chance, game_details->>\'target\' as target FROM games WHERE player_id = $1 AND game_type = $2 ORDER BY date desc LIMIT 50', [userId, 'dice']);
+  const result = await db.any('SELECT id, date, bet_amount, currency, profit, game_details->>\'roll\' as roll, game_details->>\'chance\' as chance, game_details->>\'target\' as target FROM bets WHERE player_id = $1 AND game_type = $2 ORDER BY date desc LIMIT 50', [userId, 'dice']);
   return result;
 };
 
@@ -456,12 +456,12 @@ const doDiceBet = async (userId, betAmount, currency, target, chance) => {
         const roll = dice.calculateDiceRoll(seed.server_seed, seed.client_seed, seed.nonce);
         const profit = dice.calculateProfit(roll, chance, betAmount, target);
 
-        /* Increment nonce and update games table */
+        /* Increment nonce and update bets table */
         return t.none('UPDATE dice_seeds SET nonce = nonce + 1 WHERE id = $1', seed.id)
           .then(() => {
             const gameDetails = {chance, roll, target};
             const seedDetails = {seed_id: seed.id, nonce: seed.nonce};
-            return t.one('INSERT INTO games (player_id, date, bet_amount, currency, profit, game_type, game_details, seed_details) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7) RETURNING *', [userId, betAmount, currency, profit, 'dice', gameDetails, seedDetails]);
+            return t.one('INSERT INTO bets (player_id, date, bet_amount, currency, profit, game_type, game_details, seed_details) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7) RETURNING *', [userId, betAmount, currency, profit, 'dice', gameDetails, seedDetails]);
           });
       })
       .then(bet => {
