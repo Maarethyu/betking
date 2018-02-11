@@ -27,7 +27,7 @@ const requireLoggedIn = async (req, res, next) => {
 };
 
 const require2fa = async (req, res, next) => {
-  if (req.currentUser.mfa_key) {
+  if (req.currentUser.is_2fa_enabled) {
     /* If user has 2fa enabled, check if req.body.otp is valid */
     req.check('otp').exists()
       .isInt()
