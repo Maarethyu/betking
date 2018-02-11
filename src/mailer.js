@@ -11,7 +11,7 @@ const sendMail = function (address, subject, htmlBody) {
       'Content-Type': 'application/json',
       'X-Postmark-Server-Token': config.get('MAILER_SERVER_TOKEN')
     },
-    body: JSON.stringify({From: config.get('MAILER_SENDER_EMAIL'), address, subject, htmlBody})
+    body: JSON.stringify({From: config.get('MAILER_SENDER_EMAIL'), To: address, Subject: subject, HtmlBody: htmlBody})
   });
 };
 
