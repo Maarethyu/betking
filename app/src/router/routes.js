@@ -11,7 +11,7 @@ const routes = [
     meta: {requiresUser: true},
     children: [
       /* Pages which render for both user logged in or logged out state */
-      {path: '', component: () => import('pages/Home/Home')},
+      {path: '', name: 'home', component: () => import('pages/Home/Home')},
       {path: '/dice', component: () => import('pages/Dice/Dice')},
 
       /* Pages which need user to be logged out */

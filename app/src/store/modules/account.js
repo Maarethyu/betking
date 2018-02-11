@@ -1,7 +1,6 @@
 import Fingerprint2 from 'fingerprintjs2';
-
+import {routeUserOnLogin, routeUserOnLogout} from 'src/router/route-helpers';
 import api from 'src/api';
-import router from 'src/router';
 
 import * as types from '../mutation-types';
 
@@ -56,22 +55,20 @@ const actions = {
   onLogin ({commit}, user) {
     commit(types.UPDATE_AUTHSTATE, true);
     commit(types.SET_USER, user);
-    router.replace('/');
+    routeUserOnLogin();
   },
 
   logout ({commit}) {
     return api.logout()
       .then(() => {
         commit(types.UPDATE_AUTHSTATE, false);
-
-        router.replace('/');
+        routeUserOnLogout();
       })
       .catch(error => {
         if (error.response && error.response.status === 401) {
           // User is already logged out
           commit(types.UPDATE_AUTHSTATE, false);
-
-          router.replace('/');
+          routeUserOnLogout();
         } else {
           throw error;
         }
@@ -86,14 +83,12 @@ const actions = {
     return api.logoutAll()
       .then(() => {
         commit(types.UPDATE_AUTHSTATE, false);
-
-        router.replace('/');
+        routeUserOnLogout();
       })
       .catch(error => {
         if (error.response && error.response.status === 401) {
           commit(types.UPDATE_AUTHSTATE, false);
-
-          router.replace('/');
+          routeUserOnLogout();
         } else {
           throw error;
         }
