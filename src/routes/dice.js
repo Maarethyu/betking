@@ -63,7 +63,8 @@ router.post('/bet', async function (req, res, next) {
 
   req.checkBody('chance', 'Invalid chance')
     .exists()
-    .isFloat({gt: 0.0001, lt: 98.99});
+    .isFloat()
+    .custom(value => value >= 0.0001 && value <= 98.99);
 
   req.checkBody('betAmount', 'Invalid bet amount')
     .custom(amount => require('./validators/amountValidator')(amount));
