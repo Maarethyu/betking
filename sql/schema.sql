@@ -171,7 +171,7 @@ CREATE TABLE bankrolls (
   min_bet_amount numeric (36, 0) NOT NULL
 );
 
-CREATE TABLE games (
+CREATE TABLE bets (
   id bigserial PRIMARY KEY,
   player_id bigint NOT NULL REFERENCES users(id),
   date timestamp with time zone NOT NULL  DEFAULT NOW(),
