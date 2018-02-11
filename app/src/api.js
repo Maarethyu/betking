@@ -1,6 +1,6 @@
 import axios from 'axios';
 import store from 'src/store';
-import router from 'src/router';
+import {routeUserOnLogout} from 'src/router/route-helpers';
 
 const csrfToken = () => {
   const el = document.getElementById('csrfToken');
@@ -10,7 +10,7 @@ const csrfToken = () => {
 const errorHandler = function (error) {
   if (error.response && error.response.status === 401) {
     store.dispatch('clearAuthState');
-    router.replace('/');
+    routeUserOnLogout();
   }
 
   throw error;
