@@ -406,7 +406,7 @@ const isAddressWhitelisted = async (userId, currency, address) => {
 
 /* DICE */
 const getLatestUserDiceBets = async (userId) => {
-  const result = await db.any('SELECT id, date, bet_amount, currency, profit, game_details->>\'roll\' as roll, game_details->>\'chance\' as chance, game_details->>\'target\' as target FROM bets WHERE player_id = $1 AND game_type = $2 ORDER BY date desc LIMIT 50', [userId, 'dice']);
+  const result = await db.any('SELECT id, date, bet_amount, currency, profit, game_details FROM bets WHERE player_id = $1 AND game_type = $2 ORDER BY date desc LIMIT 50', [userId, 'dice']);
   return result;
 };
 
@@ -476,10 +476,11 @@ const doDiceBet = async (userId, betAmount, currency, target, chance) => {
               date: bet.date,
               bet_amount: bet.bet_amount,
               currency: bet.currency,
-              chance: bet.game_details.chance,
-              roll: bet.game_details.roll,
+              // chance: bet.game_details.chance,
+              // roll: bet.game_details.roll,
               profit: bet.profit,
-              target: bet.game_details.target,
+              // target: bet.game_details.target,
+              game_details: bet.game_details,
               balance: res.balance,
               nextNonce: bet.seed_details.nonce + 1
             };
