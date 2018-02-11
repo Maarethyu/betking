@@ -1,4 +1,4 @@
-const currencies = require('../../currencies');
+const currencyCache = require('../../currencyCache');
 
 module.exports = (currency) => {
   let value = currency;
@@ -7,7 +7,7 @@ module.exports = (currency) => {
     value = parseInt(currency, 10);
   }
 
-  const isCurrencySupported = currencies.find(c => c.value === value);
+  const isCurrencySupported = currencyCache.findById(value);
 
   return !!isCurrencySupported;
 };

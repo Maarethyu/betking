@@ -109,7 +109,7 @@
 
         api.removeWhitelistedAddress(currency, this.otp)
           .then(() => {
-            const currencyConfig = this.currencies.find(c => c.value === currency);
+            const currencyConfig = this.currencies.find(c => c.id === currency);
 
             if (currencyConfig) {
               toastr.success(`Removed whitelisted address for ${currencyConfig.name}`);
@@ -131,7 +131,7 @@
 
         api.addWhitelistedAddress(this.activeCurrency, this.activeAddress, this.otp)
           .then(() => {
-            const currency = this.currencies.find(c => c.value === this.activeCurrency);
+            const currency = this.currencies.find(c => c.id === this.activeCurrency);
 
             if (currency) {
               toastr.success(`Added whitelisted address for ${currency.name}`);

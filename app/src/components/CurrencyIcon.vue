@@ -7,7 +7,7 @@
 
   export default {
     props: {
-      value: {
+      id: {
         default: null,
         type: Number
       },
@@ -29,7 +29,7 @@
         currencies: 'currencies'
       }),
       currency () {
-        return this.currencies.find(c => c.value === this.value);
+        return this.currencies.find(c => c.id === this.id);
       },
       symbol () {
         return this.currency && this.currency.symbol;

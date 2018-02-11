@@ -6,6 +6,7 @@ const config = require('config');
 const db = require('../db');
 const mailer = require('../mailer');
 const helpers = require('../helpers');
+const currencyCache = require('../currencyCache');
 
 const milliSecondsInYear = 31536000000;
 const milliSecondsInTwoWeeks = 1209600000;
@@ -308,7 +309,7 @@ router.post('/verify-email', async function (req, res, next) {
 });
 
 router.get('/config/currencies', async function (req, res, next) {
-  const currencies = require('../currencies');
+  const currencies = currencyCache.currencies;
 
   res.json({currencies});
 });

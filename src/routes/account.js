@@ -6,7 +6,7 @@ const db = require('../db');
 const helpers = require('../helpers');
 const mw = require('../middleware');
 const mailer = require('../mailer');
-const currencies = require('../currencies');
+const currencyCache = require('../currencyCache');
 
 router.use(mw.requireLoggedIn);
 router.use(mw.requireWhitelistedIp);
@@ -281,9 +281,9 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
     return res.status(400).json({error: 'You have asked to confirm withdrawals by email but you do not have a verified email id added to profile'});
   }
 
-  const currency = currencies.find(c => c.value === req.body.currency);
+  const currency = currencyCache.findById(req.body.currency);
 
-  if (new BigNumber(currency.minWdLimit).gt(new BigNumber(req.body.amount))) {
+  if (new BigNumber(currency.min_withdraw_limit).gt(new BigNumber(req.body.amount))) {
     return res.status(400).json({error: 'Requested amount is less than minimum withdrawal limit'});
   }
 
@@ -292,25 +292,25 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
     return res.status(400).json({error: 'Cannot withdraw to a non-whitelisted address'});
   }
 
-  const wdFee = new BigNumber(currency.wdFee).toString();
+  const withdrawalFee = new BigNumber(currency.withdrawal_fee).toString();
 
   try {
-    const wdTx = await db.createWithdrawalEntry(
+    const withdrawTransaction = await db.createWithdrawalEntry(
       req.currentUser.id,
       req.body.currency,
-      wdFee,
+      withdrawalFee,
       req.body.amount,
       req.body.address
     );
 
-    if (wdTx.status === 'pending_email_verification') {
+    if (withdrawTransaction.status === 'pending_email_verification') {
       mailer.sendWithdrawConfirmationEmail(
         req.currentUser.username,
         req.currentUser.email,
-        wdTx.verification_token,
+        withdrawTransaction.verification_token,
         currency.symbol,
-        new BigNumber(wdTx.amount).div(new BigNumber(10).pow(currency.scale)),
-        wdTx.address
+        new BigNumber(withdrawTransaction.amount).div(new BigNumber(10).pow(currency.scale)),
+        withdrawTransaction.address
       );
     }
 

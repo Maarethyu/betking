@@ -30,11 +30,11 @@ export const getUrlParams = function () {
     : {};
 };
 
-export const formatAmount = function (amount, value) {
+export const formatAmount = function (amount, currencyId) {
   /* This helper should be added in component.methods
     The component must map "currencies" getter from store in component.computed
     */
-  const currency = this.currencies.find(c => c.value === value);
+  const currency = this.currencies.find(c => c.id === currencyId);
 
   if (!currency) {
     return null;
@@ -43,18 +43,18 @@ export const formatAmount = function (amount, value) {
   return new BigNumber(amount).toFixed(currency.scale, BigNumber.ROUND_DOWN);
 };
 
-export const formatBigAmount = function (amount, value) {
+export const formatBigAmount = function (amount, currencyId) {
   /* This helper should be added in component.methods
     The component must map "currencies" getter from store in component.computed
     */
-  const currency = this.currencies.find(c => c.value === value);
+  const currency = this.currencies.find(c => c.id === currencyId);
 
   if (!currency) {
     return null;
   }
 
   return new BigNumber(amount).div(new BigNumber(10).pow(currency.scale))
-  .toFixed(currency.scale, BigNumber.ROUND_DOWN);
+    .toFixed(currency.scale, BigNumber.ROUND_DOWN);
 };
 
 export const addCommas = (x) => {
@@ -66,7 +66,7 @@ export const addCommas = (x) => {
   return `${parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')}.${parts[1]}`;
 };
 
-export const formatCurrency = function (value, key) {
+export const formatCurrency = function (currencyId, key) {
   let field = key;
   if (!key) {
     field = 'symbol';
@@ -75,7 +75,7 @@ export const formatCurrency = function (value, key) {
   /* This helper should be added in component.methods
     The component must map "currencies" getter from store in component.computed
     */
-  const currency = this.currencies.find(c => c.value === value);
+  const currency = this.currencies.find(c => c.id === currencyId);
 
   if (!currency) {
     return null;

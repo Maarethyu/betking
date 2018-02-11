@@ -38,8 +38,8 @@ const actions = {
       });
   },
 
-  setActiveCurrency ({commit}, value) {
-    commit(types.SET_ACTIVE_CURRENCY, value);
+  setActiveCurrency ({commit}, id) {
+    commit(types.SET_ACTIVE_CURRENCY, id);
   }
 };
 
@@ -47,16 +47,17 @@ const actions = {
 const mutations = {
   [types.SET_CURRENCIES] (state, currencies) {
     state.currencies = currencies.map(c => Object.assign({}, c, {
-      maxWdLimit: new BigNumber(c.maxWdLimit)
+      // value: c.id,
+      maxWdLimit: new BigNumber(c.max_withdraw_limit)
         .div(new BigNumber(10).pow(c.scale))
         .toNumber(),
-      minWdLimit: new BigNumber(c.minWdLimit)
+      minWdLimit: new BigNumber(c.min_withdraw_limit)
         .div(new BigNumber(10).pow(c.scale))
         .toNumber(),
-      wdFee: new BigNumber(c.wdFee)
+      wdFee: new BigNumber(c.withdrawal_fee)
         .div(new BigNumber(10).pow(c.scale))
         .toNumber(),
-      minTip: new BigNumber(c.minTip)
+      minTip: new BigNumber(c.min_tip)
         .div(new BigNumber(10).pow(c.scale))
         .toNumber(),
       balance: 0
@@ -66,7 +67,7 @@ const mutations = {
 
   [types.SET_ALL_BALANCES] (state, balances) {
     balances.forEach(row => {
-      const currencyIdx = state.currencies.findIndex(c => c.value === row.currency);
+      const currencyIdx = state.currencies.findIndex(c => c.id === row.currency);
 
       if (currencyIdx === -1) {
         console.error(`Currency not found in config: ${row.currency}`);
@@ -83,7 +84,6 @@ const mutations = {
           .toString()
       );
 
-      /* Set balance for active currency */
       if (row.currency === state.activeCurrency) {
         state.activeCurrencyBalance = new BigNumber(row.balance)
           .div(new BigNumber(10).pow(scale))
@@ -93,7 +93,7 @@ const mutations = {
   },
 
   [types.SET_BALANCE] (state, {currency, balance}) {
-    const currencyIdx = state.currencies.findIndex(c => c.value === currency);
+    const currencyIdx = state.currencies.findIndex(c => c.id === currency);
 
     if (currencyIdx === -1) {
       console.error(`Currency not found in config: ${currency}`);
@@ -117,10 +117,10 @@ const mutations = {
     }
   },
 
-  [types.SET_ACTIVE_CURRENCY] (state, value) {
-    state.activeCurrency = value;
+  [types.SET_ACTIVE_CURRENCY] (state, id) {
+    state.activeCurrency = id;
 
-    const currency = state.currencies.find(c => c.value === value);
+    const currency = state.currencies.find(c => c.id === id);
 
     if (!currency) {
       console.error(`Active Currency not found in config: ${currency}`);

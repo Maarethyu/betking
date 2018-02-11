@@ -227,15 +227,20 @@ const markEmailAsVerified = async (token) => {
 };
 
 /* CRYPTO */
+const getAllCurrencies = async () => {
+  const result = await db.any('SELECT * FROM currencies');
+  return result;
+};
+
 const getAllBalancesForUser = async (userId) => {
   const result = await db.any('SELECT balance, currency from user_balances where user_id = $1', userId);
   return result;
 };
 
-const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) => {
+const createWithdrawalEntry = async (userId, currency, withdrawalFee, amount, address) => {
   // TODO: totalFee should be calculated inside the query.
   const amountDeducted = new BigNumber(amount).toString();
-  const amountReceived = new BigNumber(amount).minus(wdFee)
+  const amountReceived = new BigNumber(amount).minus(withdrawalFee)
     .toString();
 
   const result = await db.tx(t => {
@@ -252,7 +257,7 @@ const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) =
         const wdStatus = res.confirm_wd ? 'pending_email_verification' : 'pending';
         const verificationToken = res.confirm_wd ? uuidV4() : null;
 
-        return t.one('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *', [uuidV4(), userId, currency, amountReceived, wdFee, wdStatus, address, verificationToken]);
+        return t.one('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *', [uuidV4(), userId, currency, amountReceived, withdrawalFee, wdStatus, address, verificationToken]);
       });
   });
 
@@ -566,6 +571,7 @@ module.exports = {
   createVerifyEmailToken,
   markEmailAsVerified,
   /* CRYPTO */
+  getAllCurrencies,
   getAllBalancesForUser,
   createWithdrawalEntry,
   addDeposit,

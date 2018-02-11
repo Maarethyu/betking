@@ -2,7 +2,7 @@ const express = require('express');
 const BigNumber = require('bignumber.js');
 const db = require('../db');
 const mw = require('../middleware');
-const helpers = require('../helpers');
+const currencyCache = require('../currencyCache');
 const dice = require('../games/dice');
 
 const router = express.Router();
@@ -88,8 +88,8 @@ router.post('/bet', async function (req, res, next) {
   const multiplier = new BigNumber(99).dividedBy(chance);
 
   if (betAmount.lt(minBetAmount)) {
-    const currencyName = helpers.getCurrencyField(currency, 'name');
-    const minBetAmountFloat = minBetAmount.dividedBy(new BigNumber(10).pow(helpers.getCurrencyField(currency, 'scale')));
+    const currencyName = currencyCache.getFieldById(currency, 'name');
+    const minBetAmountFloat = minBetAmount.dividedBy(new BigNumber(10).pow(currencyCache.getFieldById(currency, 'scale')));
     return res.status(400).json({error: `Min bet amount for ${currencyName} is ${minBetAmountFloat}`});
   }
 

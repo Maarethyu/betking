@@ -13,9 +13,9 @@
       :sort-by.sync="sortBy"
       :sort-desc.sync="sortDesc"
       responsive striped small outlined hover>
-      <template slot="value" slot-scope="data">
-        <b-button  size="sm" variant="default" @click="openDepositModal(data.value)">+</b-button>
-        <b-button  size="sm" variant="default" @click="openWithdrawModal(data.value)">-</b-button>
+      <template slot="id" slot-scope="data">
+        <b-button  size="sm" variant="default" @click="openDepositModal(data.id)">+</b-button>
+        <b-button  size="sm" variant="default" @click="openWithdrawModal(data.id)">-</b-button>
       </template>
     </b-table>
 
@@ -47,7 +47,7 @@
       sortBy: 'balance',
       sortDesc: true,
       fields: [
-        {key: 'value', label: '+'},
+        {key: 'id', label: '+'},
         {key: 'name', label: 'Name', sortable: true},
         {key: 'symbol', label: 'Symbol', sortable: true},
         {key: 'balance', label: 'Balance', formatter: 'formatBalance', sortable: true}
@@ -78,7 +78,7 @@
       formatAmount,
       addCommas,
       formatBalance (value, key, item) {
-        return this.addCommas(this.formatAmount(value, item.value));
+        return this.addCommas(this.formatAmount(value, item.id));
       },
       filterData (item) {
         if (this.hideZeroBalances) {

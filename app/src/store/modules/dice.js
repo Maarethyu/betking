@@ -41,7 +41,7 @@ const actions = {
 
     api.loadDiceState(clientSeed, currency)
       .then(res => {
-        const currencyConfig = rootState.funds.currencies.find(c => c.value === currency);
+        const currencyConfig = rootState.funds.currencies.find(c => c.id === currency);
         const scale = currencyConfig.scale;
 
         const data = Object.assign({}, res.data, {
