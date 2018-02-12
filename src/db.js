@@ -232,31 +232,17 @@ const getAllBalancesForUser = async (userId) => {
   return result;
 };
 
-const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) => {
-  // TODO: totalFee should be calculated inside the query.
-  const amountDeducted = new BigNumber(amount).toString();
-  const amountReceived = new BigNumber(amount).minus(wdFee)
-    .toString();
-
-  const result = await db.tx(t => {
-    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amountDeducted, userId, currency])
+const createWithdrawalEntry = async (userId, currency, wdFee, amount, amountReceived, address, withdrawalStatus, verificationToken) => {
+  await db.tx(t => {
+    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amount, userId, currency])
       .then(res => {
         if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
 
-        // Check if user has enabled confirm withdrawals by email
-        return t.one('SELECT confirm_wd from users where id = $1', userId);
-      })
-      .then(res => {
-        const wdStatus = res.confirm_wd ? 'pending_email_verification' : 'pending';
-        const verificationToken = res.confirm_wd ? uuidV4() : null;
-
-        return t.one('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *', [uuidV4(), userId, currency, amountReceived, wdFee, wdStatus, address, verificationToken]);
+        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [uuidV4(), userId, currency, amountReceived, wdFee, withdrawalStatus, address, verificationToken]);
       });
   });
-
-  return result;
 };
 
 const setConfirmWithdrawalByEmail = async (userId, confirmWd) => {
