@@ -26,7 +26,10 @@ router.get('/load-state', async function (req, res, next) {
     return res.status(400).json({errors: validationResult.array()});
   }
 
-  const diceSeed = await db.getActiveDiceSeed(req.currentUser.id, req.query.clientSeed);
+  const newServerSeed = dice.generateServerSeed();
+  const newClientSeed = req.query.clientSeed;
+
+  const diceSeed = await db.getActiveDiceSeed(req.currentUser.id, newServerSeed, newClientSeed);
   const latestUserBets = await db.getLatestUserDiceBets(req.currentUser.id);
   const bankRoll = await db.getBankrollByCurrency(req.query.currency);
 

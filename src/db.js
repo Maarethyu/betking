@@ -415,19 +415,15 @@ const getBankrollByCurrency = async (currency) => {
   return result;
 };
 
-const getActiveDiceSeed = async (userId, newClientSeed) => {
+const getActiveDiceSeed = async (userId, newServerSeed, newClientSeed) => {
   const result = await db.tx(t => {
-    /* check if user has an active seed */
     return t.oneOrNone('SELECT * from dice_seeds WHERE player_id = $1 AND in_use = $2', [userId, true])
       .then(res => {
         if (res) {
           return res;
         }
 
-        // generate new if they don't have a seed
-        const serverSeed = dice.generateServerSeed();
-
-        return t.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, $2, $3, $4, $5) RETURNING *', [userId, true, newClientSeed, serverSeed, 0]);
+        return t.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, $2, $3, $4, $5) RETURNING *', [userId, true, newClientSeed, newServerSeed, 0]);
       })
       .then(res => ({
         clientSeed: res.client_seed,
