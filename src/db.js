@@ -2,7 +2,6 @@ const config = require('config');
 const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
 const BigNumber = require('bignumber.js');
-const helpers = require('./helpers');
 const dice = require('./games/dice');
 
 const initOptions = {
@@ -282,10 +281,7 @@ const confirmWithdrawByToken = async (token) => {
     });
 };
 
-const addDeposit = async (currency, amount, address, txid) => {
-  // currencyToQuery is ETH if currency is an eth-token
-  const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
-
+const addDeposit = async (currencyToQuery, currency, amount, address, txid) => {
   await db.tx(t => {
     return t.oneOrNone('SELECT user_id from user_addresses WHERE currency = $1 AND address = $2', [currencyToQuery, address])
       .then(row => {
@@ -325,18 +321,15 @@ const addDeposit = async (currency, amount, address, txid) => {
 };
 
 const getDepositAddress = async (userId, currency) => {
-  // currencyToQuery is ETH if currency is an eth-token
-  const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
-
   const result = await db.tx(t => {
-    return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currencyToQuery])
+    return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currency])
       .then(res => {
         if (res) {
           return res.address;
         }
 
         // Address not found in db. Find an available address
-        return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currencyToQuery)
+        return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currency)
           .then(res => {
             if (!res) {
               /* No address is free in db for the currency. Log this ? */

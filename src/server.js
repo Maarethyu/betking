@@ -12,7 +12,7 @@ const csrfProtection = require('csurf')({cookie: true});
 const db = require('./db');
 const helpers = require('./helpers');
 const mw = require('./middleware');
-const currencyCache = require('./currencyCache');
+const InMemoryCache = require('./cache/InMemoryCache');
 
 // We should never have uncaught exceptions or rejections.
 // TODO - should these be before express is created?
@@ -26,6 +26,8 @@ process.on('uncaughtException', (err) => {
   db.logUncaughtExceptionError(err.message, err.stack);
   console.log('Uncaught Exception', err);
 });
+
+const cache = new InMemoryCache(db);
 
 const startServer = function () {
   const app = express();
@@ -55,10 +57,10 @@ const startServer = function () {
   app.use(mw.attachCurrentUserToRequest);
 
   const router = express.Router();
-  router.use('/account', csrfProtection, require('./routes/account'));
-  router.use('/admin', require('./routes/admin'));
-  router.use('/dice', require('./routes/dice'));
-  router.use('', csrfProtection, require('./routes/index'));
+  router.use('/account', csrfProtection, require('./routes/account')(cache.currencyCache));
+  router.use('/admin', require('./routes/admin')(cache.currencyCache));
+  router.use('/dice', require('./routes/dice')(cache.currencyCache));
+  router.use('', csrfProtection, require('./routes/index')(cache.currencyCache));
   app.use('/api', router);
 
   // TODO - review
@@ -100,7 +102,7 @@ const startServer = function () {
   console.log(`server listening on port ${config.get('PORT')}`);
 };
 
-currencyCache.loadFromDb()
+cache.load()
   .then(() => {
     startServer();
   });

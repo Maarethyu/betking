@@ -2,7 +2,6 @@ const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const config = require('config');
 const Transform = require('stream').Transform;
-const currencyCache = require('./currencyCache');
 
 const getNew2faSecret = function () {
   const secret = speakeasy.generateSecret({length: 32, name: config.get('PROJECT_NAME')});
@@ -50,7 +49,7 @@ const addCsrfToken = function (csrfToken) {
   return parser;
 };
 
-const getCurrencyToQueryFromAddressTable = function (currency) {
+const getCurrencyToQueryFromAddressTable = function (currencyCache, currency) {
   // Check if currency is an eth token, if yes, get ethereum address
   let currencyToQuery = currency;
 
