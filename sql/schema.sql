@@ -5,7 +5,7 @@ CREATE TABLE users (
   email text NULL,
   email_verified boolean NOT NULL DEFAULT false,
   mfa_key text NULL,
-  temp_mfa_key text NULL,
+  is_2fa_enabled boolean NOT NULL DEFAULT false,
   affiliate_id text NULL,
   confirm_wd boolean NOT NULL DEFAULT false,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW(),

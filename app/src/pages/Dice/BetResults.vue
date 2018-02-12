@@ -68,16 +68,17 @@
           ...this.$mq === 'desktop' ? [{
             key: 'chance',
             label: 'Payout',
-            formatter: 'chanceToPayout',
+            formatter: 'gameDetailsToPayout',
             class: 'text-center'
           }] : [], {
             key: 'target',
             label: 'Target',
-            formatter: 'formatTarget',
+            formatter: 'gameDetailsToTarget',
             class: 'text-center'
           }, {
             key: 'roll',
             label: 'Roll',
+            formatter: 'gameDetailsToRoll',
             class: 'text-center'
           }, {
             key: 'profit',
@@ -97,9 +98,9 @@
 
         return `<span class="${className}">${amount}</span>`;
       },
-      chanceToPayout (chance) {
+      gameDetailsToPayout (value, key, item) {
         const payoutFixed = new BigNumber(99)
-          .dividedBy(chance)
+          .dividedBy(item.game_details.chance)
           .toFixed(4, BigNumber.ROUND_DOWN);
 
         const payout = new BigNumber(payoutFixed).toString();
@@ -109,11 +110,14 @@
       formatTime (value) {
         return moment(value).format('mm:ss');
       },
-      formatTarget (target, key, item) {
-        const sign = target === 0 ? '<' : '>';
-        const chance = new BigNumber(item.chance).toFixed(4, BigNumber.ROUND_DOWN);
+      gameDetailsToTarget (value, key, item) {
+        const sign = item.game_details.target === 0 ? '<' : '>';
+        const chance = new BigNumber(item.game_details.chance).toFixed(4, BigNumber.ROUND_DOWN);
 
         return `${sign} ${chance}`;
+      },
+      gameDetailsToRoll (value, key, item) {
+        return item.game_details.roll;
       },
       darkenZero (x) {
         const parts = x.split('.');

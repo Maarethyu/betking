@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const BigNumber = require('bignumber.js');
+const uuidV4 = require('uuid/v4');
 const db = require('../db');
 const helpers = require('../helpers');
 const mw = require('../middleware');
@@ -24,7 +25,7 @@ module.exports = (currencyCache) => {
       username: req.currentUser.username,
       email: req.currentUser.email,
       isEmailVerified: req.currentUser.email_verified,
-      is2faEnabled: !!req.currentUser.mfa_key,
+      is2faEnabled: req.currentUser.is_2fa_enabled,
       confirmWithdrawals: req.currentUser.confirm_wd,
       dateJoined: req.currentUser.date_joined
     });
@@ -121,34 +122,22 @@ module.exports = (currencyCache) => {
 
   router.post('/logout-all-sessions', async function (req, res, next) {
     await db.logoutAllSessions(req.currentUser.id);
-
     res.end();
   });
 
   router.get('/2fa-key', async function (req, res, next) {
-    if (req.currentUser.mfa_key) {
+    if (req.currentUser.is_2fa_enabled) {
       return res.status(400).send({error: 'Two factor authentication is already enabled'});
     }
 
-    // Check if user already has a temp mfa secret, if yes return with secret
-    if (req.currentUser.temp_mfa_key) {
-      return res.json({
-        key: req.currentUser.temp_mfa_key,
-        qr: await helpers.get2faQR(req.currentUser.temp_mfa_key)
-      });
-    }
-
-    // User does not have temp secret: Generate new mfa_secret, write to temp field and send
-    const newKey = await db.addTemp2faSecret(req.currentUser.id, helpers.getNew2faSecret());
-
-    return res.json({
-      key: newKey.temp_mfa_key,
-      qr: await helpers.get2faQR(newKey.temp_mfa_key)
+    res.json({
+      key: req.currentUser.mfa_key,
+      qr: await helpers.get2faQR(req.currentUser.mfa_key)
     });
   });
 
   router.post('/enable-2fa', async function (req, res, next) {
-    if (req.currentUser.mfa_key) {
+    if (req.currentUser.is_2fa_enabled) {
       return res.status(400).json({error: 'Two factor authentication is already enabled'});
     }
 
@@ -161,24 +150,25 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Invalid two factor code'});
     }
 
-    if (!helpers.isOtpValid(req.currentUser.temp_mfa_key, req.body.otp)) {
+    if (!helpers.isOtpValid(req.currentUser.mfa_key, req.body.otp)) {
       return res.status(400).json({error: 'Invalid two factor code'});
     }
 
     await db.enableTwofactor(req.currentUser.id);
 
-    /* Insert this code as a used code */
     await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
 
     res.end();
   });
 
   router.post('/disable-2fa', mw.require2fa, async function (req, res, next) {
-    if (!req.currentUser.mfa_key) {
+    if (!req.currentUser.is_2fa_enabled) {
       return res.status(400).json({error: 'Two factor authentication is not enabled for this account'});
     }
 
-    await db.disableTwoFactor(req.currentUser.id);
+    const newMfaKey = helpers.getNew2faSecret();
+
+    await db.disableTwoFactor(req.currentUser.id, newMfaKey);
 
     res.end();
   });
@@ -207,11 +197,6 @@ module.exports = (currencyCache) => {
     req.check('ip', 'Invalid ip').exists()
       .trim()
       .isIP();
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
 
     await db.removeIpFromWhitelist(req.body.ip, req.currentUser.id);
 
@@ -299,23 +284,32 @@ module.exports = (currencyCache) => {
 
     const withdrawalFee = new BigNumber(currency.withdrawal_fee).toString();
 
+    const withdrawalStatus = req.currentUser.confirm_wd ? 'pending_email_verification' : 'pending';
+    const verificationToken = req.currentUser.confirm_wd ? uuidV4() : null;
+    const amountReceived = new BigNumber(req.body.amount)
+      .minus(withdrawalFee)
+      .toString();
+
     try {
-      const withdrawTransaction = await db.createWithdrawalEntry(
+      await db.createWithdrawalEntry(
         req.currentUser.id,
         req.body.currency,
         withdrawalFee,
         req.body.amount,
-        req.body.address
+        amountReceived,
+        req.body.address,
+        withdrawalStatus,
+        verificationToken
       );
 
-      if (withdrawTransaction.status === 'pending_email_verification') {
+      if (withdrawalStatus === 'pending_email_verification') {
         mailer.sendWithdrawConfirmationEmail(
           req.currentUser.username,
           req.currentUser.email,
-          withdrawTransaction.verification_token,
+          verificationToken,
           currency.symbol,
-          new BigNumber(withdrawTransaction.amount).div(new BigNumber(10).pow(currency.scale)),
-          withdrawTransaction.address
+          new BigNumber(amountReceived).div(new BigNumber(10).pow(currency.scale)),
+          req.body.address
         );
       }
 
@@ -385,6 +379,7 @@ module.exports = (currencyCache) => {
 
     res.json({results, count});
   });
+
 
   router.get('/withdrawal-history', async function (req, res, next) {
     req.checkQuery('limit', 'Invalid limit param')

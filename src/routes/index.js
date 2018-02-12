@@ -1,4 +1,5 @@
 const express = require('express');
+const router = express.Router();
 const bcrypt = require('bcrypt');
 const RateLimit = require('express-rate-limit');
 const config = require('config');
@@ -29,8 +30,6 @@ const apiLimiter = new RateLimit({
 });
 
 module.exports = (currencyCache) => {
-  const router = express.Router();
-
   router.post('/login', async function (req, res, next) {
     req.check('password', 'Invalid Password').exists();
     req.check('loginvia', 'Invalid login via option').exists()
@@ -91,7 +90,7 @@ module.exports = (currencyCache) => {
     const isIpWhitelisted = await db.isIpWhitelisted(helpers.getIp(req), user.id);
 
     let isTwoFactorOk = false;
-    if (user.mfa_key) {
+    if (user.is_2fa_enabled) {
       const isOtpValid = helpers.isOtpValid(user.mfa_key, req.body.otp);
 
       if (isOtpValid) {
@@ -149,7 +148,7 @@ module.exports = (currencyCache) => {
       email: user.email,
       isEmailVerified: user.email_verified,
       dateJoined: user.date_joined,
-      is2faEnabled: !!user.mfa_key,
+      is2faEnabled: user.is_2fa_enabled,
       confirmWithdrawals: user.confirm_wd
     });
   });
@@ -204,7 +203,9 @@ module.exports = (currencyCache) => {
 
     const hash = await bcrypt.hash(req.body.password, 10);
 
-    const user = await db.createUser(req.body.username, hash, req.body.email, affiliateId);
+    const mfaKey = helpers.getNew2faSecret();
+
+    const user = await db.createUser(req.body.username, hash, req.body.email, affiliateId, mfaKey);
 
     if (user) {
       await createSession(res, user.id, false, helpers.getIp(req), helpers.getFingerPrint(req));
@@ -221,7 +222,7 @@ module.exports = (currencyCache) => {
         email: user.email,
         isEmailVerified: user.email_verified,
         dateJoined: user.date_joined,
-        is2faEnabled: !!user.mfa_key,
+        is2faEnabled: user.is_2fa_enabled,
         confirmWithdrawals: user.confirm_wd
       });
     } else {

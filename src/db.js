@@ -42,8 +42,8 @@ const getUserByEmail = async (email) => {
   return user;
 };
 
-const createUser = async (username, password, email, affiliateId) => {
-  const result = await db.one('INSERT INTO users (username, password, email, affiliate_id) VALUES ($1, $2, $3, $4) RETURNING *', [username, password, email, affiliateId]);
+const createUser = async (username, password, email, affiliateId, mfaKey) => {
+  const result = await db.one('INSERT INTO users (username, password, email, affiliate_id, mfa_key) VALUES ($1, $2, $3, $4, $5) RETURNING *', [username, password, email, affiliateId, mfaKey]);
   return result;
 };
 
@@ -102,17 +102,12 @@ const getActiveSessions = async (userId) => {
   return result;
 };
 
-const addTemp2faSecret = async (userId, tempSecret) => {
-  const result = await db.one('UPDATE users set temp_mfa_key = $1 where id = $2 returning temp_mfa_key', [tempSecret, userId]);
-  return result;
-};
-
 const enableTwofactor = async (userId) => {
-  await db.none('UPDATE users set mfa_key = temp_mfa_key, temp_mfa_key = NULL where id = $1', userId);
+  await db.none('UPDATE users SET is_2fa_enabled = true WHERE id = $1', userId);
 };
 
-const disableTwoFactor = async (userId) => {
-  await db.none('UPDATE users set mfa_key = NULL, temp_mfa_key = NULL where id = $1', userId);
+const disableTwoFactor = async (userId, newMfaKey) => {
+  await db.none('UPDATE users SET mfa_key = $1, is_2fa_enabled = false WHERE id = $2', [newMfaKey, userId]);
 };
 
 const insertTwoFactorCode = async (userId, code) => {
@@ -236,31 +231,17 @@ const getAllBalancesForUser = async (userId) => {
   return result;
 };
 
-const createWithdrawalEntry = async (userId, currency, withdrawalFee, amount, address) => {
-  // TODO: totalFee should be calculated inside the query.
-  const amountDeducted = new BigNumber(amount).toString();
-  const amountReceived = new BigNumber(amount).minus(withdrawalFee)
-    .toString();
-
-  const result = await db.tx(t => {
-    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amountDeducted, userId, currency])
+const createWithdrawalEntry = async (userId, currency, withdrawalFee, amount, amountReceived, address, withdrawalStatus, verificationToken) => {
+  await db.tx(t => {
+    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amount, userId, currency])
       .then(res => {
         if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
 
-        // Check if user has enabled confirm withdrawals by email
-        return t.one('SELECT confirm_wd from users where id = $1', userId);
-      })
-      .then(res => {
-        const wdStatus = res.confirm_wd ? 'pending_email_verification' : 'pending';
-        const verificationToken = res.confirm_wd ? uuidV4() : null;
-
-        return t.one('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *', [uuidV4(), userId, currency, amountReceived, withdrawalFee, wdStatus, address, verificationToken]);
+        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [uuidV4(), userId, currency, amountReceived, withdrawalFee, withdrawalStatus, address, verificationToken]);
       });
   });
-
-  return result;
 };
 
 const setConfirmWithdrawalByEmail = async (userId, confirmWd) => {
@@ -404,7 +385,7 @@ const isAddressWhitelisted = async (userId, currency, address) => {
 
 /* DICE */
 const getLatestUserDiceBets = async (userId) => {
-  const result = await db.any('SELECT id, date, bet_amount, currency, profit, game_details->>\'roll\' as roll, game_details->>\'chance\' as chance, game_details->>\'target\' as target FROM bets WHERE player_id = $1 AND game_type = $2 ORDER BY date desc LIMIT 50', [userId, 'dice']);
+  const result = await db.any('SELECT id, date, bet_amount, currency, profit, game_details FROM bets WHERE player_id = $1 AND game_type = $2 ORDER BY date desc LIMIT 50', [userId, 'dice']);
   return result;
 };
 
@@ -413,29 +394,15 @@ const getBankrollByCurrency = async (currency) => {
   return result;
 };
 
-const getActiveDiceSeed = async (userId, newClientSeed) => {
-  const result = await db.tx(t => {
-    /* check if user has an active seed */
-    return t.oneOrNone('SELECT * from dice_seeds WHERE player_id = $1 AND in_use = $2', [userId, true])
-      .then(res => {
-        if (res) {
-          return res;
-        }
-
-        // generate new if they don't have a seed
-        const serverSeed = dice.generateServerSeed();
-
-        return t.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, $2, $3, $4, $5) RETURNING *', [userId, true, newClientSeed, serverSeed, 0]);
-      })
-      .then(res => ({
-        clientSeed: res.client_seed,
-        serverSeedHash: dice.hashServerSeed(res.server_seed),
-        nonce: res.nonce
-      }));
-  });
-
+const getActiveDiceSeed = async (userId) => {
+  const result = await db.oneOrNone('SELECT * from dice_seeds WHERE player_id = $1 AND in_use = true', userId);
   return result;
 };
+
+const addNewDiceSeed = async (userId, newServerSeed, newClientSeed) => {
+  const result = await db.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, true, $2, $3, 0) RETURNING *', [userId, newClientSeed, newServerSeed]);
+  return result;
+}
 
 const doDiceBet = async (userId, betAmount, currency, target, chance) => {
   const result = await db.tx(t => {
@@ -474,10 +441,11 @@ const doDiceBet = async (userId, betAmount, currency, target, chance) => {
               date: bet.date,
               bet_amount: bet.bet_amount,
               currency: bet.currency,
-              chance: bet.game_details.chance,
-              roll: bet.game_details.roll,
+              // chance: bet.game_details.chance,
+              // roll: bet.game_details.roll,
               profit: bet.profit,
-              target: bet.game_details.target,
+              // target: bet.game_details.target,
+              game_details: bet.game_details,
               balance: res.balance,
               nextNonce: bet.seed_details.nonce + 1
             };
@@ -543,7 +511,6 @@ module.exports = {
   updatePassword,
   getActiveSessions,
   logoutAllSessions,
-  addTemp2faSecret,
   enableTwofactor,
   disableTwoFactor,
   createResetToken,
@@ -582,6 +549,7 @@ module.exports = {
   getLatestUserDiceBets,
   getBankrollByCurrency,
   getActiveDiceSeed,
+  addNewDiceSeed,
   doDiceBet,
   setNewDiceClientSeed,
   generateNewSeed
