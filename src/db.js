@@ -43,8 +43,8 @@ const getUserByEmail = async (email) => {
   return user;
 };
 
-const createUser = async (username, password, email, affiliateId) => {
-  const result = await db.one('INSERT INTO users (username, password, email, affiliate_id) VALUES ($1, $2, $3, $4) RETURNING *', [username, password, email, affiliateId]);
+const createUser = async (username, password, email, affiliateId, mfaKey) => {
+  const result = await db.one('INSERT INTO users (username, password, email, affiliate_id, mfa_key) VALUES ($1, $2, $3, $4, $5) RETURNING *', [username, password, email, affiliateId, mfaKey]);
   return result;
 };
 
@@ -103,17 +103,12 @@ const getActiveSessions = async (userId) => {
   return result;
 };
 
-const addTemp2faSecret = async (userId, tempSecret) => {
-  const result = await db.one('UPDATE users set temp_mfa_key = $1 where id = $2 returning temp_mfa_key', [tempSecret, userId]);
-  return result;
-};
-
 const enableTwofactor = async (userId) => {
-  await db.none('UPDATE users set mfa_key = temp_mfa_key, temp_mfa_key = NULL where id = $1', userId);
+  await db.none('UPDATE users SET is_2fa_enabled = true WHERE id = $1', userId);
 };
 
-const disableTwoFactor = async (userId) => {
-  await db.none('UPDATE users set mfa_key = NULL, temp_mfa_key = NULL where id = $1', userId);
+const disableTwoFactor = async (userId, newMfaKey) => {
+  await db.none('UPDATE users SET mfa_key = $1, is_2fa_enabled = false WHERE id = $2', [newMfaKey, userId]);
 };
 
 const insertTwoFactorCode = async (userId, code) => {
@@ -531,7 +526,6 @@ module.exports = {
   updatePassword,
   getActiveSessions,
   logoutAllSessions,
-  addTemp2faSecret,
   enableTwofactor,
   disableTwoFactor,
   createResetToken,
