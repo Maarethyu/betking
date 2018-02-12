@@ -5,13 +5,17 @@
         <span class="text-red">Online: </span>123
       </div>
       <div class="info-bar__item">
-        <span class="text-red">Bets:</span> 123,456,789
+        <span class="text-red">Bets: </span>123,456,789
       </div>
       <div class="info-bar__item">
-        <span class="text-red">Won last 24 hours:</span> 123.12 BTC
+        <span class="text-red">Won last 24 hours: </span> 123.12 BTC
+      </div>
+      <div class="info-bar__item info-bar__item--max-win" v-if="path === '/dice'">
+        <span class="text-red">Max Win: </span>
+        {{ diceMaxWin }}
+        <CurrencyIcon :value="activeCurrency" :width="18" />
       </div>
     </div>
-    <div class='logged-in nudge-info'></div>
     <div class="ml-auto">
       <button class="navbar-toggler-alt aside-menu-toggler" type="button" @click="toggleChat">
         <span class="icon-bubble"></span>
@@ -44,21 +48,43 @@
     height:22px;
     line-height:22px;
     color:#1b262d;
+
+    &--max-win {
+      img {
+        position: relative;
+        top: -1px;
+      }
+    }
   }
 }
 </style>
 <script>
 import bToggle from 'bootstrap-vue/es/directives/toggle/toggle';
 
+import {mapGetters, mapState} from 'vuex';
+import CurrencyIcon from 'components/CurrencyIcon';
+
 export default {
   directives: {
     'b-toggle': bToggle
+  },
+  components: {
+    CurrencyIcon
   },
   props: {
     toggleChat: {
       type: Function,
       default: () => {}
     }
+  },
+  computed: {
+    ...mapGetters({
+      diceMaxWin: 'diceMaxWin',
+      activeCurrency: 'activeCurrency'
+    }),
+    ...mapState({
+      path: state => state.route.path
+    })
   }
 };
 </script>
