@@ -19,8 +19,7 @@ const isOtpValid = function (base32Secret, otp) {
 };
 
 const getIp = function (req) {
-  // Todo - we should also get IP from Cloudflare in prod
-  return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  return req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 };
 
 const getFingerPrint = function (req) {
