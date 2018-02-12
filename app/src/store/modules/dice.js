@@ -62,13 +62,13 @@ const actions = {
 
     api.diceBet(betAmount, currency, target, chance)
       .then(res => {
-        const {id, date, bet_amount, currency, roll, profit, chance, target, balance, nextNonce} = res.data;
-        commit(types.ADD_DICE_BET, {id, date, bet_amount, currency, roll, profit, chance, target});
+        const {id, date, bet_amount, currency, profit, game_details, balance, nextNonce} = res.data;
+        commit(types.ADD_DICE_BET, {id, date, bet_amount, currency, profit, game_details});
         commit(types.SET_BALANCE, {currency, balance});
         commit(types.SET_DICE_NONCE, nextNonce);
         commit(types.ENABLE_DICE_BETTING);
 
-        bus.$emit('dice-bet-result', {currency, roll, profit});
+        bus.$emit('dice-bet-result', {currency, roll: game_details.roll, profit});
       })
       .catch(err => {
         if (err.response && err.response.data) {
