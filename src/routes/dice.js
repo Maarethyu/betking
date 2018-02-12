@@ -26,16 +26,20 @@ router.get('/load-state', async function (req, res, next) {
     return res.status(400).json({errors: validationResult.array()});
   }
 
-  const newServerSeed = dice.generateServerSeed();
-  const newClientSeed = req.query.clientSeed;
+  let diceSeed = await db.getActiveDiceSeed(req.currentUser.id);
+  if (!diceSeed) {
+    const newServerSeed = dice.generateServerSeed();
+    const newClientSeed = req.query.clientSeed;
 
-  const diceSeed = await db.getActiveDiceSeed(req.currentUser.id, newServerSeed, newClientSeed);
+    diceSeed = await db.addNewDiceSeed(req.currentUser.id, newServerSeed, newClientSeed);
+  }
+
   const latestUserBets = await db.getLatestUserDiceBets(req.currentUser.id);
   const bankRoll = await db.getBankrollByCurrency(req.query.currency);
 
   res.json({
-    clientSeed: diceSeed.clientSeed,
-    serverSeedHash: diceSeed.serverSeedHash,
+    clientSeed: diceSeed.client_seed,
+    serverSeedHash: dice.hashServerSeed(diceSeed.server_seed),
     nonce: diceSeed.nonce,
     latestUserBets,
     maxWin: bankRoll.max_win,
