@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const BigNumber = require('bignumber.js');
+const uuidV4 = require('uuid/v4');
 const router = express.Router();
 const db = require('../db');
 const helpers = require('../helpers');
@@ -294,23 +295,32 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
 
   const wdFee = new BigNumber(currency.wdFee).toString();
 
+  const withdrawalStatus = req.currentUser.confirm_wd ? 'pending_email_verification' : 'pending';
+  const verificationToken = req.currentUser.confirm_wd ? uuidV4() : null;
+  const amountReceived = new BigNumber(req.body.amount)
+    .minus(wdFee)
+    .toString();
+
   try {
-    const wdTx = await db.createWithdrawalEntry(
+    await db.createWithdrawalEntry(
       req.currentUser.id,
       req.body.currency,
       wdFee,
       req.body.amount,
-      req.body.address
+      amountReceived,
+      req.body.address,
+      withdrawalStatus,
+      verificationToken
     );
 
-    if (wdTx.status === 'pending_email_verification') {
+    if (withdrawalStatus === 'pending_email_verification') {
       mailer.sendWithdrawConfirmationEmail(
         req.currentUser.username,
         req.currentUser.email,
-        wdTx.verification_token,
+        verificationToken,
         currency.symbol,
-        new BigNumber(wdTx.amount).div(new BigNumber(10).pow(currency.scale)),
-        wdTx.address
+        new BigNumber(amountReceived).div(new BigNumber(10).pow(currency.scale)),
+        req.body.address
       );
     }
 
