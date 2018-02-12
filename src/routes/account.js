@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const BigNumber = require('bignumber.js');
+const uuidV4 = require('uuid/v4');
 const router = express.Router();
 const db = require('../db');
 const helpers = require('../helpers');
@@ -23,7 +24,7 @@ router.get('/me', async function (req, res, next) {
     username: req.currentUser.username,
     email: req.currentUser.email,
     isEmailVerified: req.currentUser.email_verified,
-    is2faEnabled: !!req.currentUser.mfa_key,
+    is2faEnabled: req.currentUser.is_2fa_enabled,
     confirmWithdrawals: req.currentUser.confirm_wd,
     dateJoined: req.currentUser.date_joined
   });
@@ -125,29 +126,18 @@ router.post('/logout-all-sessions', async function (req, res, next) {
 });
 
 router.get('/2fa-key', async function (req, res, next) {
-  if (req.currentUser.mfa_key) {
+  if (req.currentUser.is_2fa_enabled) {
     return res.status(400).send({error: 'Two factor authentication is already enabled'});
   }
 
-  // Check if user already has a temp mfa secret, if yes return with secret
-  if (req.currentUser.temp_mfa_key) {
-    return res.json({
-      key: req.currentUser.temp_mfa_key,
-      qr: await helpers.get2faQR(req.currentUser.temp_mfa_key)
-    });
-  }
-
-  // User does not have temp secret: Generate new mfa_secret, write to temp field and send
-  const newKey = await db.addTemp2faSecret(req.currentUser.id, helpers.getNew2faSecret());
-
-  return res.json({
-    key: newKey.temp_mfa_key,
-    qr: await helpers.get2faQR(newKey.temp_mfa_key)
+  res.json({
+    key: req.currentUser.mfa_key,
+    qr: await helpers.get2faQR(req.currentUser.mfa_key)
   });
 });
 
 router.post('/enable-2fa', async function (req, res, next) {
-  if (req.currentUser.mfa_key) {
+  if (req.currentUser.is_2fa_enabled) {
     return res.status(400).json({error: 'Two factor authentication is already enabled'});
   }
 
@@ -160,24 +150,25 @@ router.post('/enable-2fa', async function (req, res, next) {
     return res.status(400).json({error: 'Invalid two factor code'});
   }
 
-  if (!helpers.isOtpValid(req.currentUser.temp_mfa_key, req.body.otp)) {
+  if (!helpers.isOtpValid(req.currentUser.mfa_key, req.body.otp)) {
     return res.status(400).json({error: 'Invalid two factor code'});
   }
 
   await db.enableTwofactor(req.currentUser.id);
 
-  /* Insert this code as a used code */
   await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
 
   res.end();
 });
 
 router.post('/disable-2fa', mw.require2fa, async function (req, res, next) {
-  if (!req.currentUser.mfa_key) {
+  if (!req.currentUser.is_2fa_enabled) {
     return res.status(400).json({error: 'Two factor authentication is not enabled for this account'});
   }
 
-  await db.disableTwoFactor(req.currentUser.id);
+  const newMfaKey = helpers.getNew2faSecret();
+
+  await db.disableTwoFactor(req.currentUser.id, newMfaKey);
 
   res.end();
 });
@@ -294,23 +285,32 @@ router.post('/withdraw', mw.require2fa, async function (req, res, next) {
 
   const wdFee = new BigNumber(currency.wdFee).toString();
 
+  const withdrawalStatus = req.currentUser.confirm_wd ? 'pending_email_verification' : 'pending';
+  const verificationToken = req.currentUser.confirm_wd ? uuidV4() : null;
+  const amountReceived = new BigNumber(req.body.amount)
+    .minus(wdFee)
+    .toString();
+
   try {
-    const wdTx = await db.createWithdrawalEntry(
+    await db.createWithdrawalEntry(
       req.currentUser.id,
       req.body.currency,
       wdFee,
       req.body.amount,
-      req.body.address
+      amountReceived,
+      req.body.address,
+      withdrawalStatus,
+      verificationToken
     );
 
-    if (wdTx.status === 'pending_email_verification') {
+    if (withdrawalStatus === 'pending_email_verification') {
       mailer.sendWithdrawConfirmationEmail(
         req.currentUser.username,
         req.currentUser.email,
-        wdTx.verification_token,
+        verificationToken,
         currency.symbol,
-        new BigNumber(wdTx.amount).div(new BigNumber(10).pow(currency.scale)),
-        wdTx.address
+        new BigNumber(amountReceived).div(new BigNumber(10).pow(currency.scale)),
+        req.body.address
       );
     }
 

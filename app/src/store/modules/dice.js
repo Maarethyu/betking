@@ -73,6 +73,7 @@ const actions = {
       .catch(err => {
         if (err.response && err.response.data) {
           toastr.error(err.response.data.error);
+          commit(types.ENABLE_DICE_BETTING);
         }
 
         throw err;

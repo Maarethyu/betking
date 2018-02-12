@@ -43,8 +43,8 @@ const getUserByEmail = async (email) => {
   return user;
 };
 
-const createUser = async (username, password, email, affiliateId) => {
-  const result = await db.one('INSERT INTO users (username, password, email, affiliate_id) VALUES ($1, $2, $3, $4) RETURNING *', [username, password, email, affiliateId]);
+const createUser = async (username, password, email, affiliateId, mfaKey) => {
+  const result = await db.one('INSERT INTO users (username, password, email, affiliate_id, mfa_key) VALUES ($1, $2, $3, $4, $5) RETURNING *', [username, password, email, affiliateId, mfaKey]);
   return result;
 };
 
@@ -91,10 +91,10 @@ const updateEmail = async (userId, email) => {
 
 const updatePassword = async (userId, hash, currentSessionId) => {
   await db.tx(t => {
-    return t.none('UPDATE users set password = $2 WHERE id = $1', [userId, hash])
-      .then(() => {
-        t.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1 AND id != $2', [userId, currentSessionId]);
-      });
+    return t.batch([
+      t.none('UPDATE users set password = $2 WHERE id = $1', [userId, hash]),
+      t.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1 AND id != $2', [userId, currentSessionId])
+    ]);
   });
 };
 
@@ -103,17 +103,12 @@ const getActiveSessions = async (userId) => {
   return result;
 };
 
-const addTemp2faSecret = async (userId, tempSecret) => {
-  const result = await db.one('UPDATE users set temp_mfa_key = $1 where id = $2 returning temp_mfa_key', [tempSecret, userId]);
-  return result;
-};
-
 const enableTwofactor = async (userId) => {
-  await db.none('UPDATE users set mfa_key = temp_mfa_key, temp_mfa_key = NULL where id = $1', userId);
+  await db.none('UPDATE users SET is_2fa_enabled = true WHERE id = $1', userId);
 };
 
-const disableTwoFactor = async (userId) => {
-  await db.none('UPDATE users set mfa_key = NULL, temp_mfa_key = NULL where id = $1', userId);
+const disableTwoFactor = async (userId, newMfaKey) => {
+  await db.none('UPDATE users SET mfa_key = $1, is_2fa_enabled = false WHERE id = $2', [newMfaKey, userId]);
 };
 
 const insertTwoFactorCode = async (userId, code) => {
@@ -232,31 +227,17 @@ const getAllBalancesForUser = async (userId) => {
   return result;
 };
 
-const createWithdrawalEntry = async (userId, currency, wdFee, amount, address) => {
-  // TODO: totalFee should be calculated inside the query.
-  const amountDeducted = new BigNumber(amount).toString();
-  const amountReceived = new BigNumber(amount).minus(wdFee)
-    .toString();
-
-  const result = await db.tx(t => {
-    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amountDeducted, userId, currency])
+const createWithdrawalEntry = async (userId, currency, wdFee, amount, amountReceived, address, withdrawalStatus, verificationToken) => {
+  await db.tx(t => {
+    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amount, userId, currency])
       .then(res => {
         if (!res) {
           throw new Error('INSUFFICIENT_BALANCE');
         }
 
-        // Check if user has enabled confirm withdrawals by email
-        return t.one('SELECT confirm_wd from users where id = $1', userId);
-      })
-      .then(res => {
-        const wdStatus = res.confirm_wd ? 'pending_email_verification' : 'pending';
-        const verificationToken = res.confirm_wd ? uuidV4() : null;
-
-        return t.one('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *', [uuidV4(), userId, currency, amountReceived, wdFee, wdStatus, address, verificationToken]);
+        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [uuidV4(), userId, currency, amountReceived, wdFee, withdrawalStatus, address, verificationToken]);
       });
   });
-
-  return result;
 };
 
 const setConfirmWithdrawalByEmail = async (userId, confirmWd) => {
@@ -546,7 +527,6 @@ module.exports = {
   updatePassword,
   getActiveSessions,
   logoutAllSessions,
-  addTemp2faSecret,
   enableTwofactor,
   disableTwoFactor,
   createResetToken,

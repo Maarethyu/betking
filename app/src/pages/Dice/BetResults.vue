@@ -1,7 +1,15 @@
 <template>
-  <b-table id="dice-bet-results" class="dice-bet-results" responsive striped small outlined hover fixed :items="latestBets" :fields="fields">
-    <template slot="currency" slot-scope="data">
-      <CurrencyIcon :value="data.value" :width="15" />
+  <b-table
+    id="dice-bet-results"
+    class="dice-bet-results"
+    responsive striped small outlined hover fixed
+    :items="latestBets"
+    :fields="fields"
+    :show-empty="true"
+    empty-text="You haven't placed any bets.">
+    <template slot="profit" slot-scope="data">
+      <span v-html="formatProfit(data.item.profit, 'profit', data.item)"></span>
+      <CurrencyIcon :value="data.item.currency" :width="15" />
     </template>
   </b-table>
 </template>
@@ -15,7 +23,6 @@
   .dice-bet-results th{
     text-align:center!important;
   }
-
 </style>
 
 
@@ -35,51 +42,51 @@
       'b-table': bTable,
       CurrencyIcon
     },
-    computed: mapGetters({
-      currencies: 'currencies',
-      latestBets: 'diceLatestBets'
-    }),
-    data: () => ({
-      fields: [{
-        key: 'id',
-        label: 'Bet Id',
-        class: 'text-center'
-      }, {
-        key: 'date',
-        label: 'Time',
-        formatter: 'formatTime',
-        class: 'text-center'
-      }, {
-        key: 'bet_amount',
-        label: 'Bet Amount',
-        formatter: 'formatAmount',
-        class: 'text-right'
-      }, {
-        key: 'chance',
-        label: 'Payout',
-        formatter: 'gameDetailsToPayout',
-        class: 'text-center'
-      }, {
-        key: 'target',
-        label: 'Target',
-        formatter: 'gameDetailsToTarget',
-        class: 'text-center'
-      }, {
-        key: 'roll',
-        label: 'Roll',
-        formatter: 'gameDetailsToRoll',
-        class: 'text-center'
-      }, {
-        key: 'profit',
-        label: 'Profit',
-        formatter: 'formatProfit',
-        class: 'text-right'
-      }, {
-        key: 'currency',
-        label: 'Currency',
-        class: 'text-center'
-      }]
-    }),
+    computed: {
+      ...mapGetters({
+        currencies: 'currencies',
+        latestBets: 'diceLatestBets',
+      }),
+      fields () {
+        return [
+          ...this.$mq === 'desktop' ? [{
+            key: 'id',
+            label: 'Bet Id',
+            class: 'text-center'
+          }] : [],
+          ...this.$mq === 'desktop' ? [{
+            key: 'date',
+            label: 'Time',
+            formatter: 'formatTime',
+            class: 'text-center'
+          }] : [], {
+            key: 'bet_amount',
+            label: 'Bet Amount',
+            formatter: 'formatAmount',
+            class: 'text-right'
+          },
+          ...this.$mq === 'desktop' ? [{
+            key: 'chance',
+            label: 'Payout',
+            formatter: 'gameDetailsToPayout',
+            class: 'text-center'
+          }] : [], {
+            key: 'target',
+            label: 'Target',
+            formatter: 'gameDetailsToTarget',
+            class: 'text-center'
+          }, {
+            key: 'roll',
+            label: 'Roll',
+            formatter: 'gameDetailsToRoll',
+            class: 'text-center'
+          }, {
+            key: 'profit',
+            label: 'Profit',
+            class: 'text-right no-wrap'
+          }];
+      }
+    },
     methods: {
       formatBigAmount,
       formatAmount (value, key, item) {
