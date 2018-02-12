@@ -7,8 +7,9 @@
     :fields="fields"
     :show-empty="true"
     empty-text="You haven't placed any bets.">
-    <template slot="currency" slot-scope="data">
-      <CurrencyIcon :value="data.value" :width="15" />
+    <template slot="profit" slot-scope="data">
+      <span v-html="formatProfit(data.item.profit, 'profit', data.item)"></span>
+      <CurrencyIcon :value="data.item.currency" :width="15" />
     </template>
   </b-table>
 </template>
@@ -81,12 +82,7 @@
           }, {
             key: 'profit',
             label: 'Profit',
-            formatter: 'formatProfit',
-            class: 'text-right'
-          }, {
-            key: 'currency',
-            label: 'Currency',
-            class: 'text-center'
+            class: 'text-right no-wrap'
           }];
       }
     },
