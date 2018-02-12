@@ -406,53 +406,32 @@ const addNewDiceSeed = async (userId, newServerSeed, newClientSeed) => {
   return result;
 }
 
-const doDiceBet = async (userId, betAmount, currency, target, chance) => {
+const doDiceBet = async (userId, betAmount, currency, profit, roll, target, chance, seedId, nonce) => {
   const result = await db.tx(t => {
-    /* Deduct balance and throw error if insufficient balance */
-    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [betAmount, userId, currency])
-      .then(res => {
-        if (!res) {
-          throw new Error('INSUFFICIENT_BALANCE');
-        }
+    return t.batch([
+      t.none('UPDATE dice_seeds SET nonce = nonce + 1 WHERE id = $1', seedId),
+      t.one('INSERT INTO bets (player_id, date, bet_amount, currency, profit, game_type, game_details, seed_details) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7) RETURNING *', [userId, betAmount, currency, profit, 'dice', {chance, roll, target}, {seed_id: seedId, nonce}]),
+      t.oneOrNone('UPDATE user_balances SET balance = balance + $1 WHERE user_id = $2 AND currency = $3 AND balance >= $4 RETURNING balance', [profit, userId, currency, betAmount])
+    ])
+    .then(data => {
+      const bet = data[1];
+      const userBalance = data[2];
 
-        /* Get user seed in use */
-        return t.one('SELECT * FROM dice_seeds WHERE player_id = $1 AND in_use = $2', [userId, true]);
-      })
-      .then(seed => {
-        /* Calculate dice roll and profit */
-        const roll = dice.calculateDiceRoll(seed.server_seed, seed.client_seed, seed.nonce);
-        const profit = dice.calculateProfit(roll, chance, betAmount, target);
+      if (!userBalance) {
+        throw new Error('INSUFFICIENT_BALANCE');
+      }
 
-        /* Increment nonce and update bets table */
-        return t.none('UPDATE dice_seeds SET nonce = nonce + 1 WHERE id = $1', seed.id)
-          .then(() => {
-            const gameDetails = {chance, roll, target};
-            const seedDetails = {seed_id: seed.id, nonce: seed.nonce};
-            return t.one('INSERT INTO bets (player_id, date, bet_amount, currency, profit, game_type, game_details, seed_details) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7) RETURNING *', [userId, betAmount, currency, profit, 'dice', gameDetails, seedDetails]);
-          });
-      })
-      .then(bet => {
-        /* Now update balance */
-        const userProfit = new BigNumber(betAmount)
-          .add(bet.profit)
-          .toString();
-        return t.one('UPDATE user_balances SET balance = balance + $1 WHERE user_id = $2 AND currency = $3 RETURNING balance', [userProfit, userId, currency])
-          .then(res => {
-            return {
-              id: bet.id,
-              date: bet.date,
-              bet_amount: bet.bet_amount,
-              currency: bet.currency,
-              // chance: bet.game_details.chance,
-              // roll: bet.game_details.roll,
-              profit: bet.profit,
-              // target: bet.game_details.target,
-              game_details: bet.game_details,
-              balance: res.balance,
-              nextNonce: bet.seed_details.nonce + 1
-            };
-          });
-      });
+      return {
+        id: bet.id,
+        date: bet.date,
+        bet_amount: bet.bet_amount,
+        currency: bet.currency,
+        profit: bet.profit,
+        game_details: bet.game_details,
+        balance: userBalance.balance,
+        nextNonce: bet.seed_details.nonce + 1
+      };
+    });
   });
 
   return result;
