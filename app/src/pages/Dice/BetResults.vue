@@ -22,7 +22,6 @@
   .dice-bet-results th{
     text-align:center!important;
   }
-
 </style>
 
 
@@ -42,50 +41,55 @@
       'b-table': bTable,
       CurrencyIcon
     },
-    computed: mapGetters({
-      currencies: 'currencies',
-      latestBets: 'diceLatestBets'
-    }),
-    data: () => ({
-      fields: [{
-        key: 'id',
-        label: 'Bet Id',
-        class: 'text-center'
-      }, {
-        key: 'date',
-        label: 'Time',
-        formatter: 'formatTime',
-        class: 'text-center'
-      }, {
-        key: 'bet_amount',
-        label: 'Bet Amount',
-        formatter: 'formatAmount',
-        class: 'text-right'
-      }, {
-        key: 'chance',
-        label: 'Payout',
-        formatter: 'chanceToPayout',
-        class: 'text-center'
-      }, {
-        key: 'target',
-        label: 'Target',
-        formatter: 'formatTarget',
-        class: 'text-center'
-      }, {
-        key: 'roll',
-        label: 'Roll',
-        class: 'text-center'
-      }, {
-        key: 'profit',
-        label: 'Profit',
-        formatter: 'formatProfit',
-        class: 'text-right'
-      }, {
-        key: 'currency',
-        label: 'Currency',
-        class: 'text-center'
-      }]
-    }),
+    computed: {
+      ...mapGetters({
+        currencies: 'currencies',
+        latestBets: 'diceLatestBets',
+      }),
+      fields () {
+        return [
+          ...this.$mq === 'desktop' ? [{
+            key: 'id',
+            label: 'Bet Id',
+            class: 'text-center'
+          }] : [],
+          ...this.$mq === 'desktop' ? [{
+            key: 'date',
+            label: 'Time',
+            formatter: 'formatTime',
+            class: 'text-center'
+          }] : [], {
+            key: 'bet_amount',
+            label: 'Bet Amount',
+            formatter: 'formatAmount',
+            class: 'text-right'
+          },
+          ...this.$mq === 'desktop' ? [{
+            key: 'chance',
+            label: 'Payout',
+            formatter: 'chanceToPayout',
+            class: 'text-center'
+          }] : [], {
+            key: 'target',
+            label: 'Target',
+            formatter: 'formatTarget',
+            class: 'text-center'
+          }, {
+            key: 'roll',
+            label: 'Roll',
+            class: 'text-center'
+          }, {
+            key: 'profit',
+            label: 'Profit',
+            formatter: 'formatProfit',
+            class: 'text-right'
+          }, {
+            key: 'currency',
+            label: 'Currency',
+            class: 'text-center'
+          }];
+      }
+    },
     methods: {
       formatBigAmount,
       formatAmount (value, key, item) {
