@@ -1,13 +1,11 @@
 const bitcoin = require('bitcoinjs-lib');
 const sha3 = require('crypto-js/sha3');
-const currencies = require('../../currencies');
 
 const validateBtcAddress = function (address) {
   try {
     bitcoin.address.toOutputScript(address, bitcoin.networks.bitcoin);
     return true;
   } catch (e) {
-    console.log(e);
     return false;
   }
 };
@@ -57,23 +55,12 @@ const ADDRESS_VALIDATORS = {
  * Returns true if currency supported
  * Returns false if not
  */
-module.exports = function (address, currency) {
-  if (!address || (!currency && currency !== 0)) {
+module.exports = function (address, currencyConfig) {
+  if (!address || !currencyConfig) {
     return false;
   }
 
-  let value = currency;
-  if (typeof currency !== 'number') {
-    value = parseInt(currency, 10);
-  }
+  const {address_type} = currencyConfig;
 
-  const currencyConfig = currencies.find(c => c.value === value);
-
-  if (!currencyConfig) {
-    return false;
-  }
-
-  const {addressType} = currencyConfig;
-
-  return ADDRESS_VALIDATORS[addressType] && ADDRESS_VALIDATORS[addressType](address);
+  return ADDRESS_VALIDATORS[address_type] && ADDRESS_VALIDATORS[address_type](address);
 };

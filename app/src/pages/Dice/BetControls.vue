@@ -8,7 +8,7 @@
             <input class="form-control" id="dice-betamount" v-model="betAmount" @keyup="updateProfit" type="text"
               autocomplete="off" />
             <template slot="append">
-              <CurrencyIcon :value="activeCurrency" :width="20" />
+              <CurrencyIcon :id="activeCurrency" :width="20" />
             </template>
           </b-input-group>
         </b-form-group>
@@ -20,7 +20,7 @@
             <input class="form-control" id="dice-betprofit" v-model="betProfit" @keyup="updateBetAmount" type="text"
               autocomplete="off" />
             <template slot="append">
-              <CurrencyIcon :value="activeCurrency" :width="20" />
+              <CurrencyIcon :id="activeCurrency" :width="20" />
             </template>
           </b-input-group>
         </b-form-group>
@@ -66,7 +66,7 @@
       <b-col cols="8" offset="2" :class="`text-${winColour}`">
         {{ rollMessage }} <br>
         {{ winMessage }}
-        <CurrencyIcon  v-if="winCurrency !== null" :value="winCurrency" :color="winColour"  />
+        <CurrencyIcon  v-if="winCurrency !== null" :id="winCurrency" :color="winColour"  />
       </b-col>
     </b-row>
 
@@ -316,7 +316,7 @@
         isBettingDisabled: 'diceIsBettingDisabled'
       }),
       currency () {
-        return this.currencies.find(c => c.value === this.activeCurrency);
+        return this.currencies.find(c => c.id === this.activeCurrency);
       },
       bettingDisabled () {
         return this.isBettingDisabled || !this.isPayoutValid || !this.isChanceValid || this.demoModeOn;

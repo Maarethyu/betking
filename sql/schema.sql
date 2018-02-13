@@ -107,10 +107,24 @@ CREATE TABLE error_logs (
   to_email text NULL
 );
 
+CREATE TYPE address_type as ENUM('bitcoin', 'ethereum');
+
+CREATE TABLE currencies (
+  id integer PRIMARY KEY,
+  symbol text NOT NULL,
+  name text NOT NULL,
+  scale integer NOT NULL,
+  max_withdraw_limit numeric (36, 0) NOT NULL,
+  min_withdraw_limit numeric (36, 0) NOT NULL,
+  withdrawal_fee numeric (36, 0) NOT NULL,
+  min_tip numeric (36, 0) NOT NULL,
+  address_type address_type NOT NULL
+);
+
 CREATE TABLE user_balances (
   id bigserial PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
-  currency integer NOT NULL,
+  currency integer NOT NULL REFERENCES currencies(id),
   balance numeric (36, 0) NOT NULL
 );
 
@@ -120,7 +134,7 @@ CREATE INDEX user_balances_user_id_idx ON user_balances USING btree(user_id);
 CREATE TABLE user_withdrawals (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
-  currency integer NOT NULL,
+  currency integer NOT NULL REFERENCES currencies(id),
   amount numeric (36, 0) NOT NULL,
   fee numeric (36, 0) NOT NULL,
   status text NOT NULL,
@@ -135,7 +149,7 @@ CREATE INDEX user_withdrawals_created_at_user_id_idx ON user_withdrawals USING b
 CREATE TABLE user_addresses (
   id bigserial PRIMARY KEY,
   user_id bigint NULL REFERENCES users(id),
-  currency integer NOT NULL,
+  currency integer NOT NULL REFERENCES currencies(id),
   address text NOT NULL
 );
 
@@ -144,7 +158,7 @@ CREATE INDEX user_addresses_user_id_currency_idx ON user_addresses(user_id, curr
 CREATE TABLE user_deposits (
   id uuid PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users(id),
-  currency integer NOT NULL,
+  currency integer NOT NULL REFERENCES currencies(id),
   amount numeric (36, 0) NOT NULL,
   address text NOT NULL,
   txid text NOT NULL,
@@ -166,7 +180,7 @@ CREATE INDEX whitelisted_addresses_user_id_idx ON whitelisted_addresses USING bt
 
 CREATE TABLE bankrolls (
   id bigserial PRIMARY KEY,
-  currency integer NOT NULL,
+  currency integer NOT NULL REFERENCES currencies(id),
   max_win numeric (36, 0) NOT NULL,
   min_bet_amount numeric (36, 0) NOT NULL
 );
@@ -176,7 +190,7 @@ CREATE TABLE bets (
   player_id bigint NOT NULL REFERENCES users(id),
   date timestamp with time zone NOT NULL  DEFAULT NOW(),
   bet_amount numeric (36, 0) NOT NULL,
-  currency integer NOT NULL,
+  currency integer NOT NULL REFERENCES currencies(id),
   profit numeric (36, 0) NOT NULL,
   game_type text NOT NULL,
   game_details jsonb NOT NULL,

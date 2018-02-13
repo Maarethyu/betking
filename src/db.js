@@ -2,7 +2,6 @@ const config = require('config');
 const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
 const BigNumber = require('bignumber.js');
-const helpers = require('./helpers');
 const dice = require('./games/dice');
 
 const initOptions = {
@@ -222,12 +221,17 @@ const markEmailAsVerified = async (token) => {
 };
 
 /* CRYPTO */
+const getAllCurrencies = async () => {
+  const result = await db.any('SELECT * FROM currencies');
+  return result;
+};
+
 const getAllBalancesForUser = async (userId) => {
   const result = await db.any('SELECT balance, currency from user_balances where user_id = $1', userId);
   return result;
 };
 
-const createWithdrawalEntry = async (userId, currency, wdFee, amount, amountReceived, address, withdrawalStatus, verificationToken) => {
+const createWithdrawalEntry = async (userId, currency, withdrawalFee, amount, amountReceived, address, withdrawalStatus, verificationToken) => {
   await db.tx(t => {
     return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amount, userId, currency])
       .then(res => {
@@ -235,7 +239,7 @@ const createWithdrawalEntry = async (userId, currency, wdFee, amount, amountRece
           throw new Error('INSUFFICIENT_BALANCE');
         }
 
-        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [uuidV4(), userId, currency, amountReceived, wdFee, withdrawalStatus, address, verificationToken]);
+        return t.none('INSERT INTO user_withdrawals (id, user_id, currency, amount, fee, status, address, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [uuidV4(), userId, currency, amountReceived, withdrawalFee, withdrawalStatus, address, verificationToken]);
       });
   });
 };
@@ -258,10 +262,7 @@ const confirmWithdrawByToken = async (token) => {
     });
 };
 
-const addDeposit = async (currency, amount, address, txid) => {
-  // currencyToQuery is ETH if currency is an eth-token
-  const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
-
+const addDeposit = async (currencyToQuery, currency, amount, address, txid) => {
   await db.tx(t => {
     return t.oneOrNone('SELECT user_id from user_addresses WHERE currency = $1 AND address = $2', [currencyToQuery, address])
       .then(row => {
@@ -301,18 +302,15 @@ const addDeposit = async (currency, amount, address, txid) => {
 };
 
 const getDepositAddress = async (userId, currency) => {
-  // currencyToQuery is ETH if currency is an eth-token
-  const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currency);
-
   const result = await db.tx(t => {
-    return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currencyToQuery])
+    return t.oneOrNone('SELECT address FROM user_addresses WHERE user_id = $1 AND currency = $2', [userId, currency])
       .then(res => {
         if (res) {
           return res.address;
         }
 
         // Address not found in db. Find an available address
-        return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currencyToQuery)
+        return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currency)
           .then(res => {
             if (!res) {
               /* No address is free in db for the currency. Log this ? */
@@ -512,6 +510,7 @@ module.exports = {
   createVerifyEmailToken,
   markEmailAsVerified,
   /* CRYPTO */
+  getAllCurrencies,
   getAllBalancesForUser,
   createWithdrawalEntry,
   addDeposit,

@@ -6,13 +6,13 @@
       </div>
       <div class="currency-dropdown__balance-amount">
         {{addCommas(formatAmount(activeCurrencyBalance, activeCurrency))}}
-        <CurrencyIcon :value="activeCurrency" :width="13" />
+        <CurrencyIcon :id="activeCurrency" :width="13" />
       </div>
     </template>
     <b-dropdown-item v-for="currency in currencies" :key="currency.symbol"
-      @click="setActiveCurrency(currency.value)" balance="currency.balance">
+      @click="setActiveCurrency(currency.id)" balance="currency.balance">
         <span class="float-left">{{currency.name}}</span>
-        <CurrencyIcon :className="'float-right'" :value="currency.value" />
+        <CurrencyIcon :className="'float-right'" :id="currency.id" />
         <div class="clearfix" />
     </b-dropdown-item>
   </b-nav-item-dropdown>
@@ -116,8 +116,8 @@
     methods: {
       addCommas,
       formatAmount,
-      setActiveCurrency (value) {
-        this.$store.dispatch('setActiveCurrency', value);
+      setActiveCurrency (id) {
+        this.$store.dispatch('setActiveCurrency', id);
       },
       fetchBalances () {
         this.$store.dispatch('fetchAllBalances');

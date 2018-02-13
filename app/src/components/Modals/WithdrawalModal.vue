@@ -107,7 +107,7 @@
         is2faEnabled: 'is2faEnabled'
       }),
       currency () {
-        return this.currencies.find(c => c.value === this.withdrawalModalCurrency);
+        return this.currencies.find(c => c.id === this.withdrawalModalCurrency);
       },
       balance () {
         return this.currency && this.currency.balance;

@@ -12,12 +12,11 @@ const csrfProtection = require('csurf')({cookie: true});
 const db = require('./db');
 const helpers = require('./helpers');
 const mw = require('./middleware');
-
-const app = express();
-require('./middleware-wrapper');
+const InMemoryCache = require('./cache/InMemoryCache');
 
 // We should never have uncaught exceptions or rejections.
 // TODO - should these be before express is created?
+// TODO - Moved express creation inside startServer function
 process.on('unhandledRejection', (reason, promise) => {
   db.logUnhandledRejectionError(reason, promise);
   console.log('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -28,70 +27,82 @@ process.on('uncaughtException', (err) => {
   console.log('Uncaught Exception', err);
 });
 
-// add uuid to each request
-const assignId = function (req, res, next) {
-  req.id = uuid.v4();
-  next();
-};
+const cache = new InMemoryCache(db);
 
-app.use(assignId);
+const startServer = function () {
+  const app = express();
+  require('./middleware-wrapper');
 
-// setup logger
-logger.token('id', function getId (req) {
-  return req.id;
-});
+  // add uuid to each request
+  const assignId = function (req, res, next) {
+    req.id = uuid.v4();
+    next();
+  };
 
-app.use(logger(':id :remote-addr :method :url :status :response-time'));
+  app.use(assignId);
 
-app.use(helmet({frameguard: {action: 'deny'}}));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser());
-app.use(expressValidator());
-
-app.use(mw.attachCurrentUserToRequest);
-
-const router = express.Router();
-router.use('/account', csrfProtection, require('./routes/account'));
-router.use('/admin', require('./routes/admin'));
-router.use('/dice', require('./routes/dice'));
-router.use('', csrfProtection, require('./routes/index'));
-app.use('/api', router);
-
-// TODO - review
-const frontendStaticPath = path.join(__dirname, '..', 'app/dist');
-
-if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
-  app.use('/static', express.static(`${frontendStaticPath}/static`));
-}
-
-if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-  require(path.join(__dirname, '..', 'app/build/express-server'))(app);
-} else {
-  app.get('*', csrfProtection, function (req, res) {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-
-    fs.createReadStream(`${frontendStaticPath}/index.html`)
-      .pipe(helpers.addCsrfToken(req.csrfToken()))
-      .pipe(res);
+  // setup logger
+  logger.token('id', function getId (req) {
+    return req.id;
   });
-}
 
-app.use(function (error, req, res, next) {
-  if (error.code === 'EBADCSRFTOKEN') {
-    return res.status(403).send('Invalid request token');
+  app.use(logger(':id :remote-addr :method :url :status :response-time'));
+
+  app.use(helmet({frameguard: {action: 'deny'}}));
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({extended: false}));
+  app.use(cookieParser());
+  app.use(expressValidator());
+
+  app.use(mw.attachCurrentUserToRequest);
+
+  const router = express.Router();
+  router.use('/account', csrfProtection, require('./routes/account')(cache.currencyCache));
+  router.use('/admin', require('./routes/admin')(cache.currencyCache));
+  router.use('/dice', require('./routes/dice')(cache.currencyCache));
+  router.use('', csrfProtection, require('./routes/index')(cache.currencyCache));
+  app.use('/api', router);
+
+  // TODO - review
+  const frontendStaticPath = path.join(__dirname, '..', 'app/dist');
+
+  if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
+    app.use('/static', express.static(`${frontendStaticPath}/static`));
   }
 
-  const query = error.query ? error.query.toString() : null;
-  const code = error.code || null;
-  const source = error.DB_ERROR ? 'DB_ERROR' : 'API_ERROR';
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    require(path.join(__dirname, '..', 'app/build/express-server'))(app);
+  } else {
+    app.get('*', csrfProtection, function (req, res) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
-  db.logError(error.message, error.stack, req.id, req.currentUser && req.currentUser.id, source, query, code);
+      fs.createReadStream(`${frontendStaticPath}/index.html`)
+        .pipe(helpers.addCsrfToken(req.csrfToken()))
+        .pipe(res);
+    });
+  }
 
-  console.log(source, error);
+  app.use(function (error, req, res, next) {
+    if (error.code === 'EBADCSRFTOKEN') {
+      return res.status(403).send('Invalid request token');
+    }
 
-  res.status(500).send('An error occured');
-});
+    const query = error.query ? error.query.toString() : null;
+    const code = error.code || null;
+    const source = error.DB_ERROR ? 'DB_ERROR' : 'API_ERROR';
 
-app.listen(config.get('PORT'));
-console.log(`server listening on port ${config.get('PORT')}`);
+    db.logError(error.message, error.stack, req.id, req.currentUser && req.currentUser.id, source, query, code);
+
+    console.log(source, error);
+
+    res.status(500).send('An error occured');
+  });
+
+  app.listen(config.get('PORT'));
+  console.log(`server listening on port ${config.get('PORT')}`);
+};
+
+cache.load()
+  .then(() => {
+    startServer();
+  });

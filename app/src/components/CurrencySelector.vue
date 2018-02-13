@@ -1,12 +1,12 @@
 <template>
   <b-dropdown variant="default">
     <template slot="button-content">
-      {{ name }} <CurrencyIcon v-if="activeCurrency !== -1" :value="activeCurrency" :width="20" />
+      {{ name }} <CurrencyIcon v-if="activeCurrency !== -1" :id="activeCurrency" :width="20" />
     </template>
 
-    <b-dropdown-item v-for="currency of currencies" :key="currency.value" @click="currencyChanged(currency)">
+    <b-dropdown-item v-for="currency of currencies" :key="currency.id" @click="currencyChanged(currency)">
       <span class="float-left">{{ currency.name }}</span>
-      <CurrencyIcon :className="'float-right'" :value="currency.value" :width="15" />
+      <CurrencyIcon :className="'float-right'" :id="currency.id" :width="15" />
       <div class="clearfix" />
     </b-dropdown-item>
   </b-dropdown>
@@ -33,7 +33,7 @@
         currencies: 'currencies'
       }),
       name () {
-        const currency = this.currencies.find(c => c.value === this.activeCurrency);
+        const currency = this.currencies.find(c => c.id === this.activeCurrency);
 
         if (currency) {
           return currency.name;
@@ -61,8 +61,8 @@
     },
     methods: {
       currencyChanged (currency) {
-        this.activeCurrency = currency.value;
-        this.$emit('change', currency.value);
+        this.activeCurrency = currency.id;
+        this.$emit('change', currency.id);
       }
     }
   };

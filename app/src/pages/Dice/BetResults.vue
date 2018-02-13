@@ -9,7 +9,7 @@
     empty-text="You haven't placed any bets.">
     <template slot="profit" slot-scope="data">
       <span v-html="formatProfit(data.item.profit, 'profit', data.item)"></span>
-      <CurrencyIcon :value="data.item.currency" :width="15" />
+      <CurrencyIcon :id="data.item.currency" :width="15" />
     </template>
   </b-table>
 </template>
