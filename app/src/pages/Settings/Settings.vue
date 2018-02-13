@@ -4,22 +4,21 @@
     <Profile />
 
     <br />
-    <h3>Make your bets and stats private</h3>
-    <SetBetsAndStatsHidden />
+    <BetSettings />
   </b-container>
 </template>
 
 <script>
   import bContainer from 'bootstrap-vue/es/components/layout/container';
   import Profile from './Profile';
-  import SetBetsAndStatsHidden from './SetBetsAndStatsHidden';
+  import BetSettings from './BetSettings';
 
   export default {
     name: 'Settings',
     components: {
       'b-container': bContainer,
       Profile,
-      SetBetsAndStatsHidden
+      BetSettings
     }
   };
 </script>

@@ -477,6 +477,10 @@ const toggleStatsHidden = async (userId, statsHidden) => {
   await db.none('UPDATE users SET stats_hidden = $1 WHERE id = $2', [statsHidden, userId]);
 };
 
+const disableBetting = async (userId) => {
+  await db.none('UPDATE users SET betting_disabled = true WHERE id = $1', userId);
+};
+
 module.exports = {
   isEmailAlreadyTaken,
   isUserNameAlreadyTaken,
@@ -535,5 +539,6 @@ module.exports = {
   doDiceBet,
   setNewDiceClientSeed,
   generateNewSeed,
-  toggleStatsHidden
+  toggleStatsHidden,
+  disableBetting
 };

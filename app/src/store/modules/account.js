@@ -15,7 +15,8 @@ const state = {
   is2faEnabled: null,
   fingerprint: null,
   confirmWithdrawals: null,
-  statsHidden: null
+  statsHidden: null,
+  bettingDisabled: null
 };
 
 // getters
@@ -29,7 +30,8 @@ const getters = {
     isEmailVerified: state.isEmailVerified,
     dateJoined: state.dateJoined,
     confirmWithdrawals: state.confirmWithdrawals,
-    statsHidden: state.statsHidden
+    statsHidden: state.statsHidden,
+    bettingDisabled: state.bettingDisabled
   }),
   username: state => state.username,
   userId: state => state.id,
@@ -117,6 +119,7 @@ const mutations = {
       state.is2faEnabled = null;
       state.confirmWithdrawals = null;
       state.statsHidden = null;
+      state.bettingDisabled = null;
     }
   },
 
@@ -129,6 +132,7 @@ const mutations = {
     state.is2faEnabled = user.is2faEnabled;
     state.confirmWithdrawals = user.confirmWithdrawals;
     state.statsHidden = user.statsHidden;
+    state.bettingDisabled = user.bettingDisabled;
   },
 
   [types.SET_FINGERPRINT] (state, fingerprint) {
