@@ -269,9 +269,6 @@ export const setMaxBetAmount = function () {
   let b = new BigNumber(this.balance);
   let p = b.times(this.payout).minus(b);
 
-  console.log(p.toString());
-  console.log(this.maxWin);
-
   if (p.isNaN() || p.lt(0)) {
     p = new BigNumber(0);
   }
