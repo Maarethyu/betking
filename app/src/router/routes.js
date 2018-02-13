@@ -13,6 +13,7 @@ const routes = [
       /* Pages which render for both user logged in or logged out state */
       {path: '', name: 'home', component: () => import('pages/Home/Home')},
       {path: '/dice', component: () => import('pages/Dice/Dice')},
+      {path: '/stats', component: () => import('pages/Stats')},
 
       /* Pages which need user to be logged out */
 

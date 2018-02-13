@@ -7,5 +7,9 @@ module.exports = (statsCache) => {
     res.json({totalBets: statsCache.totalBets});
   });
 
+  router.get('/all', async function (req, res, next) {
+    res.json({stats: statsCache.siteStats});
+  });
+
   return router;
 };
