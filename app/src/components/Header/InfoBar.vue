@@ -4,8 +4,9 @@
       <div class="info-bar__item">
         <span class="text-red">Online: </span>123
       </div>
-      <div class="info-bar__item">
-        <span class="text-red">Bets: </span>123,456,789
+      <div class="info-bar__item" v-if="totalBets">
+        <span class="text-red">Bets: </span>
+        {{ addCommas(totalBets) }}
       </div>
       <div class="info-bar__item">
         <span class="text-red">Won last 24 hours: </span> 123.12 BTC
@@ -59,32 +60,37 @@
 }
 </style>
 <script>
-import bToggle from 'bootstrap-vue/es/directives/toggle/toggle';
+  import bToggle from 'bootstrap-vue/es/directives/toggle/toggle';
+  import CurrencyIcon from 'components/CurrencyIcon';
 
-import {mapGetters, mapState} from 'vuex';
-import CurrencyIcon from 'components/CurrencyIcon';
+  import {mapGetters, mapState} from 'vuex';
+  import {addCommas} from 'src/helpers';
 
-export default {
-  directives: {
-    'b-toggle': bToggle
-  },
-  components: {
-    CurrencyIcon
-  },
-  props: {
-    toggleChat: {
-      type: Function,
-      default: () => {}
+  export default {
+    directives: {
+      'b-toggle': bToggle
+    },
+    components: {
+      CurrencyIcon
+    },
+    props: {
+      toggleChat: {
+        type: Function,
+        default: () => {}
+      }
+    },
+    computed: {
+      ...mapGetters({
+        diceMaxWin: 'diceMaxWin',
+        activeCurrency: 'activeCurrency',
+        totalBets: 'totalBets'
+      }),
+      ...mapState({
+        path: state => state.route.path
+      })
+    },
+    methods: {
+      addCommas
     }
-  },
-  computed: {
-    ...mapGetters({
-      diceMaxWin: 'diceMaxWin',
-      activeCurrency: 'activeCurrency'
-    }),
-    ...mapState({
-      path: state => state.route.path
-    })
-  }
-};
+  };
 </script>

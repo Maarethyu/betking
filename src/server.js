@@ -59,7 +59,8 @@ const startServer = function () {
   const router = express.Router();
   router.use('/account', csrfProtection, require('./routes/account')(cache.currencyCache));
   router.use('/admin', require('./routes/admin')(cache.currencyCache));
-  router.use('/dice', require('./routes/dice')(cache.currencyCache));
+  router.use('/dice', require('./routes/dice')(cache.currencyCache, cache.statsCache));
+  router.use('/stats', require('./routes/stats')(cache.statsCache));
   router.use('', csrfProtection, require('./routes/index')(cache.currencyCache));
   app.use('/api', router);
 

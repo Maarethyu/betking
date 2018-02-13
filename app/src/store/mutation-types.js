@@ -1,21 +1,21 @@
-/* Account Module */
+// Account
 export const UPDATE_AUTHSTATE = 'UPDATE_AUTHSTATE';
 export const SET_USER = 'SET_USER';
 export const SET_FINGERPRINT = 'SET_FINGERPRINT';
 
-/* Funds Module */
+// Funds
 export const SET_CURRENCIES = 'SET_CURRENCIES';
 export const SET_ALL_BALANCES = 'SET_ALL_BALANCES';
 export const SET_BALANCE = 'SET_BALANCE';
 export const SET_ACTIVE_CURRENCY = 'SET_ACTIVE_CURRENCY';
 
-/* Modals Module */
+// Modals
 export const SHOW_WITHDRWAL_MODAL = 'SHOW_WITHDRWAL_MODAL';
 export const HIDE_WITHDRAWAL_MODAL = 'HIDE_WITHDRAWAL_MODAL';
 export const SHOW_DEPOSIT_MODAL = 'SHOW_DEPOSIT_MODAL';
 export const HIDE_DEPOSIT_MODAL = 'HIDE_DEPOSIT_MODAL';
 
-/* Dice Module */
+// Dice
 export const SET_DICE_STATE = 'SET_DICE_STATE';
 export const DISABLE_DICE_BETTING = 'DISABLE_DICE_BETTING';
 export const ENABLE_DICE_BETTING = 'ENABLE_DICE_BETTING';
@@ -23,3 +23,6 @@ export const ADD_DICE_BET = 'ADD_DICE_BET';
 export const SET_DICE_CLIENT_SEED = 'SET_DICE_CLIENT_SEED';
 export const SET_DICE_NONCE = 'SET_DICE_NONCE';
 export const UPDATE_PREVIOUS_AND_CURRENT_DICE_SEED = 'UPDATE_PREVIOUS_AND_CURRENT_DICE_SEED';
+
+// Stats
+export const SET_BET_STATS = 'SET_BET_STATS';

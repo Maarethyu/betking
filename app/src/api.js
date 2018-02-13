@@ -139,6 +139,9 @@ export default {
   disableBetting () {
     return post('/api/account/disable-betting');
   },
+  fetchBetStats () {
+    return get('/api/stats/bets');
+  },
   // Dice
   loadDiceState (clientSeed, currency) {
     return get(`/api/dice/load-state?clientSeed=${clientSeed}&currency=${currency}`);

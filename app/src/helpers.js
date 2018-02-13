@@ -63,7 +63,9 @@ export const addCommas = (x) => {
   }
 
   const parts = x.toString().split('.');
-  return `${parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')}.${parts[1]}`;
+  const decimalPart = parts[1] ? `.${parts[1]}` : '';
+
+  return `${parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')}${decimalPart}`;
 };
 
 export const formatCurrency = function (currencyId, key) {

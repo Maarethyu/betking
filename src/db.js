@@ -481,6 +481,11 @@ const disableBetting = async (userId) => {
   await db.none('UPDATE users SET betting_disabled = true WHERE id = $1', userId);
 };
 
+const getBetStatsByCurrency = async () => {
+  const result = await db.any('SELECT currency, SUM(bet_amount) AS sum_bet_amount, SUM(profit) AS sum_profit, COUNT(id) as num_bets FROM bets GROUP BY currency');
+  return result;
+};
+
 module.exports = {
   isEmailAlreadyTaken,
   isUserNameAlreadyTaken,
@@ -540,5 +545,6 @@ module.exports = {
   setNewDiceClientSeed,
   generateNewSeed,
   toggleStatsHidden,
-  disableBetting
+  disableBetting,
+  getBetStatsByCurrency
 };
