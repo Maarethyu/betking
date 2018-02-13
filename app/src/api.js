@@ -133,6 +133,9 @@ export default {
   addWhitelistedAddress (currency, address, otp) {
     return post('/api/account/whitelisted-address/add', {currency, address, otp});
   },
+  toggleStatsHidden (statsHidden) {
+    return post('/api/account/toggle-stats-hidden', {statsHidden});
+  },
   // Dice
   loadDiceState (clientSeed, currency) {
     return get(`/api/dice/load-state?clientSeed=${clientSeed}&currency=${currency}`);

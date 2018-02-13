@@ -149,7 +149,8 @@ module.exports = (currencyCache) => {
       isEmailVerified: user.email_verified,
       dateJoined: user.date_joined,
       is2faEnabled: user.is_2fa_enabled,
-      confirmWithdrawals: user.confirm_wd
+      confirmWithdrawals: user.confirm_wd,
+      statsHidden: user.stats_hidden
     });
   });
 
@@ -223,7 +224,8 @@ module.exports = (currencyCache) => {
         isEmailVerified: user.email_verified,
         dateJoined: user.date_joined,
         is2faEnabled: user.is_2fa_enabled,
-        confirmWithdrawals: user.confirm_wd
+        confirmWithdrawals: user.confirm_wd,
+        statsHidden: user.stats_hidden
       });
     } else {
       res.status(500)

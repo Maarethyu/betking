@@ -27,7 +27,8 @@ module.exports = (currencyCache) => {
       isEmailVerified: req.currentUser.email_verified,
       is2faEnabled: req.currentUser.is_2fa_enabled,
       confirmWithdrawals: req.currentUser.confirm_wd,
-      dateJoined: req.currentUser.date_joined
+      dateJoined: req.currentUser.date_joined,
+      statsHidden: req.currentUser.stats_hidden
     });
   });
 
@@ -487,6 +488,21 @@ module.exports = (currencyCache) => {
       req.currentUser.id,
       parseInt(req.body.currency, 10)
     );
+
+    res.end();
+  });
+
+  router.post('/toggle-stats-hidden', async function (req, res, next) {
+    req.checkBody('statsHidden', 'Invalid option')
+      .exists()
+      .isBoolean();
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    await db.toggleStatsHidden(req.currentUser.id, req.body.statsHidden);
 
     res.end();
   });
