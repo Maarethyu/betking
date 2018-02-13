@@ -93,6 +93,7 @@ router.post('/bet', async function (req, res, next) {
   const maxWin = new BigNumber(bankRoll.max_win);
   const chance = new BigNumber(req.body.chance);
   const multiplier = new BigNumber(99).dividedBy(chance);
+  const target = req.body.target;
 
   if (betAmount.lt(minBetAmount)) {
     const currencyName = helpers.getCurrencyField(currency, 'name');
@@ -110,13 +111,21 @@ router.post('/bet', async function (req, res, next) {
     return res.status(400).json({error: 'Profit greater than max'});
   }
 
+  const seed = await db.getActiveDiceSeed(req.currentUser.id);
+  const roll = dice.calculateDiceRoll(seed.server_seed, seed.client_seed, seed.nonce);
+  const profit = dice.calculateProfit(roll, chance, betAmount.toString(), target);
+
   try {
     const result = await db.doDiceBet(
       req.currentUser.id,
       betAmount.toString(),
       currency,
+      profit,
+      roll,
       req.body.target,
-      chance.toNumber()
+      chance.toNumber(),
+      seed.id,
+      seed.nonce
     );
 
     res.json(result);
