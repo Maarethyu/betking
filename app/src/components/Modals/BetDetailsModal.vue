@@ -22,7 +22,7 @@
           </b-col>
           <b-col cols="4">
             <div class="bet-results__stat__key">BET AMOUNT</div>
-            <span class="bet-results__stat__value">{{betResults.betAmount}}</span>
+            <span class="bet-results__stat__value">{{formatBigAmount(betResults.betAmount, betResults.currency)}}</span>
             <CurrencyIcon :id="betResults.currency" :width="20" />
           </b-col>
           <b-col cols="4">
