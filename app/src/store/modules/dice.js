@@ -1,4 +1,5 @@
 import toastr from 'toastr';
+import Vue from 'vue';
 import BigNumber from 'bignumber.js';
 
 import * as types from '../mutation-types';
@@ -16,7 +17,8 @@ const state = {
   previousServerSeed: '',
   previousServerSeedHash: '',
   previousClientSeed: '',
-  previousNonce: ''
+  previousNonce: '',
+  sessionStats: []
 };
 
 // getters
@@ -31,7 +33,8 @@ const getters = {
   previousDiceServerSeed: state => state.previousServerSeed,
   previousDiceServerSeedHash: state => state.previousServerSeedHash,
   previousDiceClientSeed: state => state.previousClientSeed,
-  previousDiceNonce: state => state.previousNonce
+  previousDiceNonce: state => state.previousNonce,
+  sessionStats: state => state.sessionStats
 };
 
 // actions
@@ -130,6 +133,27 @@ const mutations = {
 
     if (state.latestUserBets.length > 50) {
       state.latestUserBets.splice(50);
+    }
+
+    const statIndex = state.sessionStats.findIndex(s => s.currency === bet.currency);
+    if (statIndex === -1) {
+      Vue.set(state.sessionStats, state.sessionStats.length, {
+        currency: bet.currency,
+        numBets: 1,
+        profit: bet.profit,
+        wagered: bet.bet_amount
+      });
+    } else {
+      Vue.set(state.sessionStats, statIndex, {
+        currency: bet.currency,
+        numBets: state.sessionStats[statIndex].numBets + 1,
+        profit: new BigNumber(state.sessionStats[statIndex].profit)
+          .add(bet.profit)
+          .toString(),
+        wagered: new BigNumber(state.sessionStats[statIndex].wagered)
+          .add(bet.bet_amount)
+          .toString()
+      });
     }
   },
 

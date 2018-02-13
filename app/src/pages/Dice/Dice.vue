@@ -3,9 +3,18 @@
     <BetControls />
 
     <br>
-    <b-row>
+
+    <b-row class="dice__bottom-panel">
       <b-col cols="12" sm="10" offset-sm="1">
-        <BetResults />
+        <b-nav tabs>
+          <b-nav-item v-for="navItem of navItems" :key="navItem.name"
+            :active="navItem.name === activeNavItem" @click="activeNavItem = navItem.name">
+            {{ navItem.displayName }}
+          </b-nav-item>
+        </b-nav>
+
+        <BetResults v-if="activeNavItem === 'BetResults'" />
+        <SessionStats v-if="activeNavItem === 'SessionStats'" />
       </b-col>
     </b-row>
   </div>
@@ -14,26 +23,48 @@
 <style lang="scss">
   .dice {
     margin-top: 10px;
+    &__bottom-panel {
+      min-height: 250px;
+    }
   }
 </style>
 
 <script>
-  import BetControls from './BetControls';
-  import BetResults from './BetResults';
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
+  import bNav from 'bootstrap-vue/es/components/nav/nav';
+  import bNavItem from 'bootstrap-vue/es/components/nav/nav-item';
+
+  import BetControls from './BetControls';
+  import BetResults from './BetResults';
+  import SessionStats from './SessionStats';
 
   import {getRandomAlphanumeric} from 'src/helpers';
   import {mapGetters} from 'vuex';
+
+  const navItems = [{
+    name: 'BetResults',
+    displayName: 'Bet Results'
+  }, {
+    name: 'SessionStats',
+    displayName: 'Session Stats'
+  }];
 
   export default {
     name: 'Dice',
     components: {
       'b-row': bRow,
       'b-col': bCol,
+      'b-nav': bNav,
+      'b-nav-item': bNavItem,
       BetControls,
-      BetResults
+      BetResults,
+      SessionStats
     },
+    data: () => ({
+      navItems,
+      activeNavItem: 'BetResults'
+    }),
     computed: mapGetters({
       isAuthenticated: 'isAuthenticated',
       activeCurrency: 'activeCurrency'
