@@ -7,6 +7,7 @@ CREATE TABLE users (
   mfa_key text NULL,
   is_2fa_enabled boolean NOT NULL DEFAULT false,
   stats_hidden boolean NOT NULL default false,
+  betting_disabled boolean NOT NULL default false,
   affiliate_id text NULL,
   confirm_wd boolean NOT NULL DEFAULT false,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW(),

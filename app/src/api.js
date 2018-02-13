@@ -136,6 +136,9 @@ export default {
   toggleStatsHidden (statsHidden) {
     return post('/api/account/toggle-stats-hidden', {statsHidden});
   },
+  disableBetting () {
+    return post('/api/account/disable-betting');
+  },
   // Dice
   loadDiceState (clientSeed, currency) {
     return get(`/api/dice/load-state?clientSeed=${clientSeed}&currency=${currency}`);

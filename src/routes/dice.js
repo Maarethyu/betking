@@ -85,6 +85,10 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: errorMsg});
     }
 
+    if (req.currentUser.betting_disabled) {
+      return res.status(400).json({error: 'Betting disabled on account'});
+    }
+
     const bankRoll = await db.getBankrollByCurrency(req.body.currency);
 
     const currency = parseInt(req.body.currency, 10);

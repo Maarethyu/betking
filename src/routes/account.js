@@ -28,7 +28,8 @@ module.exports = (currencyCache) => {
       is2faEnabled: req.currentUser.is_2fa_enabled,
       confirmWithdrawals: req.currentUser.confirm_wd,
       dateJoined: req.currentUser.date_joined,
-      statsHidden: req.currentUser.stats_hidden
+      statsHidden: req.currentUser.stats_hidden,
+      bettingDisabled: req.currentUser.betting_disabled
     });
   });
 
@@ -503,6 +504,12 @@ module.exports = (currencyCache) => {
     }
 
     await db.toggleStatsHidden(req.currentUser.id, req.body.statsHidden);
+
+    res.end();
+  });
+
+  router.post('/disable-betting', async function (req, res, next) {
+    await db.disableBetting(req.currentUser.id);
 
     res.end();
   });

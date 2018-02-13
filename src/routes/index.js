@@ -150,7 +150,8 @@ module.exports = (currencyCache) => {
       dateJoined: user.date_joined,
       is2faEnabled: user.is_2fa_enabled,
       confirmWithdrawals: user.confirm_wd,
-      statsHidden: user.stats_hidden
+      statsHidden: user.stats_hidden,
+      bettingDisabled: user.betting_disabled
     });
   });
 
@@ -225,7 +226,8 @@ module.exports = (currencyCache) => {
         dateJoined: user.date_joined,
         is2faEnabled: user.is_2fa_enabled,
         confirmWithdrawals: user.confirm_wd,
-        statsHidden: user.stats_hidden
+        statsHidden: user.stats_hidden,
+        bettingDisabled: user.betting_disabled
       });
     } else {
       res.status(500)
