@@ -1,15 +1,15 @@
 class CurrencyCache {
   constructor (db) {
-    this._db = db;
-    this._currencies = [];
+    this.db = db;
+    this.currenciesCache = [];
   }
 
   async load () {
-    this._currencies = await this._db.getAllCurrencies();
+    this.currenciesCache = await this.db.getAllCurrencies();
   }
 
   get currencies () {
-    return this._currencies;
+    return this.currenciesCache;
   }
 
   findById (id) {
@@ -18,12 +18,12 @@ class CurrencyCache {
       idNumeric = parseInt(id, 10);
     }
 
-    const currency = this._currencies.find(c => c.id === idNumeric);
+    const currency = this.currenciesCache.find(c => c.id === idNumeric);
     return currency;
   }
 
   findBySymbol (symbol) {
-    const currency = this._currencies.find(c => c.symbol === symbol);
+    const currency = this.currenciesCache.find(c => c.symbol === symbol);
     return currency;
   }
 
@@ -33,7 +33,7 @@ class CurrencyCache {
       idNumeric = parseInt(id, 10);
     }
 
-    const currency = this._currencies.find(c => c.id === idNumeric);
+    const currency = this.currenciesCache.find(c => c.id === idNumeric);
 
     if (!currency) {
       return null;

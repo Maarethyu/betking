@@ -339,4 +339,4 @@ module.exports = (currencyCache) => {
   });
 
   return router;
-}
+};

@@ -380,7 +380,6 @@ module.exports = (currencyCache) => {
     res.json({results, count});
   });
 
-
   router.get('/withdrawal-history', async function (req, res, next) {
     req.checkQuery('limit', 'Invalid limit param')
       .exists()

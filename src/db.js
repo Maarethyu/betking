@@ -1,7 +1,6 @@
 const config = require('config');
 const promise = require('bluebird');
 const uuidV4 = require('uuid/v4');
-const BigNumber = require('bignumber.js');
 const dice = require('./games/dice');
 
 const initOptions = {
@@ -402,7 +401,7 @@ const getActiveDiceSeed = async (userId) => {
 const addNewDiceSeed = async (userId, newServerSeed, newClientSeed) => {
   const result = await db.one('INSERT INTO dice_seeds (player_id, in_use, client_seed, server_seed, nonce) VALUES ($1, true, $2, $3, 0) RETURNING *', [userId, newClientSeed, newServerSeed]);
   return result;
-}
+};
 
 const doDiceBet = async (userId, betAmount, currency, profit, roll, target, chance, seedId, nonce) => {
   const result = await db.tx(t => {
@@ -411,25 +410,25 @@ const doDiceBet = async (userId, betAmount, currency, profit, roll, target, chan
       t.one('INSERT INTO bets (player_id, date, bet_amount, currency, profit, game_type, game_details, seed_details) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7) RETURNING *', [userId, betAmount, currency, profit, 'dice', {chance, roll, target}, {seed_id: seedId, nonce}]),
       t.oneOrNone('UPDATE user_balances SET balance = balance + $1 WHERE user_id = $2 AND currency = $3 AND balance >= $4 RETURNING balance', [profit, userId, currency, betAmount])
     ])
-    .then(data => {
-      const bet = data[1];
-      const userBalance = data[2];
+      .then(data => {
+        const bet = data[1];
+        const userBalance = data[2];
 
-      if (!userBalance) {
-        throw new Error('INSUFFICIENT_BALANCE');
-      }
+        if (!userBalance) {
+          throw new Error('INSUFFICIENT_BALANCE');
+        }
 
-      return {
-        id: bet.id,
-        date: bet.date,
-        bet_amount: bet.bet_amount,
-        currency: bet.currency,
-        profit: bet.profit,
-        game_details: bet.game_details,
-        balance: userBalance.balance,
-        nextNonce: bet.seed_details.nonce + 1
-      };
-    });
+        return {
+          id: bet.id,
+          date: bet.date,
+          bet_amount: bet.bet_amount,
+          currency: bet.currency,
+          profit: bet.profit,
+          game_details: bet.game_details,
+          balance: userBalance.balance,
+          nextNonce: bet.seed_details.nonce + 1
+        };
+      });
   });
 
   return result;
