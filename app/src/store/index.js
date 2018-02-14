@@ -4,6 +4,7 @@ import account from './modules/account';
 import funds from './modules/funds';
 import modals from './modules/modals';
 import dice from './modules/dice';
+import stats from './modules/stats';
 import socket from './modules/socket';
 
 Vue.use(Vuex);
@@ -14,6 +15,7 @@ export default new Vuex.Store({
     funds,
     modals,
     dice,
+    stats,
     socket
   }
 });

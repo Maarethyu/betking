@@ -76,7 +76,13 @@ export default {
       return !this.isChatShown;
     }
   },
+  mounted () {
+    this.fetchStats();
+  },
   methods: {
+    fetchStats () {
+      this.$store.dispatch('fetchBetStats');
+    },
     toggleSideBar () {
       this.isSideBarHidden = !this.isSideBarHidden;
     },

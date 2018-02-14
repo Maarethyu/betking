@@ -481,12 +481,18 @@ const disableBetting = async (userId) => {
   await db.none('UPDATE users SET betting_disabled = true WHERE id = $1', userId);
 };
 
+const getBetStatsByCurrency = async () => {
+  const result = await db.any('SELECT currency, SUM(bet_amount) AS sum_bet_amount, SUM(profit) AS sum_profit, COUNT(id) as num_bets FROM bets GROUP BY currency');
+  return result;
+};
+
 const getBetDetails = async (id) => {
   const result = await db.oneOrNone('SELECT b.id, b.player_id, b.date, b.bet_amount, b.currency, b.profit, b.game_type, b.game_details, u.username, u.stats_hidden FROM bets AS b INNER JOIN users AS u ON b.player_id = u.id WHERE b.id = $1', [id]);
 
   if (!result) {
     throw new Error('BET_NOT_FOUND');
   }
+
   return result;
 };
 
@@ -550,6 +556,7 @@ module.exports = {
   generateNewSeed,
   toggleStatsHidden,
   disableBetting,
+  getBetStatsByCurrency,
   // BETS
   getBetDetails
 };
