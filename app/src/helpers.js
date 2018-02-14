@@ -63,7 +63,9 @@ export const addCommas = (x) => {
   }
 
   const parts = x.toString().split('.');
-  return `${parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')}.${parts[1]}`;
+  const decimalPart = parts[1] ? `.${parts[1]}` : '';
+
+  return `${parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')}${decimalPart}`;
 };
 
 export const formatCurrency = function (currencyId, key) {
@@ -120,4 +122,37 @@ export const getRandomAlphanumeric = (n) => {
   }
 
   return text;
+};
+
+export const gameDetailsToTarget = (gameDetails) => {
+  if (!gameDetails) {
+    return null;
+  }
+
+  const sign = gameDetails.target === 0 ? '<' : '>';
+  const chance = new BigNumber(gameDetails.chance).toFixed(4, BigNumber.ROUND_DOWN);
+
+  return `${sign} ${chance}`;
+};
+
+export const gameDetailsToRoll = (gameDetails) => {
+  if (!gameDetails) {
+    return null;
+  }
+
+  return gameDetails.roll;
+};
+
+export const gameDetailsToPayout = (gameDetails) => {
+  if (!gameDetails) {
+    return null;
+  }
+
+  const payoutFixed = new BigNumber(99)
+    .dividedBy(gameDetails.chance)
+    .toFixed(4, BigNumber.ROUND_DOWN);
+
+  const payout = new BigNumber(payoutFixed).toString();
+
+  return `${payout}x`;
 };

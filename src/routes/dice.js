@@ -4,7 +4,7 @@ const db = require('../db');
 const mw = require('../middleware');
 const dice = require('../games/dice');
 
-module.exports = (currencyCache) => {
+module.exports = (currencyCache, statsCache) => {
   const router = express.Router();
 
   router.use(mw.requireLoggedIn);
@@ -133,6 +133,7 @@ module.exports = (currencyCache) => {
       );
 
       res.json(result);
+      statsCache.addBet(result);
     } catch (e) {
       if (e.message === 'INSUFFICIENT_BALANCE') {
         return res.status(400).json({error: 'Balance too low'});
