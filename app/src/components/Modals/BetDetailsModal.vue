@@ -169,26 +169,28 @@ export default {
 };
 </script>
 <style lang="scss">
-  .modal-header {
-    height: 74px;
+  #betDetailsModal {
+    .modal-header {
+      height: 74px;
+    }
+    .bet-results {
+      &__title {
+        font-size: 20px;
+        margin: 5px auto;
+      }
+      &__date {
+        font-size: 14px;
+      }
+      &__stat {
+        padding-bottom: 10px;
+        &__value {
+          font-size: 16px;
+          font-weight: bold;
+        }
+        &__key {
+          font-size: 12px;
+        }
+      }
   }
-  .bet-results {
-    &__title {
-      font-size: 20px;
-      margin: 5px auto;
-    }
-    &__date {
-      font-size: 14px;
-    }
-    &__stat {
-      padding-bottom: 10px;
-      &__value {
-        font-size: 16px;
-        font-weight: bold;
-      }
-      &__key {
-        font-size: 12px;
-      }
-    }
   }
 </style>
