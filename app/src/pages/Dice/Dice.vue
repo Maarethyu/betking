@@ -13,7 +13,7 @@
           </b-nav-item>
         </b-nav>
 
-        <BetResults v-if="activeNavItem === 'BetResults'" />
+        <BetList :showUsername="false" :bets="myBets" v-if="activeNavItem === 'BetResults'" />
         <SessionStats v-if="activeNavItem === 'SessionStats'" />
       </b-col>
     </b-row>
@@ -36,7 +36,7 @@
   import bNavItem from 'bootstrap-vue/es/components/nav/nav-item';
 
   import BetControls from './BetControls';
-  import BetResults from './BetResults';
+  import BetList from 'components/BetList';
   import SessionStats from './SessionStats';
 
   import {getRandomAlphanumeric} from 'src/helpers';
@@ -58,7 +58,7 @@
       'b-nav': bNav,
       'b-nav-item': bNavItem,
       BetControls,
-      BetResults,
+      BetList,
       SessionStats
     },
     data: () => ({
@@ -67,7 +67,8 @@
     }),
     computed: mapGetters({
       isAuthenticated: 'isAuthenticated',
-      activeCurrency: 'activeCurrency'
+      activeCurrency: 'activeCurrency',
+      myBets: 'diceLatestBets'
     }),
     mounted () {
       this.loadDiceState();
