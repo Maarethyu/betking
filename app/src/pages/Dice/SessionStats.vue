@@ -2,7 +2,7 @@
   <b-container>
     <b-row class="session-stats" v-for="stat in sessionStats" :key="stat.currency" align-v="center" align-h="center">
       <b-col cols="2" class="session-stats__stat">
-        <CurrencyIcon :value="stat.currency" :width="25" />
+        <CurrencyIcon :id="stat.currency" :width="25" />
       </b-col>
 
       <b-col cols="2" class="session-stats__stat">
