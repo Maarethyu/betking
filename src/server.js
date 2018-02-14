@@ -13,6 +13,7 @@ const db = require('./db');
 const helpers = require('./helpers');
 const mw = require('./middleware');
 const InMemoryCache = require('./cache/InMemoryCache');
+const startSocketServer = require('./socket/startSocketServer');
 
 // We should never have uncaught exceptions or rejections.
 // TODO - should these be before express is created?
@@ -29,7 +30,7 @@ process.on('uncaughtException', (err) => {
 
 const cache = new InMemoryCache(db);
 
-const startServer = function () {
+const startHttpServer = function () {
   const app = express();
   require('./middleware-wrapper');
 
@@ -98,11 +99,14 @@ const startServer = function () {
     res.status(500).send('An error occured');
   });
 
-  app.listen(config.get('PORT'));
+  const server = app.listen(config.get('PORT'));
   console.log(`server listening on port ${config.get('PORT')}`);
+
+  return server;
 };
 
 cache.load()
   .then(() => {
-    startServer();
+    const server = startHttpServer();
+    startSocketServer(server);
   });

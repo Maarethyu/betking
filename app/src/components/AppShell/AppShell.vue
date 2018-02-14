@@ -10,9 +10,11 @@
     <div class="app-body">
       <div class='menu-background'></div>
       <main class="main">
+        <SocketConnector />
+
         <MobileSecondaryHeader />
 
-        <infoBar :toggleChat="toggleChat"/>
+        <InfoBar :toggleChat="toggleChat"/>
 
         <GlobalChat :isChatShown="isChatShown" />
 
@@ -45,6 +47,7 @@ import GlobalChat from '../GlobalChat/ChatWrapper';
 import Sidebar from '../Sidebar/Sidebar';
 import Footer from '../Footer';
 import CommonModals from '../Modals/CommonModals';
+import SocketConnector from 'components/SocketConnector';
 
 import nav from './nav';
 
@@ -63,7 +66,8 @@ export default {
     InfoBar,
     Sidebar,
     Footer,
-    CommonModals
+    CommonModals,
+    SocketConnector
   },
   computed: {
     isChatHiddenOnDesktop () {
