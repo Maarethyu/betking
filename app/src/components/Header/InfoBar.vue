@@ -14,7 +14,7 @@
       <div class="info-bar__item info-bar__item--max-win" v-if="path === '/dice'">
         <span class="text-red">Max Win: </span>
         {{ diceMaxWin }}
-        <CurrencyIcon :value="activeCurrency" :width="18" />
+        <CurrencyIcon :id="activeCurrency" :width="18" />
       </div>
     </div>
     <div class="ml-auto">

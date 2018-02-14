@@ -33,6 +33,7 @@
     "pg-promise": "^7.3.2",
     "qrcode": "^1.2.0",
     "request-promise": "^4.2.2",
+    "socket.io": "^2.0.4",
     "speakeasy": "^2.0.0",
     "uuid": "^3.1.0"
   },

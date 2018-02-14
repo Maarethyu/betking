@@ -179,6 +179,7 @@
 
     &__result {
       margin-bottom: 1rem;
+      min-height: 42px;
     }
 
     &__bet-buttons {

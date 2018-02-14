@@ -157,5 +157,8 @@ export default {
   },
   generateNewDiceSeed (clientSeed) {
     return post('/api/dice/generate-new-seed', {clientSeed});
+  },
+  fetchBetDetails (id) {
+    return get(`/api/bets/bet-details?id=${id}`);
   }
 };

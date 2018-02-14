@@ -5,10 +5,9 @@ import funds from './modules/funds';
 import modals from './modules/modals';
 import dice from './modules/dice';
 import stats from './modules/stats';
+import socket from './modules/socket';
 
 Vue.use(Vuex);
-
-const debug = process.env.NODE_ENV !== 'production';
 
 export default new Vuex.Store({
   modules: {
@@ -16,7 +15,7 @@ export default new Vuex.Store({
     funds,
     modals,
     dice,
-    stats
-  },
-  strict: debug
+    stats,
+    socket
+  }
 });
