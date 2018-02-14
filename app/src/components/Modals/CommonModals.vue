@@ -6,6 +6,7 @@
     <DepositModal />
     <ForgotPasswordModal />
     <ValidateTwoFactorModal />
+    <BetDetailsModal :id="betId" />
   </div>
 </template>
 
@@ -16,6 +17,9 @@ import WithdrawalModal from './WithdrawalModal';
 import DepositModal from './DepositModal';
 import ForgotPasswordModal from './ForgotPasswordModal';
 import ValidateTwoFactorModal from './ValidateTwoFactorModal';
+import BetDetailsModal from './BetDetailsModal';
+
+import bus from 'src/bus';
 
 export default {
   name: 'CommonModals',
@@ -25,7 +29,22 @@ export default {
     WithdrawalModal,
     DepositModal,
     ForgotPasswordModal,
-    ValidateTwoFactorModal
+    ValidateTwoFactorModal,
+    BetDetailsModal
+  },
+  data: () => ({
+    betId: null
+  }),
+  mounted () {
+    bus.$on('show-bet-details-modal', (id) => {
+      this.betId = id;
+      this.$root.$emit('bv::show::modal', 'betDetailsModal');
+    });
+
+    bus.$on('bet-details-modal-closed', () => {
+      this.betId = null;
+    });
   }
+
 };
 </script>

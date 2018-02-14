@@ -7,6 +7,9 @@
     :fields="fields"
     :show-empty="true"
     empty-text="You haven't placed any bets.">
+    <template slot="id" slot-scope="data">
+      <b-link href="#" @click="showBetDetails(data.value)">{{data.value}}</b-link>
+    </template>
     <template slot="profit" slot-scope="data">
       <span v-html="formatProfit(data.item.profit, 'profit', data.item)"></span>
       <CurrencyIcon :id="data.item.currency" :width="15" />
@@ -28,18 +31,20 @@
 
 <script>
   import bTable from 'bootstrap-vue/es/components/table/table';
+  import bLink from 'bootstrap-vue/es/components/link/link';
 
   import CurrencyIcon from 'components/CurrencyIcon';
   import moment from 'moment';
-  import BigNumber from 'bignumber.js';
 
   import {mapGetters} from 'vuex';
-  import {formatBigAmount} from 'src/helpers';
+  import {formatBigAmount, gameDetailsToTarget, gameDetailsToRoll, gameDetailsToPayout} from 'src/helpers';
+  import bus from 'src/bus';
 
   export default {
     name: 'DiceBetResults',
     components: {
       'b-table': bTable,
+      'b-link': bLink,
       CurrencyIcon
     },
     computed: {
@@ -68,17 +73,17 @@
           ...this.$mq === 'desktop' ? [{
             key: 'chance',
             label: 'Payout',
-            formatter: 'gameDetailsToPayout',
+            formatter: 'formatPayout',
             class: 'text-center'
           }] : [], {
             key: 'target',
             label: 'Target',
-            formatter: 'gameDetailsToTarget',
+            formatter: 'formatTarget',
             class: 'text-center'
           }, {
             key: 'roll',
             label: 'Roll',
-            formatter: 'gameDetailsToRoll',
+            formatter: 'formatRoll',
             class: 'text-center'
           }, {
             key: 'profit',
@@ -89,6 +94,18 @@
     },
     methods: {
       formatBigAmount,
+      gameDetailsToTarget,
+      gameDetailsToRoll,
+      gameDetailsToPayout,
+      formatPayout (value, key, item) {
+        return this.gameDetailsToPayout(item.game_details);
+      },
+      formatTarget (value, key, item) {
+        return this.gameDetailsToTarget(item.game_details);
+      },
+      formatRoll (value, key, item) {
+        return this.gameDetailsToRoll(item.game_details);
+      },
       formatAmount (value, key, item) {
         return this.darkenZero(this.formatBigAmount(value, item.currency));
       },
@@ -98,26 +115,8 @@
 
         return `<span class="${className}">${amount}</span>`;
       },
-      gameDetailsToPayout (value, key, item) {
-        const payoutFixed = new BigNumber(99)
-          .dividedBy(item.game_details.chance)
-          .toFixed(4, BigNumber.ROUND_DOWN);
-
-        const payout = new BigNumber(payoutFixed).toString();
-
-        return `${payout}x`;
-      },
       formatTime (value) {
         return moment(value).format('mm:ss');
-      },
-      gameDetailsToTarget (value, key, item) {
-        const sign = item.game_details.target === 0 ? '<' : '>';
-        const chance = new BigNumber(item.game_details.chance).toFixed(4, BigNumber.ROUND_DOWN);
-
-        return `${sign} ${chance}`;
-      },
-      gameDetailsToRoll (value, key, item) {
-        return item.game_details.roll;
       },
       darkenZero (x) {
         const parts = x.split('.');
@@ -130,6 +129,9 @@
         }
 
         return newX;
+      },
+      showBetDetails (id) {
+        bus.$emit('show-bet-details-modal', id);
       }
     }
   };
