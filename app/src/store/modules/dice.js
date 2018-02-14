@@ -18,7 +18,10 @@ const state = {
   previousServerSeedHash: '',
   previousClientSeed: '',
   previousNonce: '',
-  sessionStats: []
+  sessionStats: [],
+  autoBettingEnabled: false,
+  autoBetStarted: false,
+  autoBetSettings: {}
 };
 
 // getters
@@ -34,7 +37,10 @@ const getters = {
   previousDiceServerSeedHash: state => state.previousServerSeedHash,
   previousDiceClientSeed: state => state.previousClientSeed,
   previousDiceNonce: state => state.previousNonce,
-  sessionStats: state => state.sessionStats
+  sessionStats: state => state.sessionStats,
+  diceAutoBettingEnabled: state => state.autoBettingEnabled,
+  diceAutoBetStarted: state => state.autoBetStarted,
+  diceAutoBetSettings: state => state.autoBetSettings
 };
 
 // actions
@@ -77,6 +83,7 @@ const actions = {
         if (err.response && err.response.data) {
           toastr.error(err.response.data.error);
           commit(types.ENABLE_DICE_BETTING);
+          bus.$emit('bet-error');
         }
 
         throw err;
@@ -105,6 +112,22 @@ const actions = {
         toastr.success('Seed generated');
         commit(types.UPDATE_PREVIOUS_AND_CURRENT_DICE_SEED, res.data);
       });
+  },
+
+  setAutoBetMode ({commit}, isEnabled) {
+    commit(types.SET_AUTO_BET_MODE, isEnabled);
+  },
+
+  startAutoBet ({commit}) {
+    commit(types.SET_AUTO_BET_STARTED, true);
+  },
+
+  stopAutoBet ({commit}) {
+    commit(types.SET_AUTO_BET_STARTED, false);
+  },
+
+  setAutoBetSettings ({commit}, data) {
+    commit(types.SET_AUTO_BET_SETTINGS, data);
   }
 };
 
@@ -173,6 +196,18 @@ const mutations = {
 
   [types.SET_DICE_NONCE] (state, nonce) {
     state.nonce = nonce;
+  },
+
+  [types.SET_AUTO_BET_MODE] (state, isEnabled) {
+    state.autoBettingEnabled = isEnabled;
+  },
+
+  [types.SET_AUTO_BET_STARTED] (state, autoBetStarted) {
+    state.autoBetStarted = autoBetStarted;
+  },
+
+  [types.SET_AUTO_BET_SETTINGS] (state, autoBetSettings) {
+    state.autoBetSettings = autoBetSettings;
   }
 };
 

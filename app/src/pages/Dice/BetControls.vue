@@ -71,47 +71,71 @@
     </b-row>
 
     <b-row class="dice__bet-controls__bet-buttons" id="dice-bet-buttons">
-      <b-col sm="3" offset-sm="3" cols="6">
-        <b-button variant="danger" :disabled="bettingDisabled" @click="diceBet(1)">
-          Hi<span class="shortcut" v-if="shortcutsEnabled">h</span><br>
-          <small>&gt; {{ hiTarget }}</small>
-        </b-button>
-      </b-col>
+      <template v-if="!autoBettingEnabled">
+        <b-col sm="3" offset-sm="3" cols="6">
+          <b-button variant="danger" :disabled="bettingDisabled" @click="diceBet(1)">
+            Hi<span class="shortcut" v-if="shortcutsEnabled">h</span><br>
+            <small>&gt; {{ hiTarget }}</small>
+          </b-button>
+        </b-col>
 
-      <b-col cols="3" sm="3">
-        <b-button variant="danger" :disabled="bettingDisabled" @click="diceBet(0)">
-          Lo<span class="shortcut" v-if="shortcutsEnabled">l</span><br>
-          <small>&lt; {{ loTarget }}</small>
-        </b-button>
-      </b-col>
+        <b-col cols="3" sm="3">
+          <b-button variant="danger" :disabled="bettingDisabled" @click="diceBet(0)">
+            Lo<span class="shortcut" v-if="shortcutsEnabled">l</span><br>
+            <small>&lt; {{ loTarget }}</small>
+          </b-button>
+        </b-col>
 
-      <b-col cols="3">
-        <b-button size="sm" variant="primary" @click="showProvablyFairDialog">
-          <i class="fa fa-balance-scale" />
-        </b-button>
-      </b-col>
+        <b-col cols="3">
+          <b-button size="sm" variant="primary" @click="showProvablyFairDialog">
+            <i class="fa fa-balance-scale" />
+          </b-button>
+        </b-col>
+      </template>
+
+      <template v-else>
+        <b-col sm="3" offset-sm="3" cols="6">
+          <b-button variant="danger" :disabled="autoBetStarted" @click="startAutoBet">
+            Start<br>
+          </b-button>
+        </b-col>
+
+        <b-col cols="3" sm="3">
+          <b-button variant="danger" @click="stopAutoBet">
+            Stop
+          </b-button>
+        </b-col>
+      </template>
     </b-row>
 
     <b-row>
       <b-col cols="12" id="bet-amount-controls">
-        <b-button size="sm" variant="primary" @click="halvedBetAmount">1/2<span class="shortcut" v-if="shortcutsEnabled">x</span></b-button>
-        <b-button size="sm" variant="primary" @click="doubleBetAmount">x2<span class="shortcut" v-if="shortcutsEnabled">c</span></b-button>
-        <b-button size="sm" variant="primary" @click="setMinBetAmount">min<span class="shortcut" v-if="shortcutsEnabled">z</span></b-button>
-        <b-button size="sm" variant="primary" @click="maxBetAmountClicked">max<span class="shortcut" v-if="shortcutsEnabled">b</span></b-button>
-        <b-button size="sm" class="d-none d-sm-inline-block" variant="primary" @click="activateShortcuts">
-          <i class="fa fa-keyboard-o"></i>
-        </b-button>
-        <b-button size="sm" variant="primary" @click="showDemo">
-          <span class='d-none d-sm-inline'>How to play</span>
-          <span class='d-inline d-sm-none'><i class='fa fa-question-circle'></i></span>
+        <template v-if="!autoBettingEnabled">
+          <b-button size="sm" variant="primary" @click="halvedBetAmount">1/2<span class="shortcut" v-if="shortcutsEnabled">x</span></b-button>
+          <b-button size="sm" variant="primary" @click="doubleBetAmount">x2<span class="shortcut" v-if="shortcutsEnabled">c</span></b-button>
+          <b-button size="sm" variant="primary" @click="setMinBetAmount">min<span class="shortcut" v-if="shortcutsEnabled">z</span></b-button>
+          <b-button size="sm" variant="primary" @click="maxBetAmountClicked">max<span class="shortcut" v-if="shortcutsEnabled">b</span></b-button>
+          <b-button size="sm" class="d-none d-sm-inline-block" variant="primary" @click="activateShortcuts">
+            <i class="fa fa-keyboard-o"></i>
           </b-button>
-        <b-button size="sm" variant="primary" disabled>Auto</b-button>
+          <b-button size="sm" variant="primary" @click="showDemo">
+            <span class='d-none d-sm-inline'>How to play</span>
+            <span class='d-inline d-sm-none'><i class='fa fa-question-circle'></i></span>
+            </b-button>
+          <b-button size="sm" variant="primary" @click="enableAutoBet">Auto</b-button>
+        </template>
+
+        <template v-else>
+          <b-button size="sm" variant="primary" @click="editAutoBetSettings" :disabled="autoBetStarted">Edit</b-button>
+          <b-button size="sm" variant="primary" @click="disableAutoBet">Manual</b-button>
+        </template>
       </b-col>
     </b-row>
 
     <div class="dice__bet-controls--modals">
       <MaxBetWarningModal @maxbet="allowMaxBet"></MaxBetWarningModal>
       <ProvablyFairModal></ProvablyFairModal>
+      <AutoBetModal></AutoBetModal>
     </div>
   </div>
 </template>
@@ -174,6 +198,7 @@
         border-bottom-right-radius: $input-border-radius;
         background-color: #f0f3f5;
         color: #3f3f40;
+        padding: 0 5px;
       }
   }
 
@@ -183,9 +208,10 @@
 
     &__bet-buttons {
       margin-bottom: 1rem;
-      .button-danger {
+      .btn-danger {
         max-width: 75px;
         width: 75px;
+        height: 54px;
         padding: 6px;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -235,6 +261,7 @@
   import CurrencyIcon from 'components/CurrencyIcon';
   import MaxBetWarningModal from './MaxBetWarningModal';
   import ProvablyFairModal from './ProvablyFairModal';
+  import AutoBetModal from './AutoBetModal';
   import bus from 'src/bus';
   import {loadBootstrapTour} from 'src/helpers';
   import {template, createSteps} from './diceTour';
@@ -254,7 +281,10 @@
     maxBetAmountClicked,
     activateShortcuts,
     keyUp,
-    diceBet
+    diceBet,
+    startAutoBetLoop,
+    autoBet,
+    onAutoBetResult
   } from './bet-controls';
 
   export default {
@@ -271,7 +301,8 @@
       'b-progress': bProgress,
       CurrencyIcon,
       MaxBetWarningModal,
-      ProvablyFairModal
+      ProvablyFairModal,
+      AutoBetModal
     },
     data: () => ({
       betAmount: 0,
@@ -290,7 +321,8 @@
       rollMessage: '',
       winMessage: '',
       winColour: '',
-      winCurrency: null
+      winCurrency: null,
+      rollCount: 0
     }),
     created () {
       window.addEventListener('keyup', this.keyUp);
@@ -313,7 +345,10 @@
         balance: 'activeCurrencyBalance',
         maxWin: 'diceMaxWin',
         minBetAmount: 'diceMinBetAmount',
-        isBettingDisabled: 'diceIsBettingDisabled'
+        isBettingDisabled: 'diceIsBettingDisabled',
+        autoBettingEnabled: 'diceAutoBettingEnabled',
+        autoBetStarted: 'diceAutoBetStarted',
+        autoBetSettings: 'diceAutoBetSettings'
       }),
       currency () {
         return this.currencies.find(c => c.id === this.activeCurrency);
@@ -323,7 +358,31 @@
       }
     },
     mounted () {
-      bus.$on('dice-bet-result', this.showDiceBetResult);
+      bus.$on('dice-bet-result', (result) => {
+        this.showDiceBetResult(result);
+
+        if (this.autoBetStarted) {
+          this.onAutoBetResult(result);
+        }
+      });
+
+      bus.$on('bet-error', () => {
+        if (this.autoBetStarted) {
+          this.stopAutoBet();
+        }
+      });
+    },
+    watch: {
+      autoBetStarted: function (newValue) { // eslint-disable-line object-shorthand
+        if (newValue) {
+          this.startAutoBetLoop();
+        }
+      },
+      activeCurrency: function () { // eslint-disable-line object-shorthand
+        this.winMessage = '';
+        this.winCurrency = null;
+        this.rollMessage = '';
+      }
     },
     methods: {
       updateProfit,
@@ -341,6 +400,36 @@
       keyUp,
       maxBetAmountClicked,
       diceBet,
+      startAutoBetLoop,
+      autoBet,
+      onAutoBetResult,
+      enableAutoBet () {
+        this.$store.dispatch('setAutoBetMode', true);
+        this.$root.$emit('bv::show::modal', 'dice-auto-bet');
+      },
+      disableAutoBet (e) {
+        this.$store.dispatch('setAutoBetMode', false);
+        e.target.blur();
+      },
+      editAutoBetSettings () {
+        this.$root.$emit('bv::show::modal', 'dice-auto-bet');
+      },
+      startAutoBet () {
+        if (this.autoBetSettings.betAmount && this.autoBetSettings.chance) {
+          this.$store.dispatch('startAutoBet');
+        } else {
+          this.$root.$emit('bv::show::modal', 'dice-auto-bet');
+        }
+      },
+      stopAutoBet () {
+        this.clearTimeout();
+        this.$store.dispatch('stopAutoBet');
+      },
+      clearTimeout () {
+        if (this.timeoutId !== null) {
+          clearTimeout(this.timeoutId);
+        }
+      },
       countDownChanged (dismissCountDown) {
         this.showPayoutWarning = dismissCountDown;
       },
