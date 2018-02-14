@@ -41,6 +41,7 @@ export const diceBet = function (target) {
     .toString();
 
   this.$store.dispatch('diceBet', {betAmount, currency: this.activeCurrency, target, chance: this.chance});
+  return true;
 };
 
 export const updateTargets = function () {
@@ -316,4 +317,65 @@ export const keyUp = function (e) {
       this.maxBetAmountClicked();
     }
   }
+};
+
+export const onAutoBetResult = function (betResult) {
+  this.rollCount++;
+
+  if (new BigNumber(this.autoBetSettings.noOfRolls).gt(0) && new BigNumber(this.rollCount).gte(this.autoBetSettings.noOfRolls)) {
+    this.stopAutoBet();
+    return;
+  }
+
+  if (this.autoBetSettings.stopIfBalanceGreaterThan !== '' && new BigNumber(this.balance).gt(this.autoBetSettings.stopIfBalanceGreaterThan)) {
+    this.stopAutoBet();
+    return;
+  }
+
+  if (this.autoBetSettings.stopIfBalanceLessThan !== '' && new BigNumber(this.balance).lt(this.autoBetSettings.stopIfBalanceLessThan)) {
+    this.stopAutoBet();
+    return;
+  }
+
+  if (!this.autoBetStarted) {
+    return;
+  }
+
+  if (new BigNumber(betResult.profit).gt(0)) {
+    if (this.autoBetSettings.onWinResetToBase) {
+      this.betAmount = new BigNumber(this.autoBetSettings.betAmount)
+        .toFixed(this.currency.scale);
+    } else {
+      this.betAmount = new BigNumber(this.autoBetSettings.onWinIncreaseBy)
+        .times(this.betAmount)
+        .toFixed(this.currency.scale);
+    }
+  } else {
+    if (this.autoBetSettings.onLossResetToBase) {
+      this.betAmount = new BigNumber(this.autoBetSettings.betAmount)
+        .toFixed(this.currency.scale);
+    } else {
+      this.betAmount = new BigNumber(this.autoBetSettings.onLossIncreaseBy)
+        .times(this.betAmount)
+        .toFixed(this.currency.scale);
+    }
+  }
+
+  setTimeout(() => this.autoBet(), 0);
+};
+
+export const autoBet = function () {
+  const areBetInputsValid = this.diceBet(this.autoBetSettings.target);
+
+  if (!areBetInputsValid) {
+    this.stopAutoBet();
+  }
+};
+
+export const startAutoBetLoop = function () {
+  this.chance = this.autoBetSettings.chance;
+  this.rollCount = 0;
+  this.betAmount = new BigNumber(this.autoBetSettings.betAmount).toFixed(this.currency.scale);
+  this.updateChance();
+  this.autoBet();
 };
