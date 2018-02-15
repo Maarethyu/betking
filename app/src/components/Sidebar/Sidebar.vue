@@ -38,7 +38,12 @@
             </template>
             <template v-else>
               <SidebarNavItem :classes="item.class">
-                <SidebarNavLink :name="item.name" :url="item.url" :icon="item.icon" :badge="item.badge" :variant="item.variant" :isComingSoon="item.isComingSoon"/>
+                <template v-if="item.func">
+                  <SidebarNavClickable :name="item.name" :icon="item.icon" :handler="item.func"/>
+                </template>
+                <template v-else>
+                  <SidebarNavLink :name="item.name" :url="item.url" :icon="item.icon" :badge="item.badge" :variant="item.variant" :isComingSoon="item.isComingSoon"/>
+                </template>
               </SidebarNavItem>
             </template>
           </template>
@@ -54,6 +59,7 @@ import SidebarNavDropdown from './SidebarNavDropdown';
 import SidebarNavLink from './SidebarNavLink';
 import SidebarNavTitle from './SidebarNavTitle';
 import SidebarNavItem from './SidebarNavItem';
+import SidebarNavClickable from './SidebarNavClickable';
 export default {
   name: 'sidebar',
   props: {
@@ -75,7 +81,8 @@ export default {
     SidebarNavDropdown,
     SidebarNavLink,
     SidebarNavTitle,
-    SidebarNavItem
+    SidebarNavItem,
+    SidebarNavClickable
   }
 };
 </script>
