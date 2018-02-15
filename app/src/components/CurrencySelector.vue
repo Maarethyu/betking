@@ -4,6 +4,10 @@
       {{ name }} <CurrencyIcon v-if="activeCurrency !== -1" :id="activeCurrency" :width="20" />
     </template>
 
+    <b-dropdown-item v-if="showAllCurrenciesOption" @click="currencyChanged({id: -1})">
+      {{ defaultName }}
+    </b-dropdown-item>
+
     <b-dropdown-item v-for="currency of currencies" :key="currency.id" @click="currencyChanged(currency)">
       <span class="float-left">{{ currency.name }}</span>
       <CurrencyIcon :className="'float-right'" :id="currency.id" :width="15" />
@@ -38,7 +42,7 @@
         if (currency) {
           return currency.name;
         } else {
-          return 'Choose Currency';
+          return this.defaultName;
         }
       }
     },
@@ -46,6 +50,14 @@
       default: {
         type: Number,
         default: -1
+      },
+      defaultName: {
+        type: String,
+        default: 'Choose Currency'
+      },
+      showAllCurrenciesOption: {
+        type: Boolean,
+        default: false
       }
     },
     mounted () {

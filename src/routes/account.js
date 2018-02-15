@@ -6,6 +6,7 @@ const db = require('../db');
 const helpers = require('../helpers');
 const mw = require('../middleware');
 const mailer = require('../mailer');
+const {eventEmitter, types} = require('../eventEmitter');
 
 module.exports = (currencyCache) => {
   const router = express.Router();
@@ -504,6 +505,11 @@ module.exports = (currencyCache) => {
     }
 
     await db.toggleStatsHidden(req.currentUser.id, req.body.statsHidden);
+
+    eventEmitter.emit(types.TOGGLE_STATS_HIDDEN, {
+      username: req.currentUser.username,
+      statsHidden: req.body.statsHidden
+    });
 
     res.end();
   });

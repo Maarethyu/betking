@@ -388,6 +388,21 @@ const getLatestUserDiceBets = async (userId) => {
   return result;
 };
 
+const getLatestDiceBets = async (limit) => {
+  const result = await db.any('SELECT bets.id AS id, date, bet_amount, currency, profit, game_details, users.username AS username, users.stats_hidden AS stats_hidden FROM bets INNER JOIN users ON users.id = bets.player_id WHERE game_type = \'dice\' ORDER BY date DESC LIMIT $1', limit);
+  return result;
+};
+
+const getLatestDiceHighrollerBets = async (limit) => {
+  const result = await db.any('SELECT bets.id AS id, date, bet_amount, bets.currency AS currency, profit, game_details, users.username AS username,  users.stats_hidden AS stats_hidden FROM bets INNER JOIN users ON users.id = bets.player_id INNER JOIN bankrolls ON bankrolls.currency = bets.currency WHERE game_type = \'dice\' AND (bets.bet_amount >= bankrolls.highroller_amount OR bets.profit >= bankrolls.highroller_amount) ORDER BY date desc LIMIT $1', limit);
+  return result;
+};
+
+const getAllBankrolls = async () => {
+  const result = await db.any('SELECT * FROM bankrolls');
+  return result;
+};
+
 const getBankrollByCurrency = async (currency) => {
   const result = await db.one('SELECT * FROM bankrolls WHERE currency = $1', currency);
   return result;
@@ -548,6 +563,9 @@ module.exports = {
   confirmWithdrawByToken,
   /* DICE */
   getLatestUserDiceBets,
+  getLatestDiceBets,
+  getLatestDiceHighrollerBets,
+  getAllBankrolls,
   getBankrollByCurrency,
   getActiveDiceSeed,
   addNewDiceSeed,

@@ -37,15 +37,23 @@ class StatsCache {
     }));
   }
 
-  addBet (bet) {
-    const currencyStat = this.siteStats.find(s => s.currency === bet.currency);
+  handle (event) {
+    if (this[event.type]) {
+      this[event.type](event.payload);
+    }
+  }
+
+  // events
+
+  diceBet (payload) {
+    const currencyStat = this.siteStats.find(s => s.currency === payload.currency);
     this.totalBets++;
 
     if (!currencyStat) {
       const stat = {
-        currency: bet.currency,
-        wagered: bet.bet_amount,
-        profit: new BigNumber(bet.profit)
+        currency: payload.currency,
+        wagered: payload.bet_amount,
+        profit: new BigNumber(payload.profit)
           .times(-1)
           .toString(),
         numBets: 1
@@ -54,10 +62,10 @@ class StatsCache {
       this.siteStats.push(stat);
     } else {
       currencyStat.wagered = new BigNumber(currencyStat.wagered)
-        .add(bet.bet_amount)
+        .add(payload.bet_amount)
         .toString();
       currencyStat.profit = new BigNumber(currencyStat.profit)
-        .minus(bet.profit)
+        .minus(payload.profit)
         .toString();
       currencyStat.numBets++;
     }

@@ -5,6 +5,7 @@ import BigNumber from 'bignumber.js';
 import * as types from '../mutation-types';
 import bus from 'src/bus';
 import api from 'src/api';
+import {addBetToList} from 'src/helpers';
 
 const state = {
   clientSeed: '',
@@ -152,11 +153,7 @@ const mutations = {
   },
 
   [types.ADD_DICE_BET] (state, bet) {
-    state.latestUserBets.splice(0, 0, bet);
-
-    if (state.latestUserBets.length > 50) {
-      state.latestUserBets.splice(50);
-    }
+    addBetToList(state.latestUserBets, bet);
 
     const statIndex = state.sessionStats.findIndex(s => s.currency === bet.currency);
     if (statIndex === -1) {

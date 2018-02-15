@@ -3,8 +3,9 @@ const BigNumber = require('bignumber.js');
 const db = require('../db');
 const mw = require('../middleware');
 const dice = require('../games/dice');
+const {eventEmitter, types} = require('../eventEmitter');
 
-module.exports = (currencyCache, statsCache) => {
+module.exports = (currencyCache) => {
   const router = express.Router();
 
   router.use(mw.requireLoggedIn);
@@ -133,7 +134,13 @@ module.exports = (currencyCache, statsCache) => {
       );
 
       res.json(result);
-      statsCache.addBet(result);
+
+      const eventPayload = {
+        ...result,
+        username: req.currentUser.username,
+        stats_hidden: req.currentUser.stats_hidden
+      };
+      eventEmitter.emit(types.DICE_BET, eventPayload);
     } catch (e) {
       if (e.message === 'INSUFFICIENT_BALANCE') {
         return res.status(400).json({error: 'Balance too low'});

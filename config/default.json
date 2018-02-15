@@ -8,5 +8,6 @@
   "SESSION_COOKIE_SECURE": false,
   "CAPTCHA_SECRET": "6LdWpj8UAAAAAJIfkImnogk7wZhbY8JtQ3fsycW3",
   "PROJECT_NAME": "PROJECT NAME",
-  "ADMIN_ACCESS_SECRET": "Secret for admin access"
+  "ADMIN_ACCESS_SECRET": "Secret for admin access",
+  "BET_THROTTLE_DELAY_MS": 1000
 }

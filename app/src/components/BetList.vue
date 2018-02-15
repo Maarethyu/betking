@@ -3,17 +3,26 @@
     id="dice-bet-results"
     class="dice-bet-results"
     responsive striped small outlined hover fixed
-    :items="latestBets"
+    :items="bets"
     :fields="fields"
     :show-empty="true"
-    empty-text="You haven't placed any bets.">
+    :empty-text="emptyText">
+
+    <template slot="username" slot-scope="data">
+      <b-link href="#" @click="showUserDetails(data.value)" :class="{'username-hidden': data.value === '[HIDDEN]'}" >
+        {{data.value}}
+      </b-link>
+    </template>
+
     <template slot="id" slot-scope="data">
       <b-link href="#" @click="showBetDetails(data.value)">{{data.value}}</b-link>
     </template>
+
     <template slot="profit" slot-scope="data">
       <span v-html="formatProfit(data.item.profit, 'profit', data.item)"></span>
       <CurrencyIcon :id="data.item.currency" :width="15" />
     </template>
+
   </b-table>
 </template>
 
@@ -25,6 +34,11 @@
 
   .dice-bet-results th{
     text-align:center!important;
+  }
+
+  .username-hidden:hover {
+    text-decoration: none;
+    cursor: auto;
   }
 </style>
 
@@ -47,13 +61,29 @@
       'b-link': bLink,
       CurrencyIcon
     },
+    props: {
+      bets: {
+        type: Array,
+        default: []
+      },
+      showUsername: {
+        type: Boolean,
+        default: false
+      },
+      emptyText: {
+        type: String
+      }
+    },
     computed: {
       ...mapGetters({
-        currencies: 'currencies',
-        latestBets: 'diceLatestBets',
+        currencies: 'currencies'
       }),
       fields () {
         return [
+          this.showUsername ? [{
+            key: 'username',
+            label: 'Username'
+          }] : [],
           ...this.$mq === 'desktop' ? [{
             key: 'id',
             label: 'Bet Id',
@@ -132,6 +162,12 @@
       },
       showBetDetails (id) {
         bus.$emit('show-bet-details-modal', id);
+      },
+      showUserDetails (username) {
+        // if (username === 'HIDDEN') {
+          // return;
+        // }
+        // TODO: User details dialog
       }
     }
   };
