@@ -184,7 +184,8 @@ CREATE TABLE bankrolls (
   id bigserial PRIMARY KEY,
   currency integer NOT NULL REFERENCES currencies(id),
   max_win numeric (36, 0) NOT NULL,
-  min_bet_amount numeric (36, 0) NOT NULL
+  min_bet_amount numeric (36, 0) NOT NULL,
+  highroller_amount numeric (36, 0) NOT NULL
 );
 
 CREATE TABLE bets (

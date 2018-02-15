@@ -6,10 +6,12 @@
     :items="bets"
     :fields="fields"
     :show-empty="true"
-    empty-text="You haven't placed any bets.">
+    :empty-text="emptyText">
 
     <template slot="username" slot-scope="data">
-      <b-link href="#" @click="showUserDetails(data.value)">{{data.value}}</b-link>
+      <b-link href="#" @click="showUserDetails(data.value)" :class="{'username-hidden': data.value === '[HIDDEN]'}" >
+        {{data.value}}
+      </b-link>
     </template>
 
     <template slot="id" slot-scope="data">
@@ -32,6 +34,11 @@
 
   .dice-bet-results th{
     text-align:center!important;
+  }
+
+  .username-hidden:hover {
+    text-decoration: none;
+    cursor: auto;
   }
 </style>
 
@@ -62,6 +69,9 @@
       showUsername: {
         type: Boolean,
         default: false
+      },
+      emptyText: {
+        type: String
       }
     },
     computed: {
@@ -154,6 +164,9 @@
         bus.$emit('show-bet-details-modal', id);
       },
       showUserDetails (username) {
+        // if (username === 'HIDDEN') {
+          // return;
+        // }
         // TODO: User details dialog
       }
     }

@@ -14,6 +14,7 @@ const helpers = require('./helpers');
 const mw = require('./middleware');
 const InMemoryCache = require('./cache/InMemoryCache');
 const startSocketServer = require('./socket/startSocketServer');
+const {eventEmitter} = require('./eventEmitter');
 
 // We should never have uncaught exceptions or rejections.
 // TODO - should these be before express is created?
@@ -60,7 +61,7 @@ const startHttpServer = function () {
   const router = express.Router();
   router.use('/account', csrfProtection, require('./routes/account')(cache.currencyCache));
   router.use('/admin', require('./routes/admin')(cache.currencyCache));
-  router.use('/dice', require('./routes/dice')(cache.currencyCache, cache.statsCache));
+  router.use('/dice', require('./routes/dice')(cache.currencyCache));
   router.use('/stats', require('./routes/stats')(cache.statsCache));
   router.use('/bets', require('./routes/bets')());
   router.use('', csrfProtection, require('./routes/index')(cache.currencyCache));
@@ -110,5 +111,9 @@ const startHttpServer = function () {
 cache.load()
   .then(() => {
     const server = startHttpServer();
-    startSocketServer(server);
+    startSocketServer(server, cache);
+
+    eventEmitter.addListener((event) => {
+      cache.handle(event);
+    });
   });

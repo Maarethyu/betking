@@ -156,3 +156,15 @@ export const gameDetailsToPayout = (gameDetails) => {
 
   return `${payout}x`;
 };
+
+export const addBetToList = (betList, bet) => {
+  if (betList.find(b => b.id === bet.id)) {
+    return;
+  };
+
+  betList.splice(0, 0, bet);
+
+  if (betList.length > 50) {
+    betList.splice(50);
+  }
+};

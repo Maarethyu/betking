@@ -2,6 +2,7 @@ const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const config = require('config');
 const Transform = require('stream').Transform;
+const BigNumber = require('bignumber.js');
 
 const getNew2faSecret = function () {
   const secret = speakeasy.generateSecret({length: 32, name: config.get('PROJECT_NAME')});
@@ -69,6 +70,22 @@ const getAddressQr = async function (address) {
   return qr;
 };
 
+const maskUsernameFromBets = function (bets, usernameToStatsHidden, loggedInUsername) {
+  return bets.map(bet => {
+    let username = bet.username;
+    if (usernameToStatsHidden[bet.username] && bet.username !== loggedInUsername) {
+      username = '[HIDDEN]';
+    }
+
+    return Object.assign({}, bet, {username});
+  });
+};
+
+const isHighrollerBet = function (betAmount, profit, highrollerAmountForCurrency) {
+  return new BigNumber(betAmount).gte(highrollerAmountForCurrency) ||
+    new BigNumber(profit).gte(highrollerAmountForCurrency);
+};
+
 module.exports = {
   getIp,
   getFingerPrint,
@@ -79,5 +96,7 @@ module.exports = {
   isOtpValid,
   addCsrfToken,
   getCurrencyToQueryFromAddressTable,
-  getAddressQr
+  getAddressQr,
+  maskUsernameFromBets,
+  isHighrollerBet
 };

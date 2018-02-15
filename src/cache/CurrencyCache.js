@@ -41,6 +41,12 @@ class CurrencyCache {
 
     return currency[field];
   }
+
+  handle (event) {
+    if (this[event.type]) {
+      this[event.type](event.payload);
+    }
+  }
 }
 
 module.exports = CurrencyCache;
