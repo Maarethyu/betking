@@ -18,7 +18,7 @@ module.exports = () => {
       let userName = result.username;
 
       if (result.stats_hidden && ((req.currentUser && req.currentUser.id !== result.player_id) || !req.currentUser)) {
-        userName = 'Hidden';
+        userName = '[Hidden]';
       }
 
       res.json({

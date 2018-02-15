@@ -1,3 +1,9 @@
+import bus from 'src/bus';
+
+const showBetDetailModal = function () {
+  bus.$emit('show-bet-details-modal');
+};
+
 export default {
   items: [
     {
@@ -33,6 +39,11 @@ export default {
       name: 'Stats',
       url: '/stats',
       icon: 'icon-chart'
+    },
+    {
+      name: 'Bet Lookup',
+      icon: 'fa fa-search',
+      func: showBetDetailModal
     },
    /*  {
       name: 'Promotions',
