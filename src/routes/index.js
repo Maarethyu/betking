@@ -29,38 +29,70 @@ const apiLimiter = new RateLimit({
   keyGenerator: helpers.getIp
 });
 
+let validationErrors = [];
+
+const validatePassword = function (req) {
+  if(req.body.password.length === 0) {
+    validationErrors.push({msg: 'Invalid Password', param: 'password', value: req.body.password});
+  }
+};
+
+const validateUsername = function (req) {
+  if(req.body.username.length === 0) {
+    validationErrors.push({msg: 'Invalid Username', param: 'username', value: req.body.username});
+  }
+};
+
+const validateEmail = function (req) {
+  req.check('email', 'Invalid Username').exists()
+    .trim()
+    .isEmail();
+};
+
+const validateLoginMethod = function (req) {
+  req.check('loginvia', 'Invalid login via option').exists()
+    .custom(value => value === 'username' || value === 'email')
+    .optional({checkFalsy: true});
+
+  const loginVia = req.body.loginvia || 'username';
+  
+  if (loginVia === 'username') {
+    validateUsername(req);
+  } else if (loginVia === 'email') {
+    validateEmail(req);
+  }
+};
+
+const validateRememberMe = function (req) {
+  req.check('rememberme', 'Invalid remember me option').isBoolean();
+};
+
+const validateOtp = function (req) {
+  req.check('otp', 'Invalid two factor code').exists()
+    .isInt()
+    .isLength({min: 6, max: 6})
+    .optional({checkFalsy: true});
+};
+
+const resetValidation = function () {
+  validationErrors = [];
+}
+
 module.exports = (currencyCache) => {
   router.post('/login', async function (req, res, next) {
-    req.check('password', 'Invalid Password').exists();
-    req.check('loginvia', 'Invalid login via option').exists()
-      .custom(value => value === 'username' || value === 'email')
-      .optional({checkFalsy: true});
+    resetValidation();
+    validatePassword(req);
+    validateLoginMethod(req);
+    validateRememberMe(req);
+    validateOtp(req);
 
-    const loginVia = req.body.loginvia || 'username';
-
-    if (loginVia === 'username') {
-      req.check('username', 'Invalid Username').exists();
-    }
-
-    if (loginVia === 'email') {
-      req.check('email', 'Invalid Username').exists()
-        .trim()
-        .isEmail();
-    }
-
-    req.check('rememberme', 'Invalid remember me option').isBoolean();
-    req.check('otp', 'Invalid two factor code').exists()
-      .isInt()
-      .isLength({min: 6, max: 6})
-      .optional({checkFalsy: true});
-
-    const errors = req.validationErrors();
-    if (errors) {
-      return res.status(400).json({errors});
+    if (validationErrors.length > 0) {
+      return res.status(400).json({errors: validationErrors});
     }
 
     // Fetch user on basis of login via option
     let user = null;
+    const loginVia = req.body.loginvia || 'username';
     if (loginVia === 'username') {
       user = await db.getUserByName(req.body.username);
     } else if (loginVia === 'email') {
