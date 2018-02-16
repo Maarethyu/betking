@@ -81,12 +81,13 @@
       fields () {
         return [
           this.showUsername ? [{
-            key: 'username',
-            label: 'Username'
-          }] : [],
-          ...this.$mq === 'desktop' ? [{
             key: 'id',
             label: 'Bet Id',
+            class: 'text-center'
+          }] : [],
+          ...this.$mq === 'desktop' ? [{
+            key: 'username',
+            label: 'Username',
             class: 'text-center'
           }] : [],
           ...this.$mq === 'desktop' ? [{
