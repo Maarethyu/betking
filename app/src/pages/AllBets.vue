@@ -32,12 +32,6 @@
 </template>
 
 <style lang="scss">
-  input#betamount-filter {
-    &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-  }
   .filter-all-bets {
     padding-top: 20px;
 
