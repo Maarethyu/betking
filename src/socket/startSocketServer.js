@@ -21,7 +21,13 @@ const startSocketServer = function (server, cache) {
   });
 
   io.on('connection', function (socket) {
-    // const currentUser = socket.request.currentUser;
+    const currentUser = socket.request.currentUser;
+    let currentUserId = currentUser && currentUser.id;
+
+    socket.join('public');
+    if (currentUserId) {
+      socket.join(currentUserId);
+    }
   });
 
   io.of('/watch-bets').on('connection', function (socket) {

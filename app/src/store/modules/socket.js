@@ -1,7 +1,9 @@
 import socketIo from 'socket.io-client';
+import toastr from 'toastr';
 
 import * as types from '../mutation-types';
-import {addBetToList} from 'src/helpers';
+import bus from 'src/bus';
+import {addBetToList, formatBigAmount, formatCurrency} from 'src/helpers';
 
 const state = {
   webSocket: null,
@@ -25,7 +27,7 @@ const getters = {
 
 // actions
 const actions = {
-  setupSocket ({commit, state}) {
+  setupSocket ({commit, state, rootState}) {
     if (!state.webSocket) {
       const socket = socketIo('/');
 
@@ -43,6 +45,19 @@ const actions = {
         socket.disconnect();
         commit(types.SET_SOCKET_CONNECTION, false);
         commit(types.SET_SOCKET_RECONNECTION_COUNT, state.reconnectionCount + 1);
+      });
+
+      socket.on('depositConfirmed', (msg) => {
+        const amount = formatBigAmount.call(rootState.funds, msg.amount, msg.currency);
+        const currencySymbol = formatCurrency.call(rootState.funds, msg.currency, 'symbol');
+        toastr.info(`Deposit of ${amount} ${currencySymbol} received.`);
+
+        commit(types.SET_BALANCE, {currency: msg.currency, balance: msg.balance});
+
+        const isOnWalletsPage = rootState.route.name === 'wallet';
+        if (isOnWalletsPage) {
+          bus.$emit('DEPOSIT_CONFIRMED');
+        }
       });
 
       commit(types.SET_WEBSOCKET, socket);

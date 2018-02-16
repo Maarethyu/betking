@@ -11,17 +11,17 @@ const routes = [
     meta: {requiresUser: true},
     children: [
       /* Pages which render for both user logged in or logged out state */
-      {path: '', name: 'home', component: () => import('pages/Home/Home')},
-      {path: '/dice', component: () => import('pages/Dice/Dice')},
-      {path: '/stats', component: () => import('pages/Stats')},
-      {path: '/all-bets', component: () => import('pages/AllBets')},
+      {path: '', component: () => import('pages/Home/Home'), name: 'home'},
+      {path: '/dice', component: () => import('pages/Dice/Dice'), name: 'dice'},
+      {path: '/stats', component: () => import('pages/Stats'), name: 'stats'},
+      {path: '/all-bets', component: () => import('pages/AllBets'), name: 'allBets'},
 
       /* Pages which need user to be logged out */
 
       /* Pages which need user authentication */
-      {path: 'settings', component: () => import('pages/Settings/Settings'), meta: {requiresAuth: true}},
-      {path: 'wallet', component: () => import('pages/Wallet/Wallet'), meta: {requiresAuth: true}},
-      {path: 'security', component: () => import('pages/Security/Security'), meta: {requiresAuth: true}}
+      {path: 'settings', component: () => import('pages/Settings/Settings'), name: 'settings', meta: {requiresAuth: true}},
+      {path: 'wallet', component: () => import('pages/Wallet/Wallet'), name: 'wallet', meta: {requiresAuth: true}},
+      {path: 'security', component: () => import('pages/Security/Security'), name: 'security', meta: {requiresAuth: true}}
     ]
   },
   /* Pages which do not need user session to be fetched */

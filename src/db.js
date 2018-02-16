@@ -262,7 +262,7 @@ const confirmWithdrawByToken = async (token) => {
 };
 
 const addDeposit = async (currencyToQuery, currency, amount, address, txid) => {
-  await db.tx(t => {
+  const result = await db.tx(t => {
     return t.oneOrNone('SELECT user_id from user_addresses WHERE currency = $1 AND address = $2', [currencyToQuery, address])
       .then(row => {
         if (!row || !row.user_id) {
@@ -291,13 +291,15 @@ const addDeposit = async (currencyToQuery, currency, amount, address, txid) => {
         return t.oneOrNone('SELECT id FROM user_balances WHERE user_id = $1 AND currency = $2', [row.user_id, row.currency])
           .then(res => {
             if (!res) {
-              return t.none('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3)', [row.user_id, row.currency, row.amount]);
+              return t.one('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3) RETURNING *', [row.user_id, row.currency, row.amount]);
             }
 
-            return t.none('UPDATE user_balances SET balance = balance + $1 WHERE id = $2', [row.amount, res.id]);
+            return t.one('UPDATE user_balances SET balance = balance + $1 WHERE id = $2 RETURNING *', [row.amount, res.id]);
           });
       });
   });
+
+  return result;
 };
 
 const getDepositAddress = async (userId, currency) => {

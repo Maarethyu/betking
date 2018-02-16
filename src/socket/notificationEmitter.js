@@ -3,7 +3,8 @@ const BaseEventEmitter = require('events');
 const types = {
   STATS_UPDATE: 'statsUpdate',
   DICE_BET: 'diceBet',
-  LOAD_ALL_BETS: 'loadAllBets'
+  LOAD_ALL_BETS: 'loadAllBets',
+  DEPOSIT_CONFIRMED: 'depositConfirmed'
 };
 
 class NotificationEmitter extends BaseEventEmitter {

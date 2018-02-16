@@ -80,6 +80,10 @@ class NotificationsHandler {
       }
     }
   }
+
+  depositConfirmed (type, payload) {
+    this.io.to(payload.userId).emit(type, payload);
+  }
 }
 
 module.exports = NotificationsHandler;
