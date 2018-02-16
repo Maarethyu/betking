@@ -15,7 +15,7 @@
       </b-col>
 
       <b-col cols="6" md="3">
-        <b-form-input id="betamount-filter" v-model="betAmountFilter" type="number" placeholder="Min Bet Amount Filter"></b-form-input>
+        <b-form-input id="betamount-filter" v-model="betAmountFilter" step="any" type="number" placeholder="Min Bet Amount Filter"></b-form-input>
       </b-col>
     </b-row>
 
