@@ -14,8 +14,8 @@
       :sort-desc.sync="sortDesc"
       responsive striped small outlined hover>
       <template slot="id" slot-scope="data">
-        <b-button  size="sm" variant="default" @click="openDepositModal(data.id)">+</b-button>
-        <b-button  size="sm" variant="default" @click="openWithdrawModal(data.id)">-</b-button>
+        <b-button  size="sm" variant="default" @click="openDepositModal(data.item.id)">+</b-button>
+        <b-button  size="sm" variant="default" @click="openWithdrawModal(data.item.id)">-</b-button>
       </template>
     </b-table>
 
