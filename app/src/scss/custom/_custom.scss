@@ -380,3 +380,13 @@ and (min-width: 1400px){
 .submit-buttons {
   float: right;
 }
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    margin: 0;
+  }
+}
