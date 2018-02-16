@@ -9,7 +9,7 @@ const state = {
   webSocket: null,
   watchBetsSocket: null,
   isSocketConnected: false,
-  reconnectionCount: 0,
+  reconnectionCount: -2,
   watchBetsPaused: false,
   allBets: [],
   highrollerBets: []
@@ -33,6 +33,7 @@ const actions = {
 
       socket.on('connect', () => {
         commit(types.SET_SOCKET_CONNECTION, true);
+        commit(types.SET_SOCKET_RECONNECTION_COUNT, -2);
       });
 
       socket.on('connect_error', () => {
@@ -42,9 +43,12 @@ const actions = {
       });
 
       socket.on('disconnect', () => {
+        commit(types.SET_SOCKET_RECONNECTION_COUNT, state.reconnectionCount + 1);
+        if (state.reconnectionCount < 0) {
+          return;
+        }
         socket.disconnect();
         commit(types.SET_SOCKET_CONNECTION, false);
-        commit(types.SET_SOCKET_RECONNECTION_COUNT, state.reconnectionCount + 1);
       });
 
       socket.on('depositConfirmed', (msg) => {
