@@ -3,6 +3,7 @@
     <b-table
       id="wallet-deposit-history"
       stacked="sm"
+      ref="table"
       :per-page="perPage"
       :current-page="currentPage"
       :items="fetchDepositHistory"
@@ -43,6 +44,7 @@
   import moment from 'moment';
   import {addCommas, formatBigAmount, formatCurrency} from 'src/helpers';
   import api from 'src/api';
+  import bus from 'src/bus';
 
   export default {
     name: 'PendingWithdrawals',
@@ -65,6 +67,11 @@
         {key: 'amount', label: 'Amount', formatter: 'formatAmount'}
       ]
     }),
+    mounted () {
+      bus.$on('DEPOSIT_CONFIRMED', () => {
+        this.$refs.table.refresh();
+      });
+    },
     computed: mapGetters({
       currencies: 'currencies',
     }),

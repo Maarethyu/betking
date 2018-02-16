@@ -44,9 +44,6 @@ export const formatAmount = function (amount, currencyId) {
 };
 
 export const formatBigAmount = function (amount, currencyId) {
-  /* This helper should be added in component.methods
-    The component must map "currencies" getter from store in component.computed
-    */
   const currency = this.currencies.find(c => c.id === currencyId);
 
   if (!currency) {
@@ -74,9 +71,6 @@ export const formatCurrency = function (currencyId, key) {
     field = 'symbol';
   }
 
-  /* This helper should be added in component.methods
-    The component must map "currencies" getter from store in component.computed
-    */
   const currency = this.currencies.find(c => c.id === currencyId);
 
   if (!currency) {
