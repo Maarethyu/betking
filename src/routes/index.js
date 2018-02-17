@@ -20,6 +20,7 @@ const {
   validateRecaptcha,
   validateOtp} = require('./validators/validators');
 const UserService = require('../services/userService');
+const captchaValidator = require('./validators/captchaValidator');
 const milliSecondsInYear = 31536000000;
 const milliSecondsInTwoWeeks = 1209600000;
 
@@ -56,13 +57,15 @@ module.exports = (currencyCache) => {
       return res.status(401).json({error: 'Login failed'});
     }
 
-    // Handle captcha validation for failedAttempts > 3
-    const failedAttempts = await db.getConsecutiveFailedLogins(user.id);
+    const failedLoginAttempts = await db.getConsecutiveFailedLoginAttempts(user.id);
 
-    const isCaptchaOk = failedAttempts < 3 ||
-      await require('./validators/captchaValidator')(req.body['g-recaptcha-response']);
+    if(failedLoginAttempts >= 3){
+      const captchaValid = await captchaValidator.validateCaptcha(req.body['g-recaptcha-response']);
+      if (!captchaValid) {
+        return res.status(401).json({error: 'Invalid Captcha'});
+      }
+    }
 
-    // If user locked out, return
     if (user.locked_at) {
       return res.status(401).json({error: 'Account locked'});
     }
@@ -101,12 +104,12 @@ module.exports = (currencyCache) => {
       isTwoFactorOk = true;
     }
 
-    const isLoginSuccessful = isPasswordCorrect && isCaptchaOk && isIpWhitelisted && isTwoFactorOk;
+    const isLoginSuccessful = isPasswordCorrect && isIpWhitelisted && isTwoFactorOk;
 
     await db.logLoginAttempt(user.id, isLoginSuccessful, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
 
     if (!isLoginSuccessful) {
-      if (failedAttempts >= 2) {
+      if (failedLoginAttempts >= 2) {
         res.cookie('login_captcha', 'yes', {
           maxAge: 60 * 1000,
           httpOnly: false
@@ -114,7 +117,7 @@ module.exports = (currencyCache) => {
       }
 
       // Lock Account after 5 failed attempts in last 1 minute
-      if (failedAttempts >= 4) {
+      if (failedLoginAttempts >= 4) {
         await db.lockUserAccount(user.id);
       }
 
@@ -144,7 +147,7 @@ module.exports = (currencyCache) => {
     validatePassword(req);
     validatePassword2(req);
     validateEmail(req, true); 
-    validateEmailAvailable(req, db);
+    validateEmailAvailable(req, db, true);
     validateUsername(req);
     validateUsernameAvailable(req, db);
     validateRecaptcha(req);
@@ -152,6 +155,11 @@ module.exports = (currencyCache) => {
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
       return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const captchaValid = await captchaValidator.validateCaptcha(req.body['g-recaptcha-response']);
+    if (!captchaValid) {
+      return res.status(401).json({error: 'Invalid Captcha'});
     }
 
     const affiliateId = req.cookies.aff_id || null;

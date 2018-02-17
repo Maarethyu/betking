@@ -69,7 +69,7 @@ const log2faAttempt = async (userId, isSuccess, ip, fingerprint, userAgent) => {
   return result;
 };
 
-const getConsecutiveFailedLogins = async (userId) => {
+const getConsecutiveFailedLoginAttempts = async (userId) => {
   const result = await db.one('select count(*) from login_attempts where created_at > NOW() - interval \'60 seconds\' AND is_success = false AND user_id = $1;', userId);
   return result.count;
 };
@@ -522,7 +522,7 @@ module.exports = {
   getUserByEmail,
   logLoginAttempt,
   log2faAttempt,
-  getConsecutiveFailedLogins,
+  getConsecutiveFailedLoginAttempts,
   getUserBySessionId,
   logoutSession,
   updateEmail,

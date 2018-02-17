@@ -36,13 +36,14 @@ const validateEmail = function (req, isOptional) {
     .optional({checkFalsy: isOptional});    
 };
 
-const validateEmailAvailable = function (req, db) {
+const validateEmailAvailable = function (req, db, isOptional) {
   req.check('email', 'Email already exists').exists()
     .custom(value => db.isEmailAlreadyTaken(value)
       .then(emailExists => {
         if (emailExists) throw new Error();
       })
-    );
+    )
+    .optional({checkFalsy: isOptional});
 };
 
 const validateLoginMethod = function (req) {
@@ -69,12 +70,7 @@ const validateRememberMe = function (req) {
 };
 
 const validateRecaptcha = function (req) {
-  req.check('g-recaptcha-response', 'Invalid captcha').exists()
-    .custom(value => require('./validators/captchaValidator')(value)
-      .then(isCaptchaValid => {
-        if (!isCaptchaValid) throw new Error();
-      })
-    );
+  req.check('g-recaptcha-response', 'Invalid captcha').exists();
 };
 
 const validateOtp = function (req) {

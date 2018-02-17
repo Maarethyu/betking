@@ -8,16 +8,19 @@ const config = require('config');
     * resolves if captcha is correct
     * rejects with an error if captcha is invalid
 */
-
-module.exports = (response, remoteip) => request({
-  uri: 'https://www.google.com/recaptcha/api/siteverify',
-  method: 'POST',
-  form: {secret: config.get('CAPTCHA_SECRET'), response, remoteip}
-})
-  .then((res) => {
-    const validationResponse = JSON.parse(res);
-    return validationResponse.success;
+const validateCaptcha = function (response, remoteip) {
+  return request({
+    uri: 'https://www.google.com/recaptcha/api/siteverify',
+    method: 'POST',
+    form: {secret: config.get('CAPTCHA_SECRET'), response, remoteip}
   })
-  .catch(() => {
-    return false;
-  });
+    .then((res) => {
+      const validationResponse = JSON.parse(res);
+      return validationResponse.success;
+    })
+    .catch(() => {
+      return false;
+    });
+}
+
+module.exports = {validateCaptcha}; 
