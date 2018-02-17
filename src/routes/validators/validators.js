@@ -84,6 +84,15 @@ const validateOtp = function (req) {
     .optional({checkFalsy: true});
 };
 
+const validateLoginData = function (req) {
+  validatePassword(req);
+  validateLoginMethod(req);
+  validateRememberMe(req);
+  validateOtp(req);
+
+  return req.validationErrors();
+}
+
 module.exports = {
   validatePassword,
   validatePassword2,
@@ -95,5 +104,6 @@ module.exports = {
   validateToken,
   validateRememberMe,
   validateRecaptcha,
-  validateOtp
+  validateOtp,
+  validateLoginData
 };

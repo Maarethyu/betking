@@ -7,6 +7,7 @@ const db = require('../db');
 const mailer = require('../mailer');
 const helpers = require('../helpers');
 const {
+  validateLoginData,
   validatePassword,
   validatePassword2,
   validateUsername,
@@ -43,12 +44,7 @@ const apiLimiter = new RateLimit({
 
 module.exports = (currencyCache) => {
   router.post('/login', async function (req, res, next) {
-    validatePassword(req);
-    validateLoginMethod(req);
-    validateRememberMe(req);
-    validateOtp(req);
-
-    const errors = req.validationErrors();
+    const errors = validateLoginData(req);
     if (errors) {
       return res.status(400).json({errors});
     }
