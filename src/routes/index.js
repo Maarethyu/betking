@@ -29,73 +29,64 @@ const apiLimiter = new RateLimit({
   keyGenerator: helpers.getIp
 });
 
-let validationErrors = [];
-
 const validatePassword = function (req) {
-  if(req.body.password.length === 0) {
-    validationErrors.push({msg: 'Invalid Password', param: 'password', value: req.body.password});
-  }
+  req.checkBody('password', 'Invalid Password').exists()
+    .isLength({min: 6, max: 50});
 };
 
 const validateUsername = function (req) {
-  if(req.body.username.length === 0) {
-    validationErrors.push({msg: 'Invalid Username', param: 'username', value: req.body.username});
-  }
+  req.checkBody('username', 'Invalid Username').exists();
 };
 
 const validateEmail = function (req) {
-  req.check('email', 'Invalid Username').exists()
+  req.checkBody('email', 'Invalid Username').exists()
     .trim()
     .isEmail();
 };
 
 const validateLoginMethod = function (req) {
-  req.check('loginvia', 'Invalid login via option').exists()
+  req.checkBody('loginmethod', 'Invalid login method').exists()
     .custom(value => value === 'username' || value === 'email')
     .optional({checkFalsy: true});
 
-  const loginVia = req.body.loginvia || 'username';
+  const loginMethod = req.body.loginmethod || 'username';
   
-  if (loginVia === 'username') {
+  if (loginMethod === 'username') {
     validateUsername(req);
-  } else if (loginVia === 'email') {
+  } else if (loginMethod === 'email') {
     validateEmail(req);
   }
 };
 
 const validateRememberMe = function (req) {
-  req.check('rememberme', 'Invalid remember me option').isBoolean();
+  req.checkBody('rememberme', 'Invalid remember me option').isBoolean();
 };
 
 const validateOtp = function (req) {
-  req.check('otp', 'Invalid two factor code').exists()
+  req.checkBody('otp', 'Invalid two factor code').exists()
     .isInt()
     .isLength({min: 6, max: 6})
     .optional({checkFalsy: true});
 };
 
-const resetValidation = function () {
-  validationErrors = [];
-}
-
 module.exports = (currencyCache) => {
   router.post('/login', async function (req, res, next) {
-    resetValidation();
     validatePassword(req);
     validateLoginMethod(req);
     validateRememberMe(req);
     validateOtp(req);
 
-    if (validationErrors.length > 0) {
-      return res.status(400).json({errors: validationErrors});
+    const errors = req.validationErrors();
+    if (errors) {
+      return res.status(400).json({errors});
     }
 
     // Fetch user on basis of login via option
     let user = null;
-    const loginVia = req.body.loginvia || 'username';
-    if (loginVia === 'username') {
+    const loginMethod = req.body.loginmethod || 'username';
+    if (loginMethod === 'username') {
       user = await db.getUserByName(req.body.username);
-    } else if (loginVia === 'email') {
+    } else if (loginMethod === 'email') {
       user = await db.getUserByEmail(req.body.email);
     }
 

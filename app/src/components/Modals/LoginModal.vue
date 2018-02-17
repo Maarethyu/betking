@@ -7,9 +7,9 @@
 
     <b-form v-on:submit.prevent="onLogin">
 
-      <b-form-group label="Login via" label-for="loginVia" :invalid-feedback="errors.loginvia"
-        :state="!errors.loginvia">
-        <b-form-select name="loginvia" id="loginvia" v-model="usernameOrEmail">
+      <b-form-group label="Login via" label-for="loginMethod" :invalid-feedback="errors.loginmethod"
+        :state="!errors.loginmethod">
+        <b-form-select name="loginmethod" id="loginmethod" v-model="usernameOrEmail">
           <option value="Username">Username</option>
           <option value="Email">Email</option>
         </b-form-select>
@@ -118,7 +118,7 @@ export default {
       e.preventDefault();
 
       const data = {
-        loginvia: this.usernameOrEmail.toLowerCase(),
+        loginmethod: this.usernameOrEmail.toLowerCase(),
         password: e.target.elements.password.value,
         otp: e.target.elements.otp.value,
         rememberme: e.target.elements.rememberme.checked,
@@ -127,7 +127,7 @@ export default {
           e.target.elements['g-recaptcha-response'].value
       };
 
-      data[data.loginvia] = e.target.elements.username.value;
+      data[data.loginmethod] = e.target.elements.username.value;
 
       api.login(data)
         .then(res => {
