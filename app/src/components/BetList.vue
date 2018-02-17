@@ -164,10 +164,10 @@
         bus.$emit('show-bet-details-modal', id);
       },
       showUserDetails (username) {
-        // if (username === 'HIDDEN') {
-          // return;
-        // }
-        // TODO: User details dialog
+        if (username === '[HIDDEN]') {
+          return;
+        }
+        bus.$emit('show-user-lookup-modal', username);
       }
     }
   };

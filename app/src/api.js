@@ -160,5 +160,8 @@ export default {
   },
   fetchBetDetails (id) {
     return get(`/api/bets/bet-details?id=${id}`);
+  },
+  fetchUserStats (username) {
+    return get(`/api/stats/user-stats?username=${username}`);
   }
 };
