@@ -18,6 +18,7 @@ const {
   validateRememberMe,
   validateRecaptcha,
   validateOtp} = require('./validators/validators');
+const UserService = require('../services/userService');
 const milliSecondsInYear = 31536000000;
 const milliSecondsInTwoWeeks = 1209600000;
 
@@ -52,14 +53,8 @@ module.exports = (currencyCache) => {
       return res.status(400).json({errors});
     }
 
-    // Fetch user on basis of login via option
-    let user = null;
-    const loginMethod = req.body.loginmethod || 'username';
-    if (loginMethod === 'username') {
-      user = await db.getUserByName(req.body.username);
-    } else if (loginMethod === 'email') {
-      user = await db.getUserByEmail(req.body.email);
-    }
+    const userService = new UserService(db);
+    const user = await userService.getUserByLoginMethod(req.body.loginmethod, req.body.username, req.body.email);
 
     if (!user) {
       return res.status(401).json({error: 'Login failed'});
