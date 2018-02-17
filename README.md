@@ -7,6 +7,9 @@
 2. With user and database created, create schema
     * For Windows, run `psql.exe -U bk -d bk2 -f sql/schema.sql`
     * For Mac / Linux, run `psql -U bk -d bk2 -f sql/schema.sql`
+3. Populate currencies and bankrolls tables
+    * For Windows, run `psql.exe -U bk -d bk2 -f sql/populate.sql`
+    * For Mac / Linux, run `psql -U bk -d bk2 -f sql/populate.sql`
 
 ### Development
 1. `npm run install-all`
