@@ -22,7 +22,7 @@ const startSocketServer = function (server, cache) {
 
   io.on('connection', function (socket) {
     const currentUser = socket.request.currentUser;
-    let currentUserId = currentUser && currentUser.id;
+    const currentUserId = currentUser && currentUser.id;
 
     socket.join('public');
     if (currentUserId) {
