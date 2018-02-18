@@ -14,11 +14,8 @@ const {
   validateUsernameAvailable,
   validateEmail,
   validateEmailAvailable,
-  validateLoginMethod,
   validateToken,
-  validateRememberMe,
-  validateRecaptcha,
-  validateOtp} = require('./validators/validators');
+  validateRecaptcha} = require('./validators/validators');
 const UserService = require('../services/userService');
 const captchaValidator = require('./validators/captchaValidator');
 const milliSecondsInYear = 31536000000;
@@ -59,7 +56,7 @@ module.exports = (currencyCache) => {
 
     const failedLoginAttempts = await db.getConsecutiveFailedLoginAttempts(user.id);
 
-    if(failedLoginAttempts >= 3){
+    if (failedLoginAttempts >= 3) {
       const captchaValid = await captchaValidator.validateCaptcha(req.body['g-recaptcha-response']);
       if (!captchaValid) {
         return res.status(401).json({error: 'Invalid Captcha'});
@@ -146,12 +143,12 @@ module.exports = (currencyCache) => {
   router.post('/register', apiLimiter, async function (req, res, next) {
     validatePassword(req);
     validatePassword2(req);
-    validateEmail(req, true); 
+    validateEmail(req, true);
     validateEmailAvailable(req, db, true);
     validateUsername(req);
     validateUsernameAvailable(req, db);
     validateRecaptcha(req);
-    
+
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
       return res.status(400).json({errors: validationResult.array()});
@@ -231,7 +228,7 @@ module.exports = (currencyCache) => {
     validatePassword(req);
     validatePassword2(req);
     validateToken(req);
-    
+
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
       return res.status(400).json({errors: validationResult.array()});

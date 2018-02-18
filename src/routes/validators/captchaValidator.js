@@ -21,6 +21,6 @@ const validateCaptcha = function (response, remoteip) {
     .catch(() => {
       return false;
     });
-}
+};
 
-module.exports = {validateCaptcha}; 
+module.exports = {validateCaptcha};
