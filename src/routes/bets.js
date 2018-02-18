@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../db');
+const {hashServerSeed} = require('../games/dice');
 
 module.exports = () => {
   const router = express.Router();
@@ -29,6 +30,11 @@ module.exports = () => {
         profit: result.profit,
         gameType: result.game_type,
         gameDetails: result.game_details,
+        status: result.in_use ? 'Current' : 'Not Current',
+        serverSeed: result.in_use ? 'Not Available - seed still in use' : result.server_seed,
+        clientSeed: result.client_seed,
+        serverSeedHash: hashServerSeed(result.server_seed),
+        nonce: result.nonce,
         userName
       });
     } catch (e) {

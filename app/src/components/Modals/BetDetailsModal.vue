@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="betDetailsModal" ref="modal" lazy @hide="onModalHide" @shown="onModalShow">
+  <b-modal id="betDetailsModal" ref="modal" size="lg" lazy @hide="onModalHide" @shown="onModalShow">
     <template slot="modal-header-close"><i class="fa fa-close"/></template>
     <template slot="modal-title">
       <div>Bet Lookup</div>
@@ -40,32 +40,58 @@
         <b-row class="bet-results__stat text-center">
           <b-col cols="4">
             <div class="bet-results__stat__key">USER</div>
-            <span class="bet-results__stat__value">{{betDetail.userName}}</span>
+            <div class="bet-results__stat__value">{{betDetail.userName}}</div>
           </b-col>
           <b-col cols="4">
             <div class="bet-results__stat__key">BET AMOUNT</div>
-            <span class="bet-results__stat__value">{{formatBigAmount(betDetail.betAmount, betDetail.currency)}}</span>
+            <div class="bet-results__stat__value">{{formatBigAmount(betDetail.betAmount, betDetail.currency)}}</div>
             <CurrencyIcon :id="betDetail.currency" :width="20" />
           </b-col>
           <b-col cols="4">
             <div class="bet-results__stat__key">PROFIT</div>
-            <span class="bet-results__stat__value" v-html="formatProfit(betDetail.profit, betDetail.currency)"></span>
+            <div class="bet-results__stat__value" v-html="formatProfit(betDetail.profit, betDetail.currency)"></div>
             <CurrencyIcon :id="betDetail.currency" :width="20" />
           </b-col>
         </b-row>
         <b-row class="bet-results__stat text-center">
           <b-col cols="4">
             <div class="bet-results__stat__key">PAYOUT</div>
-            <span class="bet-results__stat__value">{{gameDetailsToPayout(betDetail.gameDetails)}}</span>
+            <div class="bet-results__stat__value">{{gameDetailsToPayout(betDetail.gameDetails)}}</div>
           </b-col>
           <b-col cols="4">
             <div class="bet-results__stat__key">Target</div>
-            <span class="bet-results__stat__value">{{gameDetailsToTarget(betDetail.gameDetails)}}</span>
+            <div class="bet-results__stat__value">{{gameDetailsToTarget(betDetail.gameDetails)}}</div>
           </b-col>
           <b-col cols="4">
             <div class="bet-results__stat__key">ROLL</div>
-            <span class="bet-results__stat__value">{{gameDetailsToRoll(betDetail.gameDetails)}}</span>
+            <div class="bet-results__stat__value">{{gameDetailsToRoll(betDetail.gameDetails)}}</div>
           </b-col>
+        </b-row>
+        <b-row class="bet-results__stat text-center">
+          <b-col cols="4">
+            <div class="bet-results__stat__key">Game Type</div>
+            <div class="bet-results__stat__value">{{betDetail.gameType}}</div>
+          </b-col>
+          <b-col cols="4">
+            <div class="bet-results__stat__key">Seed Status</div>
+            <div class="bet-results__stat__value" :class="{'text-green': betDetail.status === 'Current'}">{{betDetail.status}}</div>
+          </b-col>
+          <b-col cols="4">
+            <div class="bet-results__stat__key">Bet Nonce</div>
+            <div class="bet-results__stat__value">{{betDetail.nonce}}</div>
+          </b-col>
+        </b-row>
+        <b-row class="bet-results__stat">
+          <b-col cols="3" class="bet-results__seed__key">Server Secret(hashed)</b-col>
+          <b-col cols="9" class="bet-results__seed__value">{{betDetail.serverSeedHash}}</b-col>
+        </b-row>
+        <b-row class="bet-results__stat">
+          <b-col cols="3" class="bet-results__seed__key">Server Secret</b-col>
+          <b-col cols="9" class="bet-results__seed__value">{{betDetail.serverSeed}}</b-col>
+        </b-row>
+        <b-row class="bet-results__stat">
+          <b-col cols="3" class="bet-results__seed__key">Client Seed</b-col>
+          <b-col cols="9" class="bet-results__seed__value">{{betDetail.clientSeed}}</b-col>
         </b-row>
       </template>
     </b-container>
@@ -232,6 +258,17 @@ export default {
         }
         &__key {
           font-size: 12px;
+        }
+      }
+      &__seed {
+        padding-bottom: 15px;
+        &__key {
+          font-size: 12px;
+        }
+        &__value {
+          font-size: 12px;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
       }
     }
