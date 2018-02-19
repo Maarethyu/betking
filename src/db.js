@@ -513,6 +513,16 @@ const getBetDetails = async (id) => {
   return result;
 };
 
+const getUserStats = async (username) => {
+  const results = await db.any('SELECT u.id, u.stats_hidden, u.username, u.date_joined, b.bets, b.total_wagered, b.profits, b.currency FROM users AS u INNER JOIN (SELECT player_id, currency, COUNT(*) as bets, SUM(bet_amount) as total_wagered , SUM(profit) as profits FROM bets GROUP BY currency, player_id) AS b ON u.id = b.player_id WHERE u.userName = $1', [username]);
+
+  if (!results.length) {
+    throw new Error('USER_NOT_FOUND');
+  }
+
+  return results;
+};
+
 module.exports = {
   isEmailAlreadyTaken,
   isUserNameAlreadyTaken,
@@ -578,5 +588,7 @@ module.exports = {
   disableBetting,
   getBetStatsByCurrency,
   // BETS
-  getBetDetails
+  getBetDetails,
+  // STATS
+  getUserStats
 };

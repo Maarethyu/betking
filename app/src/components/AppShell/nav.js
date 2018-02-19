@@ -4,6 +4,10 @@ const showBetDetailModal = function () {
   bus.$emit('show-bet-details-modal');
 };
 
+const showUserLookupModal = function () {
+  bus.$emit('show-user-lookup-modal');
+};
+
 export default {
   items: [
     {
@@ -44,6 +48,11 @@ export default {
       name: 'Bet Lookup',
       icon: 'fa fa-search',
       func: showBetDetailModal
+    },
+    {
+      name: 'Find People',
+      icon: 'fa fa-search',
+      func: showUserLookupModal
     },
    /*  {
       name: 'Promotions',
