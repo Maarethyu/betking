@@ -33,7 +33,7 @@ const validateEmail = function (req, isOptional) {
     .trim()
     .isLength({max: 255})
     .isEmail()
-    .optional({checkFalsy: isOptional});    
+    .optional({checkFalsy: isOptional});
 };
 
 const validateEmailAvailable = function (req, db, isOptional) {
@@ -52,7 +52,7 @@ const validateLoginMethod = function (req) {
     .optional({checkFalsy: true});
 
   const loginMethod = req.body.loginmethod || 'username';
-  
+
   if (loginMethod === 'username') {
     validateUsername(req);
   } else if (loginMethod === 'email') {
@@ -87,7 +87,7 @@ const validateLoginData = function (req) {
   validateOtp(req);
 
   return req.validationErrors();
-}
+};
 
 module.exports = {
   validatePassword,
