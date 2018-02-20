@@ -145,6 +145,9 @@ export default {
   fetchSiteStats () {
     return get('/api/stats/all');
   },
+  fetchExchangeRates () {
+    return get('/api/stats/exchange-rates');
+  },
   // Dice
   loadDiceState (clientSeed, currency) {
     return get(`/api/dice/load-state?clientSeed=${clientSeed}&currency=${currency}`);
