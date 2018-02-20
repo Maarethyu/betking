@@ -32,6 +32,8 @@ export const SET_BET_STATS = 'SET_BET_STATS';
 export const SET_SITE_STATS = 'SET_SITE_STATS';
 export const SET_ALL_BETS = 'SET_ALL_BETS';
 export const SET_HIGHROLLER_BETS = 'SET_HIGHROLLER_BETS';
+export const SET_EXCHANGE_RATES = 'SET_EXCHANGE_RATES';
+export const SET_WON_LAST_24HOURS = 'SET_WON_LAST_24HOURS';
 
 // Socket
 export const SET_WEBSOCKET = 'SET_WEBSOCKET';

@@ -1,6 +1,6 @@
 <template>
   <div class="info-bar">
-    <div class="ml-auto d-none d-sm-none d-md-inline">
+    <div class="ml-auto d-inline">
       <div class="info-bar__item">
         <span class="text-red">Online: </span>123
       </div>
@@ -8,10 +8,11 @@
         <span class="text-red">Bets: </span>
         {{ addCommas(totalBets) }}
       </div>
-      <div class="info-bar__item">
-        <span class="text-red">Won last 24 hours: </span> 123.12 BTC
+      <div class="info-bar__item d-none d-md-inline" v-if="parseFloat(sumWonLast24Hours) > 0">
+        <span class="text-red">Won last 24 hours: </span>
+        {{ addCommas(sumWonLast24Hours) }}
       </div>
-      <div class="info-bar__item info-bar__item--max-win" v-if="path === '/dice'">
+      <div class="info-bar__item info-bar__item--max-win" v-if="path === '/dice' && diceMaxWin">
         <span class="text-red">Max Win: </span>
         {{ diceMaxWin }}
         <CurrencyIcon :id="activeCurrency" :width="18" />
@@ -83,7 +84,8 @@
       ...mapGetters({
         diceMaxWin: 'diceMaxWin',
         activeCurrency: 'activeCurrency',
-        totalBets: 'totalBets'
+        totalBets: 'totalBets',
+        sumWonLast24Hours: 'sumWonLast24Hours'
       }),
       ...mapState({
         path: state => state.route.path

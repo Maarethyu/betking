@@ -5,12 +5,15 @@ class NotificationsHandler {
   constructor (io) {
     this.io = io;
     this.betThrottleDelay = config.get('BET_THROTTLE_DELAY_MS');
+    this.statsUpdateDelay = config.get('STATS_UPDATE_DELAY_MS');
 
     this.lastBetBroadcast = null;
     this.throttledBet = {
       username: null,
       bet: null
     };
+
+    this.lastStatsBroadcast = null;
   }
 
   handle (notification) {
@@ -83,6 +86,14 @@ class NotificationsHandler {
 
   depositConfirmed (type, payload) {
     this.io.to(payload.userId).emit(type, payload);
+  }
+
+  statsUpdate (type, payload) {
+    if (!this.lastStatsBroadcast || (new Date() - this.lastStatsBroadcast) >= this.statsUpdateDelay) {
+      this.lastStatsBroadcast = Date.now();
+
+      this.io.to('public').emit(type, payload);
+    }
   }
 }
 

@@ -1,4 +1,6 @@
+const config = require('config');
 const BigNumber = require('bignumber.js');
+const {notificationEmitter, types} = require('../socket/notificationEmitter');
 
 class StatsCache {
   constructor (db) {
@@ -6,6 +8,10 @@ class StatsCache {
 
     this.totalBets = 0;
     this.siteStats = [];
+    this.wonLast24Hours = [];
+
+    this.lastComputedWon24Hours = null;
+    this.cacheDurationWonLast24Hours = config.get('CACHE_DURATION_WON_LAST_24H_MS');
   }
 
   async load () {
@@ -13,6 +19,7 @@ class StatsCache {
 
     this.totalBets = this.totalBetsFromStats(betStatsByCurrency);
     this.siteStats = this.siteStatsFromStats(betStatsByCurrency);
+    await this.getWonLast24Hours();
   }
 
   totalBetsFromStats (stats) {
@@ -35,6 +42,24 @@ class StatsCache {
       numBets: new BigNumber(stat.num_bets)
         .toNumber()
     }));
+  }
+
+  async getWonLast24Hours () {
+    if (!this.lastComputedWon24Hours ||
+      (Date.now() - this.lastComputedWon24Hours) > this.cacheDurationWonLast24Hours) {
+      this.wonLast24Hours = await this.db.computeWonLast24Hours();
+      this.lastComputedWon24Hours = Date.now();
+    }
+
+    return this.wonLast24Hours;
+  }
+
+  async sendStatsUpdate () {
+    notificationEmitter.emit(types.STATS_UPDATE, {
+      siteStats: this.siteStats,
+      totalBets: this.totalBets,
+      wonLast24Hours: await this.getWonLast24Hours()
+    });
   }
 
   handle (event) {
@@ -69,6 +94,8 @@ class StatsCache {
         .toString();
       currencyStat.numBets++;
     }
+
+    this.sendStatsUpdate();
   }
 }
 

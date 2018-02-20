@@ -1,11 +1,15 @@
 const express = require('express');
 const db = require('../db');
 
-module.exports = (statsCache) => {
+module.exports = (statsCache, exchangeRateCache) => {
   const router = express.Router();
 
   router.get('/bets', async function (req, res, next) {
-    res.json({totalBets: statsCache.totalBets});
+    res.json({
+      totalBets: statsCache.totalBets,
+      wonLast24Hours: await statsCache.getWonLast24Hours(),
+      exchangeRates: await exchangeRateCache.getExchangeRates()
+    });
   });
 
   router.get('/all', async function (req, res, next) {
@@ -49,6 +53,12 @@ module.exports = (statsCache) => {
 
       throw e;
     }
+  });
+
+  router.get('/exchange-rates', async function (req, res, next) {
+    const exchangeRates = await exchangeRateCache.getExchangeRates();
+
+    res.json({exchangeRates});
   });
 
   return router;

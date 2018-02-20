@@ -522,6 +522,11 @@ const getUserStats = async (username) => {
   return results;
 };
 
+const computeWonLast24Hours = async () => {
+  const result = await db.any('SELECT SUM(profit) AS won_last_24_hours, currency FROM bets WHERE profit > 0 AND date > NOW() - interval \'24 hours\' GROUP BY currency');
+  return result;
+};
+
 module.exports = {
   isEmailAlreadyTaken,
   isUserNameAlreadyTaken,
@@ -589,5 +594,6 @@ module.exports = {
   // BETS
   getBetDetails,
   // STATS
-  getUserStats
+  getUserStats,
+  computeWonLast24Hours
 };

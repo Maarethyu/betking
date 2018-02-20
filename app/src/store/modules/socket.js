@@ -64,6 +64,15 @@ const actions = {
         }
       });
 
+      socket.on('statsUpdate', (msg) => {
+        commit(types.SET_SITE_STATS, msg.siteStats);
+        commit(types.SET_BET_STATS, msg.totalBets);
+        commit(types.SET_WON_LAST_24HOURS, {
+          wonLast24Hours: msg.wonLast24Hours,
+          currencies: rootState.funds.currencies
+        });
+      });
+
       commit(types.SET_WEBSOCKET, socket);
     }
   },
