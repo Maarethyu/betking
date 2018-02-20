@@ -83,10 +83,8 @@
     },
     methods: {
       loadDiceState () {
-        if (this.isAuthenticated) {
-          const clientSeed = getRandomAlphanumeric(20);
-          this.$store.dispatch('loadDiceState', {clientSeed, currency: this.activeCurrency});
-        }
+        const clientSeed = getRandomAlphanumeric(20);
+        this.$store.dispatch('loadDiceState', {clientSeed, currency: this.activeCurrency});
       }
     }
   };
