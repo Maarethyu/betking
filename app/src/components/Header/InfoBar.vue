@@ -1,6 +1,6 @@
 <template>
   <div class="info-bar">
-    <div class="ml-auto d-none d-sm-none d-md-inline">
+    <div class="ml-auto d-inline">
       <div class="info-bar__item">
         <span class="text-red">Online: </span>123
       </div>
@@ -8,7 +8,7 @@
         <span class="text-red">Bets: </span>
         {{ addCommas(totalBets) }}
       </div>
-      <div class="info-bar__item">
+      <div class="info-bar__item d-none d-md-inline">
         <span class="text-red">Won last 24 hours: </span> 123.12 BTC
       </div>
       <div class="info-bar__item info-bar__item--max-win" v-if="path === '/dice'">
