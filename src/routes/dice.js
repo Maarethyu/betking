@@ -8,10 +8,13 @@ const {eventEmitter, types} = require('../eventEmitter');
 module.exports = (currencyCache) => {
   const router = express.Router();
 
-  router.use(mw.requireLoggedIn);
-  router.use(mw.requireWhitelistedIp);
-
   router.get('/load-state', async function (req, res, next) {
+    if (req.currentUser) {
+      mw.requireWhitelistedIp(req, res, next);
+    } else {
+      next();
+    }
+  }, async function (req, res, next) {
     req.checkQuery('clientSeed', 'Invalid Client Seed')
       .exists()
       .isAlphanumeric()
@@ -27,20 +30,26 @@ module.exports = (currencyCache) => {
       return res.status(400).json({errors: validationResult.array()});
     }
 
-    let diceSeed = await db.getActiveDiceSeed(req.currentUser.id);
-    if (!diceSeed) {
-      const newServerSeed = dice.generateServerSeed();
-      const newClientSeed = req.query.clientSeed;
+    let diceSeed = {client_seed: '', server_seed: '', nonce: 0};
+    let latestUserBets = [];
 
-      diceSeed = await db.addNewDiceSeed(req.currentUser.id, newServerSeed, newClientSeed);
+    if (req.currentUser) {
+      diceSeed = await db.getActiveDiceSeed(req.currentUser.id);
+      if (!diceSeed) {
+        const newServerSeed = dice.generateServerSeed();
+        const newClientSeed = req.query.clientSeed;
+
+        diceSeed = await db.addNewDiceSeed(req.currentUser.id, newServerSeed, newClientSeed);
+      }
+
+      latestUserBets = await db.getLatestUserDiceBets(req.currentUser.id);
     }
 
-    const latestUserBets = await db.getLatestUserDiceBets(req.currentUser.id);
     const bankRoll = await db.getBankrollByCurrency(req.query.currency);
 
     res.json({
       clientSeed: diceSeed.client_seed,
-      serverSeedHash: dice.hashServerSeed(diceSeed.server_seed),
+      serverSeedHash: diceSeed.server_seed ? dice.hashServerSeed(diceSeed.server_seed) : '',
       nonce: diceSeed.nonce,
       latestUserBets,
       maxWin: bankRoll.max_win,
@@ -49,7 +58,7 @@ module.exports = (currencyCache) => {
     });
   });
 
-  router.post('/bet', async function (req, res, next) {
+  router.post('/bet', mw.requireLoggedIn, mw.requireWhitelistedIp, async function (req, res, next) {
     req.checkBody('currency', 'Invalid currency')
       .exists()
       .isInt()
@@ -150,7 +159,7 @@ module.exports = (currencyCache) => {
     }
   });
 
-  router.post('/set-client-seed', async function (req, res, next) {
+  router.post('/set-client-seed', mw.requireLoggedIn, mw.requireWhitelistedIp, async function (req, res, next) {
     req.checkBody('clientSeed', 'Invalid Client Seed')
       .exists()
       .isAlphanumeric()
@@ -166,7 +175,7 @@ module.exports = (currencyCache) => {
     res.json(seed);
   });
 
-  router.post('/generate-new-seed', async function (req, res, next) {
+  router.post('/generate-new-seed', mw.requireLoggedIn, mw.requireWhitelistedIp, async function (req, res, next) {
     req.checkBody('clientSeed', 'Invalid Client Seed')
       .exists()
       .isAlphanumeric()
