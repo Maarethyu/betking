@@ -34,7 +34,7 @@ module.exports = () => {
         serverSeed: result.in_use ? 'Not Available - seed still in use' : result.server_seed,
         clientSeed: result.client_seed,
         serverSeedHash: hashServerSeed(result.server_seed),
-        nonce: result.nonce,
+        nonce: result.seed_details.nonce,
         userName
       });
     } catch (e) {

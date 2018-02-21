@@ -504,7 +504,7 @@ const getBetStatsByCurrency = async () => {
 };
 
 const getBetDetails = async (id) => {
-  const result = await db.oneOrNone('SELECT b.*, u.username, u.stats_hidden, d.in_use, d.client_seed, d.server_seed, d.nonce FROM bets AS b INNER JOIN users AS u ON b.player_id = u.id INNER JOIN dice_seeds AS d ON d.id::text = b.seed_details->>\'seed_id\'AND d.player_id = u.id WHERE b.id = $1', [id]);
+  const result = await db.oneOrNone('SELECT b.*, u.username, u.stats_hidden, d.in_use, d.client_seed, d.server_seed FROM bets AS b INNER JOIN users AS u ON b.player_id = u.id INNER JOIN dice_seeds AS d ON d.id::text = b.seed_details->>\'seed_id\'AND d.player_id = u.id WHERE b.id = $1', [id]);
   if (!result) {
     throw new Error('BET_NOT_FOUND');
   }
