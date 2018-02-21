@@ -112,11 +112,11 @@ class ExchangeRateCache {
           return;
         }
 
-        const last_price = shouldFetchFromBitfinex ?
-          this.extractExchangeRateFromBitfinexResponse(response) :
-          this.extractExchangeRateFromCmcResponse(response);
+        const lastPrice = shouldFetchFromBitfinex
+          ? this.extractExchangeRateFromBitfinexResponse(response)
+          : this.extractExchangeRateFromCmcResponse(response);
 
-        if (!last_price) {
+        if (!lastPrice) {
           resolve();
           return;
         }
@@ -124,12 +124,12 @@ class ExchangeRateCache {
         const cachedCurrency = this.exchangeRates.find(r => r.currency === exchangeCurrencyToBk[currencyName]);
 
         if (!cachedCurrency) {
-          this.exchangeRates.push({currency: exchangeCurrencyToBk[currencyName], last_price});
+          this.exchangeRates.push({currency: exchangeCurrencyToBk[currencyName], lastPrice});
           resolve();
           return;
         }
 
-        cachedCurrency.last_price = last_price;
+        cachedCurrency.last_price = lastPrice;
         resolve();
       });
     }));
