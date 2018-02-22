@@ -208,3 +208,32 @@ CREATE TABLE dice_seeds (
   server_seed text NOT NULL,
   nonce integer NOT NULL default 0
 );
+
+CREATE TABLE banned_users (
+  id bigserial PRIMARY KEY,
+  username text NOT NULL,
+  banned_by text NOT NULL,
+  banned_date timestamp with time zone NOT NULL,
+  unbanned_by text NULL,
+  unbanned_date timestamp with time zone,
+  is_banned boolean NOT NULL,
+  unique (username)
+);
+
+CREATE TABLE moderators (
+  id bigserial PRIMARY KEY,
+  username text NOT NULL,
+  unique (username)
+);
+
+CREATE UNIQUE INDEX unique_moderators_username ON moderators USING btree (lower(username) text_pattern_ops);
+
+CREATE TABLE chats (
+  id bigserial PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  username text NOT NULL,
+  message text NOT NULL,
+  language text NOT NULL,
+  date timestamp with time zone NOT NULL  DEFAULT NOW(),
+  is_hidden boolean DEFAULT false NOT NULL
+);

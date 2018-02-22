@@ -35,8 +35,35 @@
           <b-col cols="12" class="user-details__title">{{user.username}}</b-col>
           <b-col cols="12" class="user-details__date">Joined on {{formatDate(user.dateJoined)}}</b-col>
         </b-row>
-        <template v-if="stats" v-for="stat in stats">
-          <b-row class="user-details__stat">
+
+        <b-row v-if="loggedInUser !== user.username && isAuthenticated">
+          <b-col cols="4">
+            <b-btn variant="default" disabled><i class="fa fa-btc"></i>&nbsp;Send Tip</b-btn>
+          </b-col>
+
+          <b-col cols="4">
+            <b-btn variant="default" disabled><i class="fa fa-comments-o"></i>&nbsp;Private chat</b-btn>
+          </b-col>
+
+          <b-col cols="4">
+            <b-btn variant="danger" disabled><i class="fa fa-ban"></i>&nbsp;Ignore User</b-btn>
+          </b-col>
+        </b-row>
+
+        <br />
+
+        <b-row v-if="loggedInUser !== user.username && isAuthenticated && isChatModerator">
+          <b-col cols="6">
+            <b-btn v-if="!isUserBanned(user.username)" variant="default" @click="banUser"><i class="fa fa-ban"></i>&nbsp;Ban user</b-btn>
+            <b-btn v-if="isUserBanned(user.username)" variant="default" @click="unBanUser"><i class="fa fa-ban"></i>&nbsp;Unban user</b-btn>
+          </b-col>
+
+          <b-col cols="6">
+          </b-col>
+        </b-row>
+
+        <template v-if="stats">
+          <b-row class="user-details__stat" v-for="stat in stats" :key="stat.currency">
             <b-col cols="2" class="user-details__currency"><CurrencyIcon :id="stat.currency" :width="30" /></b-col>
             <b-col cols="10">
               <b-row>
@@ -110,8 +137,12 @@ export default {
   },
   computed: {
     ...mapGetters({
-      currencies: 'currencies'
-    }),
+      currencies: 'currencies',
+      loggedInUser: 'username',
+      isAuthenticated: 'isAuthenticated',
+      isChatModerator: 'isChatModerator',
+      bannedUsernames: 'bannedUsernames'
+    })
   },
   data: () => ({
     errors: {},
@@ -164,7 +195,7 @@ export default {
         this.fetchingData = false;
         this.fetchSuccess = true;
         this.user = res.data.user;
-        this.stats = res.data.stats;
+        this.stats = res.data.stats.filter(s => s.currency !== null);
       })
       .catch(error => {
         this.fetchingData = false;
@@ -200,6 +231,15 @@ export default {
     },
     formatDate (date) {
       return moment(date).format('LL');
+    },
+    banUser () {
+      this.$store.dispatch('banUserFromChat', this.user.username);
+    },
+    unBanUser () {
+      this.$store.dispatch('unBanUserFromChat', this.user.username);
+    },
+    isUserBanned (username) {
+      return this.bannedUsernames.indexOf(username) > -1;
     }
   }
 };

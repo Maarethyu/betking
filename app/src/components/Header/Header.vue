@@ -103,8 +103,8 @@ export default {
     }),
   },
   mounted () {
-    this.$root.$on('bv::modal::show', this.fixNavBarAlignment);
-    this.$root.$on('bv::modal::hidden', this.resetNavBarAlignment);
+    this.$root.$on('bv::modal::show', this.fixAlignmentOnModalShow);
+    this.$root.$on('bv::modal::hidden', this.fixAlignmentOnModalHide);
   },
   methods: {
     showWithdrawalModal () {
@@ -125,13 +125,23 @@ export default {
         return 0;
       }
     },
-    fixNavBarAlignment () {
+    fixAlignmentOnModalShow () {
       const el = document.getElementById('navbar');
       el.style.width = `calc(100% - ${this.getScrollWidth()}px)`;
+
+      const aside = document.getElementById('aside-chat-wrapper');
+      if (aside) {
+        aside.style.right = `${this.getScrollWidth()}px`;
+      }
     },
-    resetNavBarAlignment () {
+    fixAlignmentOnModalHide () {
       const el = document.getElementById('navbar');
       el.style.width = '100%';
+
+      const aside = document.getElementById('aside-chat-wrapper');
+      if (aside) {
+        aside.style.right = '0px';
+      }
     }
   }
 };

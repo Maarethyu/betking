@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import toastr from 'toastr';
+import bus from 'src/bus';
 
 export const diceBet = function (target) {
   let betAmount = new BigNumber(this.betAmount);
@@ -298,6 +299,7 @@ export const maxBetAmountClicked = function () {
 
 export const activateShortcuts = function () {
   this.shortcutsEnabled = !this.shortcutsEnabled;
+  bus.$emit('lock-chat', this.shortcutsEnabled);
 };
 
 export const keyUp = function (e) {

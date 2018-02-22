@@ -513,7 +513,7 @@ const getBetDetails = async (id) => {
 };
 
 const getUserStats = async (username) => {
-  const results = await db.any('SELECT u.id, u.stats_hidden, u.username, u.date_joined, b.bets, b.total_wagered, b.profits, b.currency FROM users AS u INNER JOIN (SELECT player_id, currency, COUNT(*) as bets, SUM(bet_amount) as total_wagered , SUM(profit) as profits FROM bets GROUP BY currency, player_id) AS b ON u.id = b.player_id WHERE u.userName = $1', [username]);
+  const results = await db.any('SELECT u.id, u.stats_hidden, u.username, u.date_joined, b.bets, b.total_wagered, b.profits, b.currency FROM users AS u LEFT JOIN (SELECT player_id, currency, COUNT(*) as bets, SUM(bet_amount) as total_wagered , SUM(profit) as profits FROM bets GROUP BY currency, player_id) AS b ON u.id = b.player_id WHERE u.userName = $1', [username]);
 
   if (!results.length) {
     throw new Error('USER_NOT_FOUND');
@@ -525,6 +525,43 @@ const getUserStats = async (username) => {
 const computeWonLast24Hours = async () => {
   const result = await db.any('SELECT SUM(profit) AS won_last_24_hours, currency FROM bets WHERE profit > 0 AND date > NOW() - interval \'24 hours\' GROUP BY currency');
   return result;
+};
+
+// chat
+
+const addChatMessage = async (username, userId, message, language, date) => {
+  await db.none('INSERT INTO chats (username, user_id, message, language, date) VALUES ($1, $2, $3, $4, $5)', [username, userId, message, language, date]);
+};
+
+const getLastChatMessages = async (language, limit) => {
+  const result = db.any('SELECT * from chats WHERE language = $1 AND is_hidden = false ORDER BY date DESC LIMIT $2', [language, limit]);
+  return result;
+};
+
+const banUser = async (username, moderatorName) => {
+  await db.none('INSERT INTO banned_users (username, banned_by, banned_date, is_banned) VALUES ($1, $2, NOW(), true) ON CONFLICT (username) DO UPDATE SET is_banned = true, banned_by = $2, banned_date = NOW()', [username, moderatorName]);
+};
+
+const unBanUser = async (username, moderatorName) => {
+  await db.none('UPDATE banned_users SET unbanned_by = $1, unbanned_date = NOW(), is_banned = false WHERE username = $2', [moderatorName, username]);
+};
+
+const getAllBannedUsers = async () => {
+  const result = db.any('SELECT username FROM banned_users');
+  return result;
+};
+
+const getModerators = async () => {
+  const result = db.any('SELECT username FROM moderators');
+  return result;
+};
+
+const clearAllChat = async (language) => {
+  await db.none('UPDATE chats SET is_hidden = true WHERE language = $1', language);
+};
+
+const clearUsersChat = async (language, username) => {
+  await db.none('UPDATE chats SET is_hidden = true WHERE language = $1 AND username = $2', [language, username]);
 };
 
 module.exports = {
@@ -595,5 +632,14 @@ module.exports = {
   getBetDetails,
   // STATS
   getUserStats,
-  computeWonLast24Hours
+  computeWonLast24Hours,
+  // Chat
+  addChatMessage,
+  getLastChatMessages,
+  banUser,
+  unBanUser,
+  getAllBannedUsers,
+  getModerators,
+  clearAllChat,
+  clearUsersChat
 };

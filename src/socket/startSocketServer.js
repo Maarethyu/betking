@@ -1,13 +1,20 @@
 const socketIo = require('socket.io');
 const cookieParser = require('cookie-parser');
+const db = require('../db');
 const {notificationEmitter} = require('./notificationEmitter');
+const {chatNotificationEmitter} = require('./chatNotificationEmitter');
 const {attachCurrentUserToRequest} = require('../middleware');
 
 const NotificationsHandler = require('./NotificationsHandler');
+const ChatNotificationsHandler = require('./ChatNotificationsHandler');
+const ChatService = require('../chat/ChatService');
+
+const chat = new ChatService(db);
 
 const startSocketServer = function (server, cache) {
   const io = socketIo.listen(server);
   const notificationsHandler = new NotificationsHandler(io);
+  const chatNotificationsHandler = new ChatNotificationsHandler(io);
   const {betsCache} = cache;
 
   console.log(`websockets listening`);
@@ -23,11 +30,41 @@ const startSocketServer = function (server, cache) {
   io.on('connection', function (socket) {
     const currentUser = socket.request.currentUser;
     const currentUserId = currentUser && currentUser.id;
+    const currentUsername = currentUser && currentUser.username;
 
     socket.join('public');
     if (currentUserId) {
       socket.join(currentUserId);
+      chat.userJoinApp(currentUsername);
+    } else {
+      chat.anonymousUserJoinApp();
     }
+
+    socket.on('joinChat', (data) => {
+      chat.joinChat(data.language, socket.id, currentUsername);
+    });
+    socket.on('newChatMessage', (data) => {
+      chat.newChatMessage(data.language, data.message, currentUsername, currentUserId);
+    });
+    socket.on('banUser', (data) => {
+      chat.banUser(data.username, currentUsername, currentUserId);
+    });
+    socket.on('unBanUser', (data) => {
+      chat.unBanUser(data.username, currentUsername, currentUserId);
+    });
+    socket.on('clearAllChat', (data) => {
+      chat.clearAllChat(data.language, currentUsername, currentUserId);
+    });
+    socket.on('clearUsersChat', (data) => {
+      chat.clearUsersChat(data.language, data.username, currentUsername, currentUserId);
+    });
+    socket.on('disconnect', function () {
+      if (currentUserId) {
+        chat.userLeaveApp(currentUsername);
+      } else {
+        chat.anonymousUserLeaveApp();
+      }
+    });
   });
 
   io.of('/watch-bets').on('connection', function (socket) {
@@ -44,6 +81,10 @@ const startSocketServer = function (server, cache) {
 
   notificationEmitter.addListener((notification) => {
     notificationsHandler.handle(notification);
+  });
+
+  chatNotificationEmitter.addListener((notification) => {
+    chatNotificationsHandler.handle(notification);
   });
 };
 

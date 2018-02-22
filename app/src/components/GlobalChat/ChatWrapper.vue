@@ -3,14 +3,14 @@
     <mq-layout mq="mobile">
       <b-collapse id="global-chat" v-model="isChatShown">
         <div class="chat-wrapper-mobile">
-          <Chat />
+          <slot :device="$mq"></slot>
         </div>
       </b-collapse>
     </mq-layout>
 
     <mq-layout mq="desktop">
-      <aside class="aside-menu">
-        <Chat />
+      <aside class="aside-menu" id="aside-chat-wrapper">
+        <slot :device="$mq"></slot>
       </aside>
     </mq-layout>
   </div>
@@ -18,7 +18,8 @@
 
 <style lang="scss" scoped>
   .chat-wrapper-mobile {
-    min-height: 400px;
+    height: 400px;
+    overflow: hidden;
   }
   .aside-menu {
     top: 60px;
@@ -29,13 +30,13 @@
 
 <script>
 import bCollapse from 'bootstrap-vue/es/components/collapse/collapse';
-import Chat from './Chat';
+// import Chat from './Chat';
 
 export default {
   name: 'ChatWrapper',
   components: {
     'b-collapse': bCollapse,
-    Chat
+    // Chat
   },
   props: {
     isChatShown: {
