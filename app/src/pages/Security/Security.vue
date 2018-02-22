@@ -4,7 +4,7 @@
     <br />
     <SetSecondFactorAuth />
     <br />
-    <WhitelistedIps />
+    <WhiteListedIps />
     <br />
     <LoginAttempts />
   </div>
@@ -13,7 +13,7 @@
 <script>
   import Sessions from './Sessions';
   import SetSecondFactorAuth from './Set2fa';
-  import WhitelistedIps from './WhitelistedIps';
+  import WhiteListedIps from './WhiteListedIps';
   import LoginAttempts from './LoginAttempts';
 
   export default {
@@ -21,7 +21,7 @@
     components: {
       Sessions,
       SetSecondFactorAuth,
-      WhitelistedIps,
+      WhiteListedIps,
       LoginAttempts
     }
   };

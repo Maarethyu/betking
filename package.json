@@ -13,7 +13,10 @@
     "lint": "eslint --ext .js src && cd app && npm run lint && cd ..",
     "app:dev": "cd app && npm run dev",
     "app:build": "cd app && npm run build",
-    "server:prod": "cross-env NODE_ENV=production nodemon src/server.js"
+    "server:prod": "cross-env NODE_ENV=production nodemon src/server.js",
+    "heroku-prebuild": "bash scripts/heroku-prebuild.sh",
+    "heroku-postbuild": "bash scripts/heroku-postbuild.sh",
+    "heroku:setup-databases": "bash scripts/heroku-setup-databases.sh"
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
@@ -51,7 +54,8 @@
     "nodemon": "^1.12.1"
   },
   "engines": {
-    "node": ">= 4.0.0",
-    "npm": ">= 3.0.0"
-  }
+    "node": "8.9.4",
+    "npm": "5.6.0"
+  },
+  "cacheDirectories": ["app/node_modules"]
 }
