@@ -4,7 +4,7 @@ import Vue from 'vue';
 
 import * as types from '../mutation-types';
 import bus from 'src/bus';
-import {addBetToList, formatBigAmount, formatCurrency} from 'src/helpers';
+import {addBetToList, formatBigAmount, formatCurrency, formatBetAsMessage} from 'src/helpers';
 
 const state = {
   webSocket: null,
@@ -14,6 +14,7 @@ const state = {
   watchBetsPaused: false,
   allBets: [],
   highrollerBets: [],
+  highrollerBetsInChat: [],
   isChatOpened: false,
   chatChannels: {},
   bannedUsernames: [],
@@ -32,6 +33,7 @@ const getters = {
   highrollerBets: state => state.highrollerBets,
   watchBetsPaused: state => state.watchBetsPaused,
   chatChannels: state => state.chatChannels,
+  highrollerBetsInChat: state => state.highrollerBetsInChat,
   isChatOpened: state => state.isChatOpened,
   welcomeMessages: state => state.welcomeMessages,
   moderators: state => state.moderators,
@@ -172,6 +174,15 @@ const actions = {
         commit(types.CLEAR_USERS_CHAT, msg);
       });
 
+      socket.on('highrollerBet', (bet) => {
+        const betAmount = formatBigAmount.call(rootState.funds, bet.bet_amount, bet.currency);
+        const profit = formatBigAmount.call(rootState.funds, bet.profit, bet.currency);
+        const currencySymbol = formatCurrency.call(rootState.funds, bet.currency, 'symbol');
+
+        const betMessage = formatBetAsMessage(bet.id, bet.date, bet.username, betAmount, currencySymbol, profit);
+        commit(types.ADD_TO_HIGHROLLER_BETS_IN_CHAT, betMessage);
+      });
+
       commit(types.SET_WEBSOCKET, socket);
     }
   },
@@ -304,6 +315,10 @@ const mutations = {
 
   [types.ADD_TO_HIGHROLLER_BETS] (state, bet) {
     addBetToList(state.highrollerBets, bet);
+  },
+
+  [types.ADD_TO_HIGHROLLER_BETS_IN_CHAT] (state, bet) {
+    addBetToList(state.highrollerBetsInChat, bet);
   },
 
   [types.SET_WATCH_BETS_PAUSED] (state, shouldPause) {

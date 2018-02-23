@@ -233,7 +233,7 @@
         chatChannels: 'chatChannels',
         username: 'username',
         // IgnoredUsers: 'IgnoredUsers',
-        // HighrollerBetsInChat: 'HighrollerBetsInChat',
+        highrollerBetsInChat: 'highrollerBetsInChat',
         // ShowHighrollersInChat: 'ShowHighrollersInChat',
         isChatOpened: 'isChatOpened',
         // LoadStateDone: 'LoadStateDone',
@@ -247,7 +247,7 @@
         return (this.chatChannels[this.currentLanguage] || {messages: []}).messages;
       },
       messagesAndHighrollers () {
-        return this.filterMessages([...this.messages].sort((m1, m2) => {
+        return this.filterMessages([...this.messages, ...this.highrollerBetsInChat].sort((m1, m2) => {
           if (moment(m1.date).isSame(moment(m2.date))) {
             return 0;
           } else {

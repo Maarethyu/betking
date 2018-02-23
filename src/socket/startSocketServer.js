@@ -35,6 +35,7 @@ const startSocketServer = function (server, cache) {
     socket.join('public');
     if (currentUserId) {
       socket.join(currentUserId);
+      socket.join(currentUsername);
       chat.userJoinApp(currentUsername);
     } else {
       chat.anonymousUserJoinApp();
