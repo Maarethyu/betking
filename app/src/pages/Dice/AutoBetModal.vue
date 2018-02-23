@@ -214,7 +214,7 @@
 
 
 <script>
-  import bModal from 'bootstrap-vue/es/components/modal/modal';
+  import bModal from 'components/modal/modal';
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
   import bFormGroup from 'bootstrap-vue/es/components/form-group/form-group';

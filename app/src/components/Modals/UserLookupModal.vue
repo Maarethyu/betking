@@ -103,7 +103,7 @@
 import {mapGetters} from 'vuex';
 import moment from 'moment';
 
-import bModal from 'bootstrap-vue/es/components/modal/modal';
+import bModal from 'components/modal/modal';
 import vBModal from 'bootstrap-vue/es/directives/modal/modal';
 import bContainer from 'bootstrap-vue/es/components/layout/container';
 import bRow from 'bootstrap-vue/es/components/layout/row';

@@ -30,7 +30,7 @@
 <script>
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
-  import bModal from 'bootstrap-vue/es/components/modal/modal';
+  import bModal from 'components/modal/modal';
   import bButton from 'bootstrap-vue/es/components/button/button';
 
   import {mapGetters} from 'vuex';

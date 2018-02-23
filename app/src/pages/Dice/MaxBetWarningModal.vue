@@ -23,7 +23,7 @@
 </template>
 
 <script>
-  import bModal from 'bootstrap-vue/es/components/modal/modal';
+  import bModal from 'components/modal/modal';
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
   import bFormCheckbox from 'bootstrap-vue/es/components/form-checkbox/form-checkbox';

@@ -25,7 +25,7 @@
 </template>
 
 <script>
-  import bModal from 'bootstrap-vue/es/components/modal/modal';
+  import bModal from 'components/modal/modal';
   import bFormGroup from 'bootstrap-vue/es/components/form-group/form-group';
   import bFormInput from 'bootstrap-vue/es/components/form-input/form-input';
   import bContainer from 'bootstrap-vue/es/components/layout/container';

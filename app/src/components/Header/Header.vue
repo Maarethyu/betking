@@ -102,47 +102,12 @@ export default {
       activeCurrency: 'activeCurrency'
     }),
   },
-  mounted () {
-    this.$root.$on('bv::modal::show', this.fixAlignmentOnModalShow);
-    this.$root.$on('bv::modal::hidden', this.fixAlignmentOnModalHide);
-  },
   methods: {
     showWithdrawalModal () {
       this.$store.dispatch('showWithdrawalModal', this.activeCurrency);
     },
     showDepositModal () {
       this.$store.dispatch('showDepositModal', this.activeCurrency);
-    },
-    getScrollWidth () {
-      if (document.getElementsByTagName('body')[0].scrollHeight > window.innerHeight) {
-        const scrollDiv = document.createElement('div');
-        scrollDiv.className = 'modal-scrollbar-measure';
-        document.body.appendChild(scrollDiv);
-        const scrollbarWidth = scrollDiv.getBoundingClientRect().width - scrollDiv.clientWidth;
-        document.body.removeChild(scrollDiv);
-        return scrollbarWidth;
-      } else {
-        return 0;
-      }
-    },
-    fixAlignmentOnModalShow () {
-      const scrollbarWidth = this.getScrollWidth();
-      const el = document.getElementById('navbar');
-      el.style.width = `calc(100% - ${scrollbarWidth}px)`;
-
-      const aside = document.getElementById('aside-chat-wrapper');
-      if (aside) {
-        aside.style.right = `${scrollbarWidth}px`;
-      }
-    },
-    fixAlignmentOnModalHide () {
-      const el = document.getElementById('navbar');
-      el.style.width = '100%';
-
-      const aside = document.getElementById('aside-chat-wrapper');
-      if (aside) {
-        aside.style.right = '0px';
-      }
     }
   }
 };
