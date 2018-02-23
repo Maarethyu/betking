@@ -61,6 +61,10 @@
       BetList,
       SessionStats
     },
+    beforeRouteLeave (to, from, next) {
+      this.$store.dispatch('stopAutoBet');
+      next();
+    },
     data: () => ({
       navItems,
       activeNavItem: 'BetResults'
