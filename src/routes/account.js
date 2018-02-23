@@ -7,6 +7,7 @@ const helpers = require('../helpers');
 const mw = require('../middleware');
 const mailer = require('../mailer');
 const {eventEmitter, types} = require('../eventEmitter');
+const {validateUsername} = require('./validators/validators');
 
 module.exports = (currencyCache) => {
   const router = express.Router();
@@ -30,7 +31,9 @@ module.exports = (currencyCache) => {
       confirmWithdrawals: req.currentUser.confirm_wd,
       dateJoined: req.currentUser.date_joined,
       statsHidden: req.currentUser.stats_hidden,
-      bettingDisabled: req.currentUser.betting_disabled
+      bettingDisabled: req.currentUser.betting_disabled,
+      showHighrollerBets: req.currentUser.show_highrollers_in_chat,
+      ignoredUsers: req.currentUser.ignored_users
     });
   });
 
@@ -516,6 +519,59 @@ module.exports = (currencyCache) => {
 
   router.post('/disable-betting', async function (req, res, next) {
     await db.disableBetting(req.currentUser.id);
+
+    res.end();
+  });
+
+  router.post('/ignore-user', async function (req, res, next) {
+    validateUsername(req);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const userExists = await db.getUserByName(req.body.username);
+
+    if (!userExists) {
+      return res.status(400).json({error: 'USER_NOT_FOUND'});
+    }
+
+    await db.ignoreUser(req.currentUser.id, req.body.username);
+
+    res.end();
+  });
+
+  router.post('/unignore-user', async function (req, res, next) {
+    validateUsername(req);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const userExists = await db.getUserByName(req.body.username);
+
+    if (!userExists) {
+      return res.status(400).json({error: 'USER_NOT_FOUND'});
+    }
+
+    await db.unIgnoreUser(req.currentUser.id, req.body.username);
+
+    res.end();
+  });
+
+  router.post('/toggle-display-highrollers-in-chat', async function (req, res, next) {
+    req.checkBody('option', 'INVALID_OPTION')
+      .exists()
+      .isBoolean();
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    await db.toggleDisplayHighrollersInChat(req.currentUser.id, req.body.option);
 
     res.end();
   });

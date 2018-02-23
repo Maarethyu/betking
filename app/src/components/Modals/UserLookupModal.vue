@@ -46,7 +46,8 @@
           </b-col>
 
           <b-col cols="4">
-            <b-btn variant="danger" disabled><i class="fa fa-ban"></i>&nbsp;Ignore User</b-btn>
+            <b-btn v-if="!isUserIgnored" variant="danger" @click="ignoreUser"><i class="fa fa-ban"></i>&nbsp;Ignore User</b-btn>
+            <b-btn v-if="isUserIgnored" variant="success" @click="unIgnoreUser"><i class="fa fa-ban"></i>&nbsp;Allow Chat</b-btn>
           </b-col>
         </b-row>
 
@@ -102,6 +103,7 @@
 <script>
 import {mapGetters} from 'vuex';
 import moment from 'moment';
+import toastr from 'toastr';
 
 import bModal from 'bootstrap-vue/es/components/modal/modal';
 import vBModal from 'bootstrap-vue/es/directives/modal/modal';
@@ -142,8 +144,16 @@ export default {
       loggedInUser: 'username',
       isAuthenticated: 'isAuthenticated',
       isChatModerator: 'isChatModerator',
-      bannedUsernames: 'bannedUsernames'
-    })
+      bannedUsernames: 'bannedUsernames',
+      ignoredUsers: 'ignoredUsers'
+    }),
+    isUserIgnored () {
+      if (this.user && this.user.username) {
+        return this.ignoredUsers.indexOf(this.user.username) > -1;
+      }
+
+      return null;
+    }
   },
   data: () => ({
     errors: {},
@@ -241,6 +251,20 @@ export default {
     },
     clearUsersChat () {
       this.$store.dispatch('clearUsersChat', this.user.username);
+    },
+    ignoreUser () {
+      api.ignoreUser(this.user.username)
+        .then(() => {
+          this.$store.dispatch('fetchUser');
+          toastr.success(`${this.user.username} ignored from chat`);
+        });
+    },
+    unIgnoreUser () {
+      api.unIgnoreUser(this.user.username)
+        .then(() => {
+          this.$store.dispatch('fetchUser');
+          toastr.success(`Chats from ${this.user.username} allowed`);
+        });
     },
     isUserBanned (username) {
       return this.bannedUsernames.indexOf(username) > -1;

@@ -136,7 +136,9 @@ module.exports = (currencyCache) => {
       is2faEnabled: user.is_2fa_enabled,
       confirmWithdrawals: user.confirm_wd,
       statsHidden: user.stats_hidden,
-      bettingDisabled: user.betting_disabled
+      bettingDisabled: user.betting_disabled,
+      showHighrollerBets: user.show_highrollers_in_chat,
+      ignoredUsers: user.ignored_users
     });
   });
 
@@ -185,7 +187,9 @@ module.exports = (currencyCache) => {
         is2faEnabled: user.is_2fa_enabled,
         confirmWithdrawals: user.confirm_wd,
         statsHidden: user.stats_hidden,
-        bettingDisabled: user.betting_disabled
+        bettingDisabled: user.betting_disabled,
+        showHighrollerBets: user.show_highrollers_in_chat,
+        ignoredUsers: user.ignored_users
       });
     } else {
       res.status(500)

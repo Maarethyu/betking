@@ -16,7 +16,9 @@ const state = {
   fingerprint: null,
   confirmWithdrawals: null,
   statsHidden: null,
-  bettingDisabled: null
+  bettingDisabled: null,
+  ignoredUsers: [],
+  showHighrollerBets: null
 };
 
 // getters
@@ -35,6 +37,8 @@ const getters = {
   }),
   username: state => state.username,
   userId: state => state.id,
+  showHighrollerBets: state => state.showHighrollerBets,
+  ignoredUsers: state => state.ignoredUsers,
   is2faEnabled: state => state.is2faEnabled,
   fingerprint: statte => state.fingerprint
 };
@@ -120,6 +124,8 @@ const mutations = {
       state.confirmWithdrawals = null;
       state.statsHidden = null;
       state.bettingDisabled = null;
+      state.ignoredUsers = [];
+      state.showHighrollerBets = null;
     }
   },
 
@@ -133,6 +139,8 @@ const mutations = {
     state.confirmWithdrawals = user.confirmWithdrawals;
     state.statsHidden = user.statsHidden;
     state.bettingDisabled = user.bettingDisabled;
+    state.ignoredUsers = user.ignoredUsers || [];
+    state.showHighrollerBets = user.showHighrollerBets;
   },
 
   [types.SET_FINGERPRINT] (state, fingerprint) {

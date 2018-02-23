@@ -232,11 +232,10 @@
       ...mapGetters({
         chatChannels: 'chatChannels',
         username: 'username',
-        // IgnoredUsers: 'IgnoredUsers',
+        ignoredUsers: 'ignoredUsers',
         highrollerBetsInChat: 'highrollerBetsInChat',
-        // ShowHighrollersInChat: 'ShowHighrollersInChat',
+        showHighrollerBets: 'showHighrollerBets',
         isChatOpened: 'isChatOpened',
-        // LoadStateDone: 'LoadStateDone',
         isSocketConnected: 'isSocketConnected',
         welcomeMessages: 'welcomeMessages',
         moderators: 'moderators',
@@ -301,14 +300,12 @@
       },
       $mq: function () { // eslint-disable-line object-shorthand
         this.scrollToBottom();
-        // this.attachDialogListeners();
       }
     },
     mounted () {
       bus.$on('lock-chat', (value) => {
         this.chatLocked = value;
       });
-      // this.attachDialogListeners();
       this.scrollToBottom();
     },
     methods: {
@@ -318,8 +315,8 @@
         }
       },
       filterMessages (messages) {
-        // TODO: Add filter for ignoredUsers and showHighrollersInChat here
-        return messages;
+        return messages.filter(m => (this.ignoredUsers.indexOf(m.username) === -1 && m.type !== 'HIGHROLLER') ||
+          (m.type === 'HIGHROLLER' && this.showHighrollerBets));
       },
       switchChatLanguage (language) {
         this.currentLanguage = language;

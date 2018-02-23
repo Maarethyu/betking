@@ -166,5 +166,14 @@ export default {
   },
   fetchUserStats (username) {
     return get(`/api/stats/user-stats?username=${username}`);
+  },
+  ignoreUser (username) {
+    return post('/api/account/ignore-user', {username});
+  },
+  unIgnoreUser (username) {
+    return post('/api/account/unignore-user', {username});
+  },
+  toggleDisplayHighrollersInChat (option) {
+    return post('/api/account/toggle-display-highrollers-in-chat', {option});
   }
 };
