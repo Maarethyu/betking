@@ -16,7 +16,9 @@ import { isVisible, selectAll, select, getBCR, addClass, removeClass, hasClass, 
 var Selector = {
   FIXED_CONTENT: '.fixed-top, .fixed-bottom, .is-fixed, .sticky-top',
   STICKY_CONTENT: '.sticky-top',
-  NAVBAR_TOGGLER: '.navbar-toggler'
+  NAVBAR_TOGGLER: '.navbar-toggler',
+  NAVBAR: '#navbar',
+  ASIDE_CHAT_WRAPPER: '#aside-chat-wrapper'
 
   // ObserveDom config
 };var OBSERVER_CONFIG = {
@@ -680,6 +682,14 @@ export default {
           setAttr(el, 'data-margin-right', actualMargin);
           el.style.marginRight = parseFloat(calculatedMargin) + scrollbarWidth + 'px';
         });
+        // Adjust navbar
+        selectAll(Selector.NAVBAR).forEach(function (el) {
+          el.style.width = 'calc(100% - ' + scrollbarWidth + 'px)';
+        });
+        // Adjust aside margin
+        selectAll(Selector.ASIDE_CHAT_WRAPPER).forEach(function (el) {
+          el.style.right = scrollbarWidth + 'px';
+        });
         // Adjust body padding
         var actualPadding = body.style.paddingRight;
         var calculatedPadding = computedStyle(body).paddingRight;
@@ -701,6 +711,15 @@ export default {
           el.style.marginRight = getAttr(el, 'data-margin-right') || '';
           removeAttr(el, 'data-margin-right');
         }
+      });
+
+      // Adjust navbar
+      selectAll(Selector.NAVBAR).forEach(function (el) {
+        el.style.width = '100%';
+      });
+      // Adjust aside margin
+      selectAll(Selector.ASIDE_CHAT_WRAPPER).forEach(function (el) {
+        el.style.right = 0;
       });
       // Restore body padding
       var body = document.body;
