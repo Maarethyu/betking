@@ -52,6 +52,14 @@ class NotificationsHandler {
         .of('/watch-bets')
         .emit(type, maskedBet);
 
+      this.io
+        .to(bet.userId)
+        .emit('highrollerBet', bet);
+
+      this.io
+        .to('public')
+        .emit('highrollerBet', maskedBet);
+
       return;
     }
 

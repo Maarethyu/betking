@@ -32,6 +32,7 @@
     "express-rate-limit": "^2.11.0",
     "express-validator": "^4.3.0",
     "helmet": "^3.9.0",
+    "htmlencode": "0.0.4",
     "morgan": "^1.9.0",
     "pg-promise": "^7.3.2",
     "qrcode": "^1.2.0",
@@ -57,5 +58,7 @@
     "node": "8.9.4",
     "npm": "5.6.0"
   },
-  "cacheDirectories": ["app/node_modules"]
+  "cacheDirectories": [
+    "app/node_modules"
+  ]
 }

@@ -71,7 +71,7 @@ const mutations = {
           sumWonLast24Hours = new BigNumber(sumWonLast24Hours)
             .add(new BigNumber(stat.won_last_24_hours)
               .dividedBy(new BigNumber(10).pow(currencyConfig.scale))
-              .times(rate.last_price));
+              .times(rate.lastPrice));
         }
       });
     });

@@ -162,3 +162,22 @@ export const addBetToList = (betList, bet) => {
     betList.splice(50);
   }
 };
+
+export const showLinkUserDetails = (username) => username !== '[Hidden]';
+
+const formattedMessage = (id, username, betAmount, currencySymbol, profit) => {
+  const userString = showLinkUserDetails(username) ? `u:${username}` : username;
+
+  return profit > 0
+    ? `[ b:${id} ] ${userString} bet ${betAmount}${currencySymbol} and won ${profit}${currencySymbol}`
+    : `[ b:${id} ] ${userString} bet ${betAmount}${currencySymbol} and lost ${-1 * profit}${currencySymbol}`;
+};
+
+export const formatBetAsMessage = (id, date, username, betAmount, currencySymbol, profit) => ({
+  date,
+  username,
+  message: formattedMessage(id, username, betAmount, currencySymbol, profit),
+  profit,
+  type: 'HIGHROLLER',
+  id
+});

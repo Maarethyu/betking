@@ -12,10 +12,12 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "autolinker": "^1.6.2",
     "axios": "^0.17.1",
     "bignumber.js": "^5.0.0",
     "bootstrap": "^4.0.0",
     "bootstrap-vue": "^2.0.0-rc.1",
+    "emojione": "^3.1.2",
     "fingerprintjs2": "^1.5.1",
     "font-awesome": "^4.7.0",
     "jquery": "^1.9.1",

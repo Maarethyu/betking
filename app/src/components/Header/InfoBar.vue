@@ -2,7 +2,7 @@
   <div class="info-bar">
     <div class="ml-auto d-inline">
       <div class="info-bar__item">
-        <span class="text-red">Online: </span>123
+        <span class="text-red">Online: </span>{{totalOnlineUsers}}
       </div>
       <div class="info-bar__item" v-if="totalBets">
         <span class="text-red">Bets: </span>
@@ -21,6 +21,9 @@
     <div class="ml-auto">
       <button class="navbar-toggler-alt aside-menu-toggler" type="button" @click="toggleChat">
         <span class="icon-bubble"></span>
+        <span v-if="unreadChatMessages" class="chat-unread-count text-red">
+          {{ unreadChatMessages > 99 ? '99+' : unreadChatMessages }}
+        </span>
       </button>
     </div>
   </div>
@@ -58,10 +61,22 @@
       }
     }
   }
+
+  .aside-menu-toggler {
+    position: relative;
+  }
+
+  .chat-unread-count {
+    position: absolute;
+    font-size: 10px;
+    right: 4px;
+    top: -4px;
+  }
 }
 </style>
 <script>
   import bToggle from 'bootstrap-vue/es/directives/toggle/toggle';
+  import bBadge from 'bootstrap-vue/es/components/badge/badge';
   import CurrencyIcon from 'components/CurrencyIcon';
 
   import {mapGetters, mapState} from 'vuex';
@@ -72,7 +87,8 @@
       'b-toggle': bToggle
     },
     components: {
-      CurrencyIcon
+      CurrencyIcon,
+      'b-badge': bBadge
     },
     props: {
       toggleChat: {
@@ -85,7 +101,9 @@
         diceMaxWin: 'diceMaxWin',
         activeCurrency: 'activeCurrency',
         totalBets: 'totalBets',
-        sumWonLast24Hours: 'sumWonLast24Hours'
+        sumWonLast24Hours: 'sumWonLast24Hours',
+        totalOnlineUsers: 'totalOnlineUsers',
+        unreadChatMessages: 'unreadChatMessages'
       }),
       ...mapState({
         path: state => state.route.path

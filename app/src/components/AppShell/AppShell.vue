@@ -43,7 +43,7 @@ import Header from '../Header/Header';
 import MobileSecondaryHeader from '../Header/MobileSecondaryHeader';
 import InfoBar from '../Header/InfoBar';
 
-import GlobalChat from '../GlobalChat/ChatWrapper';
+import GlobalChat from '../GlobalChat/Chat';
 import Sidebar from '../Sidebar/Sidebar';
 import Footer from '../Footer';
 import CommonModals from '../Modals/CommonModals';
@@ -91,6 +91,7 @@ export default {
     },
     toggleChat () {
       this.isChatShown = !this.isChatShown;
+      this.$store.dispatch('setIsChatOpened', this.isChatShown);
     }
   }
 };
