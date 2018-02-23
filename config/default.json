@@ -7,6 +7,7 @@
   "MAILER_HOST": "http://localhost:3002",
   "SESSION_COOKIE_SECURE": false,
   "CAPTCHA_SECRET": "6LdWpj8UAAAAAJIfkImnogk7wZhbY8JtQ3fsycW3",
+  "CAPTCHA_SITE_KEY": "6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E",
   "PROJECT_NAME": "PROJECT NAME",
   "ADMIN_ACCESS_SECRET": "Secret for admin access",
   "BET_THROTTLE_DELAY_MS": 1000,

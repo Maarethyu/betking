@@ -35,13 +35,15 @@ const isValidUuid = function (id) {
   return uuidV4Regex.test(id);
 };
 
-const addCsrfToken = function (csrfToken) {
+const addConfigVariables = function (csrfToken) {
   const parser = new Transform();
 
   parser._transform = function (data, encoding, done) { // eslint-disable-line no-underscore-dangle
     const str = data.toString().replace(
       '</body>',
-      `<input type="hidden" id="csrfToken" value="${csrfToken}"/></body>`
+      `<input type="hidden" id="csrfToken" value="${csrfToken}"/>
+      <input type="hidden" id="captchaSiteKey" value="${config.get('CAPTCHA_SITE_KEY')}"/>
+      </body>`
     );
     done(null, str);
   };
@@ -94,7 +96,7 @@ module.exports = {
   get2faQR,
   getNew2faSecret,
   isOtpValid,
-  addCsrfToken,
+  addConfigVariables,
   getCurrencyToQueryFromAddressTable,
   getAddressQr,
   maskUsernameFromBets,

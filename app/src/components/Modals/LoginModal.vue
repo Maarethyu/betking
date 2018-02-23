@@ -37,7 +37,7 @@
       </b-form-group>
 
       <b-form-group :invalid-feedback="errors['g-recaptcha-login']" :state="!errors['g-recaptcha-login']">
-        <div id="g-recaptcha-login" data-sitekey="6LdWpj8UAAAAAE8wa82TL6Rd4o9qaVcV7lBinl-E"></div>
+        <div id="g-recaptcha-login" :data-sitekey="captchaSiteKey"></div>
       </b-form-group>
 
       <button class="btn btn-success float-right" type="submit">Login</button>
@@ -59,7 +59,7 @@ import vBModal from 'bootstrap-vue/es/directives/modal/modal';
 
 import Cookies from 'js-cookie';
 import api from 'src/api';
-import {loadRecaptcha} from 'src/helpers';
+import {loadRecaptcha, getCaptchaSiteKey} from 'src/helpers';
 
 import {mapGetters} from 'vuex';
 
@@ -80,7 +80,8 @@ export default {
   data: () => ({
     captchaId: null,
     errors: {},
-    usernameOrEmail: 'Username'
+    usernameOrEmail: 'Username',
+    captchaSiteKey: getCaptchaSiteKey()
   }),
   computed: {
     ...mapGetters({

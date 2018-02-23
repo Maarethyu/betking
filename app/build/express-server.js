@@ -2,6 +2,7 @@ const webpack = require('webpack')
 const path = require('path')
 const express = require('express')
 const csrfProtection = require('csurf')({cookie: true});
+const serverConfig = require('config');
 
 const config = require('../config')
 const webpackConfig = require('./webpack.dev.conf');
@@ -55,7 +56,9 @@ module.exports = (app) => {
         // Add csrf token
         const str = result.toString().replace(
           '</body>',
-          `<input type="hidden" id="csrfToken" value="${req.csrfToken()}"/></body>`
+          `<input type="hidden" id="csrfToken" value="${req.csrfToken()}"/>
+          <input type="hidden" id="captchaSiteKey" value="${serverConfig.get('CAPTCHA_SITE_KEY')}"/>
+          </body>`
         );
 
         res.send(str);

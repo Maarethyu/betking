@@ -81,7 +81,7 @@ const startHttpServer = function () {
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
       fs.createReadStream(`${frontendStaticPath}/index.html`)
-        .pipe(helpers.addCsrfToken(req.csrfToken()))
+        .pipe(helpers.addConfigVariables(req.csrfToken()))
         .pipe(res);
     });
   }
