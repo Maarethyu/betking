@@ -16,6 +16,9 @@
 5. Populate currencies and bankrolls tables
     * For Windows, run `psql.exe -U bk -d bk2 -f sql/populate.sql`
     * For Mac / Linux, run `psql -U bk -d bk2 -f sql/populate.sql`
+6. Fake Deposit (For all registered, users and all currencies in db, credit balance)
+    * For Windows, run `psql.exe -U bk -d bk2 -f sql/fake-deposit.sql`
+    * For Mac / Linux, run `psql -U bk -d bk2 -f sql/fake-deposit.sql`
 
 ### Development
 1. `npm run install-all`
@@ -42,3 +45,4 @@
     * For Windows, TODO: setup a similar file
     * NOTE: This runs the local version of sql file
 5. Push app to heroku, it should build and deploy
+6. Fake Deposit: `heroku pg:psql < sql/fake-deposit.sql` (For all registered, users and all currencies in db, credit balance)
