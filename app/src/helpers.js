@@ -181,3 +181,8 @@ export const formatBetAsMessage = (id, date, username, betAmount, currencySymbol
   type: 'HIGHROLLER',
   id
 });
+
+export const getCaptchaSiteKey = () => {
+  const el = document.getElementById('captchaSiteKey');
+  return el && el.value;
+};
