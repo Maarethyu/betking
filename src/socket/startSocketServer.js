@@ -56,7 +56,7 @@ const startSocketServer = function (server, cache) {
       chat.clearAllChat(data.language, currentUsername, currentUserId);
     });
     socket.on('clearUsersChat', (data) => {
-      chat.clearUsersChat(data.language, data.username, currentUsername, currentUserId);
+      chat.clearUsersChat(data.username, currentUsername, currentUserId);
     });
     socket.on('disconnect', function () {
       if (currentUserId) {

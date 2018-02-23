@@ -126,12 +126,13 @@ export default {
       }
     },
     fixAlignmentOnModalShow () {
+      const scrollbarWidth = this.getScrollWidth();
       const el = document.getElementById('navbar');
-      el.style.width = `calc(100% - ${this.getScrollWidth()}px)`;
+      el.style.width = `calc(100% - ${scrollbarWidth}px)`;
 
       const aside = document.getElementById('aside-chat-wrapper');
       if (aside) {
-        aside.style.right = `${this.getScrollWidth()}px`;
+        aside.style.right = `${scrollbarWidth}px`;
       }
     },
     fixAlignmentOnModalHide () {

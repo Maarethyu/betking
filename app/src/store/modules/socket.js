@@ -211,8 +211,8 @@ const actions = {
     state.webSocket.emit('clearAllChat', {language});
   },
 
-  clearUsersChat ({commit, state}, {language, username}) {
-    state.webSocket.emit('clearUsersChat', {language, username});
+  clearUsersChat ({commit, state}, {username}) {
+    state.webSocket.emit('clearUsersChat', {username});
   },
 
   showChatWelcomeMessage ({commit}) {
@@ -368,11 +368,17 @@ const mutations = {
     Vue.set(state.chatChannels, language, {messages: []});
   },
 
-  [types.CLEAR_USERS_CHAT] (state, {language, username}) {
-    const chMesssages = state.chatChannels[language] && state.chatChannels[language].messages;
-    const filteredMessages = Array.isArray(chMesssages) &&
-      (chMesssages.filter(msg => msg.username !== username) || []);
-    Vue.set(state.chatChannels, language, {messages: filteredMessages});
+  [types.CLEAR_USERS_CHAT] (state, {username}) {
+    Object.keys(state.chatChannels).forEach(language => {
+      if (state.chatChannels[language].messages) {
+        const chMesssages = state.chatChannels[language];
+
+        const filteredMessages = Array.isArray(chMesssages)
+          ? (chMesssages.filter(msg => msg.username !== username) || [])
+          : [];
+        Vue.set(state.chatChannels, language, {messages: filteredMessages});
+      }
+    });
   },
 
   [types.SET_MODERATORS] (state, moderators) {

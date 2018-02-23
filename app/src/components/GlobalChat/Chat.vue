@@ -3,7 +3,7 @@
     <template slot-scope="props">
       <b-row align-v="end" id="global-chat" class="global-chat">
         <b-col cols="12" align-self="end">
-          <div id="chat-messages" class="chat-messages">
+          <div id="chat-messages" class="chat-messages" @click="handleChatMessageClick">
             <div
               class="chat-item"
               :class="{'text-green': message.profit > 0, 'text-red': message.profit < 0}"
@@ -37,12 +37,13 @@
             <div class="online-users" v-on:click="showOnlineUsersDialog">
               {{ totalUsers }}&nbsp;<span class="fa fa-user"></span>
             </div>
-            <div class="chat-lang dropup">
-              <div class="btn-group dropup">
+            <div class="chat-lang">
+              <div class="btn-group dropdown dropup">
                 <button
                   type="button"
-                  class="btn btn-default dropdown-toggle"
+                  class="btn btn-sm btn-default dropdown-toggle"
                   data-toggle="dropdown"
+                  data-boundary="viewport"
                   id="languageFilter" v-html="languageHtml({lang: currentLanguage, caret: true, long: false})" :disabled="!isSocketConnected" />
                   <div class="dropdown-menu">
                     <a class="dropdown-item" href="#"
@@ -159,7 +160,8 @@
   .chat-lang .dropdown-menu {
     left: auto;
     right: 0;
-    min-width: 110px;
+    width: 120px;
+    max-width: 120px;
   }
 
   .chat-lang .dropdown-toggle {
@@ -299,13 +301,14 @@
       },
       $mq: function () { // eslint-disable-line object-shorthand
         this.scrollToBottom();
+        // this.attachDialogListeners();
       }
     },
     mounted () {
       bus.$on('lock-chat', (value) => {
         this.chatLocked = value;
       });
-      this.attachDialogListeners();
+      // this.attachDialogListeners();
       this.scrollToBottom();
     },
     methods: {
@@ -343,20 +346,20 @@
       formatMessage (message) {
         return formatMessage(message, this.username);
       },
-      attachDialogListeners () {
-        $('#chat-messages').on('click', function (e) {
-          const target = e.target;
-          if ($(target).hasClass('chat-body-betid')) {
-            e.preventDefault();
-            const betId = parseInt($(target).data('id'), 10);
-            bus.$emit('show-bet-details-modal', betId);
-          }
-          if ($(target).hasClass('chat-body-username')) {
-            e.preventDefault();
-            const username = $(target).data('username');
-            bus.$emit('show-user-lookup-modal', username);
-          }
-        });
+      handleChatMessageClick (e) {
+        const target = e.target;
+
+        if ($(target).hasClass('chat-body-betid')) {
+          e.preventDefault();
+          const betId = parseInt($(target).data('id'), 10);
+          bus.$emit('show-bet-details-modal', betId);
+        }
+
+        if ($(target).hasClass('chat-body-username')) {
+          e.preventDefault();
+          const username = $(target).data('username');
+          bus.$emit('show-user-lookup-modal', username);
+        }
       },
       scrollToBottom () { // TODO: use scrollChatToBottom defined in Home.vue
         this.$nextTick(function () {

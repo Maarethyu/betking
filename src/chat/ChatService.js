@@ -126,14 +126,13 @@ class ChatService {
     }
   }
 
-  async clearUsersChat (language, username, moderatorName, moderatorId) {
+  async clearUsersChat (username, moderatorName, moderatorId) {
     const isModerator = await this.cache.isUserModerator(moderatorName);
 
     if (isModerator) {
-      await this.cache.clearUsersChat(language, username);
+      await this.cache.clearUsersChat(username);
 
       chatNotificationEmitter.emit(types.CLEAR_USERS_CHAT, {
-        language,
         username
       });
     } else {

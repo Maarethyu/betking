@@ -54,11 +54,12 @@
 
         <b-row v-if="loggedInUser !== user.username && isAuthenticated && isChatModerator">
           <b-col cols="6">
-            <b-btn v-if="!isUserBanned(user.username)" variant="default" @click="banUser"><i class="fa fa-ban"></i>&nbsp;Ban user</b-btn>
-            <b-btn v-if="isUserBanned(user.username)" variant="default" @click="unBanUser"><i class="fa fa-ban"></i>&nbsp;Unban user</b-btn>
+            <b-btn v-if="!isUserBanned(user.username)" variant="danger" @click="banUser"><i class="fa fa-ban"></i>&nbsp;Ban user</b-btn>
+            <b-btn v-if="isUserBanned(user.username)" variant="success" @click="unBanUser"><i class="fa fa-ban"></i>&nbsp;Unban user</b-btn>
           </b-col>
 
           <b-col cols="6">
+            <b-btn variant="danger" @click="clearUsersChat"><i class="fa fa-ban"></i>&nbsp;Clear Chat</b-btn>
           </b-col>
         </b-row>
 
@@ -237,6 +238,9 @@ export default {
     },
     unBanUser () {
       this.$store.dispatch('unBanUserFromChat', this.user.username);
+    },
+    clearUsersChat () {
+      this.$store.dispatch('clearUsersChat', this.user.username);
     },
     isUserBanned (username) {
       return this.bannedUsernames.indexOf(username) > -1;

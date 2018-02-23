@@ -129,7 +129,7 @@ class ExchangeRateCache {
           return;
         }
 
-        cachedCurrency.last_price = lastPrice;
+        cachedCurrency.lastPrice = lastPrice;
         resolve();
       });
     }));

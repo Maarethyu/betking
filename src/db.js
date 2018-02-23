@@ -547,7 +547,7 @@ const unBanUser = async (username, moderatorName) => {
 };
 
 const getAllBannedUsers = async () => {
-  const result = db.any('SELECT username FROM banned_users');
+  const result = db.any('SELECT username FROM banned_users WHERE is_banned = true');
   return result;
 };
 
@@ -560,8 +560,8 @@ const clearAllChat = async (language) => {
   await db.none('UPDATE chats SET is_hidden = true WHERE language = $1', language);
 };
 
-const clearUsersChat = async (language, username) => {
-  await db.none('UPDATE chats SET is_hidden = true WHERE language = $1 AND username = $2', [language, username]);
+const clearUsersChat = async (username) => {
+  await db.none('UPDATE chats SET is_hidden = true WHERE username = $1', username);
 };
 
 module.exports = {

@@ -157,13 +157,14 @@ class ChatCache {
     await this.db.clearAllChat(language);
   }
 
-  async clearUsersChat (language, username) {
-    const item = this.messagesPerLanguage.find(item => item.language === language);
-    if (item && Array.isArray(item.messages)) {
-      item.messages = item.messages.filter(message => message.username !== username);
-    }
+  async clearUsersChat (username) {
+    this.messagesPerLanguage.forEach(item => {
+      if (Array.isArray(item.messages)) {
+        item.messages = item.messages.filter(message => message.username !== username);
+      }
+    });
 
-    await this.db.clearUsersChat(language, username);
+    await this.db.clearUsersChat(username);
   }
 }
 
