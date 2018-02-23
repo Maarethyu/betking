@@ -222,7 +222,7 @@ const actions = {
     state.webSocket.emit('clearAllChat', {language});
   },
 
-  clearUsersChat ({commit, state}, {username}) {
+  clearUsersChat ({commit, state}, username) {
     state.webSocket.emit('clearUsersChat', {username});
   },
 
@@ -386,11 +386,12 @@ const mutations = {
   [types.CLEAR_USERS_CHAT] (state, {username}) {
     Object.keys(state.chatChannels).forEach(language => {
       if (state.chatChannels[language].messages) {
-        const chMesssages = state.chatChannels[language];
+        const chMesssages = state.chatChannels[language].messages;
 
         const filteredMessages = Array.isArray(chMesssages)
-          ? (chMesssages.filter(msg => msg.username !== username) || [])
+          ? chMesssages.filter(msg => msg.username !== username)
           : [];
+
         Vue.set(state.chatChannels, language, {messages: filteredMessages});
       }
     });

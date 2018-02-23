@@ -564,6 +564,18 @@ const clearUsersChat = async (username) => {
   await db.none('UPDATE chats SET is_hidden = true WHERE username = $1', username);
 };
 
+const ignoreUser = async (userId, ignoredUsername) => {
+  await db.none('UPDATE users SET ignored_users = ignored_users || ARRAY[$1] WHERE id = $2 AND NOT($1 = ANY (ignored_users))', [ignoredUsername, userId]);
+};
+
+const unIgnoreUser = async (userId, unIgnoredUsername) => {
+  await db.none('UPDATE users SET ignored_users = array_remove(ignored_users, $1) WHERE id = $2', [unIgnoredUsername, userId]);
+};
+
+const toggleDisplayHighrollersInChat = async (userId, showHighrollers) => {
+  await db.none('UPDATE users SET show_highrollers_in_chat = $1 WHERE id = $2', [showHighrollers, userId]);
+};
+
 module.exports = {
   isEmailAlreadyTaken,
   isUserNameAlreadyTaken,
@@ -641,5 +653,8 @@ module.exports = {
   getAllBannedUsers,
   getModerators,
   clearAllChat,
-  clearUsersChat
+  clearUsersChat,
+  ignoreUser,
+  unIgnoreUser,
+  toggleDisplayHighrollersInChat
 };

@@ -21,6 +21,27 @@
     </b-row>
 
     <br>
+    <h3>Show/Hide highroller bets in chat</h3>
+    <b-row>
+      <b-col cols="10" md="4">
+        <span v-if="showHighrollerBets">Highroller bets are shown in chats</span>
+        <span v-else>Highroller bets are hidden from chat</span>
+      </b-col>
+      <b-col cols="2">
+        <b-button variant="danger" size="sm"
+          v-if="showHighrollerBets"
+          @click="toggleDisplayHighrollersInChat(false)">
+          Hide
+        </b-button>
+        <b-button variant="success" size="sm"
+          v-if="!showHighrollerBets"
+          @click="toggleDisplayHighrollersInChat(true)">
+          Show
+        </b-button>
+      </b-col>
+    </b-row>
+
+    <br>
     <h3>Disable Betting</h3>
     <b-row>
       <b-col cols="10" md="4">
@@ -59,12 +80,19 @@
       errors: {}
     }),
     computed: mapGetters({
-      profile: 'profile'
+      profile: 'profile',
+      showHighrollerBets: 'showHighrollerBets'
     }),
     methods: {
       getSecondFactorAuth,
       async toggleStatsHidden (option) {
         api.toggleStatsHidden(option)
+          .then(() => {
+            this.$store.dispatch('fetchUser');
+          });
+      },
+      toggleDisplayHighrollersInChat (option) {
+        api.toggleDisplayHighrollersInChat(option)
           .then(() => {
             this.$store.dispatch('fetchUser');
           });

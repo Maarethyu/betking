@@ -84,7 +84,7 @@ class ChatNotificationsHandler {
       return;
     }
 
-    const content = {language: payload.language, username: payload.username};
+    const content = {username: payload.username};
     this.io.to('public').emit(type, content);
   }
 }
