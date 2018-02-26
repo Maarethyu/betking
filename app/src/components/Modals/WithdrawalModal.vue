@@ -4,13 +4,12 @@
     <template slot="modal-title">Withdraw {{formatCurrency(withdrawalModalCurrency, 'name')}}</template>
 
     <div class="alert alert-danger" v-if="errors.global">{{errors.global}}</div>
-
     <b-container fluid>
       <b-row>
         <b-col cols="6">Available Balance</b-col>
         <b-col>{{addCommas(formatAmount(balance, withdrawalModalCurrency))}}</b-col>
       </b-row>
-      <b-row>
+      <b-row v-if="withdrawalModalCurrency !== 0">
         <b-col cols="6">Withdrawal Fee</b-col>
         <b-col>{{addCommas(formatAmount(wdFee, withdrawalModalCurrency))}}</b-col>
       </b-row>
@@ -18,11 +17,12 @@
         <b-col cols="6">Minimum Withdrawal Amount</b-col>
         <b-col>{{addCommas(formatAmount(minWdLimit, withdrawalModalCurrency))}}</b-col>
       </b-row>
+      <set-withdrawal-fee @onFeeChange="onFeeChange" v-if="withdrawalModalCurrency === 0" />
       <b-row v-if="isAmountValid">
         <b-col cols="6">Amount Received</b-col>
         <b-col>{{addCommas(formatAmount(amountReceived, withdrawalModalCurrency))}}</b-col>
       </b-row>
-
+      <br />
       <b-row>
         <b-col cols="12">
           <b-form v-on:submit.prevent="onSubmit" @reset="onModalHide">
@@ -73,9 +73,10 @@
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
   import BigNumber from 'bignumber.js';
+  import SetWithdrawalFee from 'components/SetWithdrawalFee';
 
   import toastr from 'toastr';
-  import {formatCurrency, addCommas, formatAmount, toBigInt} from 'src/helpers';
+  import {formatCurrency, addCommas, formatAmount, toBigInt, formatBigAmount} from 'src/helpers';
   import api from 'src/api';
   import bus from 'src/bus';
 
@@ -90,14 +91,16 @@
       'b-form-input': bFormInput,
       'b-container': bContainer,
       'b-row': bRow,
-      'b-col': bCol
+      'b-col': bCol,
+      'set-withdrawal-fee': SetWithdrawalFee
     },
     data: () => ({
       showModal: false,
       errors: {},
       withdrawAmount: '',
       withdrawAddress: '',
-      otp: ''
+      otp: '',
+      fee: 0
     }),
     computed: {
       ...mapGetters({
@@ -113,7 +116,9 @@
         return this.currency && this.currency.balance;
       },
       wdFee () {
-        return this.currency && this.currency.wdFee;
+        return this.withdrawalModalCurrency === 0
+          ? this.fetchBitcoinWithdrawalCost()
+          : this.currency && this.currency.wdFee;
       },
       minWdLimit () {
         return this.currency && this.currency.minWdLimit;
@@ -156,6 +161,7 @@
       addCommas,
       formatAmount,
       toBigInt,
+      formatBigAmount,
       hideModal () {
         this.$refs.modal && this.$refs.modal.hide();
       },
@@ -170,7 +176,8 @@
           currency: this.withdrawalModalCurrency,
           amount: this.toBigInt(this.withdrawAmount, this.currency.scale),
           address: this.withdrawAddress,
-          otp: this.otp
+          otp: this.otp,
+          withdrawalFeePerByte: this.fee
         };
         api.withdrawCurrency(data)
           .then(res => {
@@ -215,6 +222,15 @@
         } else {
           this.errors = {amount: null};
         }
+      },
+      fetchBitcoinWithdrawalCost () {
+        if (this.fee) {
+          return this.formatBigAmount(this.fee * 226, 0);
+        }
+        return 0;
+      },
+      onFeeChange (fee) {
+        this.fee = fee;
       }
     }
   };
