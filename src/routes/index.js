@@ -294,5 +294,14 @@ module.exports = (currencyCache) => {
     }
   });
 
+  router.get('/recommended-btc-txn-fee', async function (req, res, next) {
+    try {
+      const recommendedFee = await helpers.fetchRecommendedBitcoinTxnFee();
+      return res.json({recommendedFee});
+    } catch (e) {
+      return res.status(400).json({error: 'Could not fetch recommended transaction fee'});
+    }
+  });
+
   return router;
 };

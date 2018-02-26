@@ -3,6 +3,7 @@ const qrcode = require('qrcode');
 const config = require('config');
 const Transform = require('stream').Transform;
 const BigNumber = require('bignumber.js');
+const requestPromise = require('request-promise');
 
 const getNew2faSecret = function () {
   const secret = speakeasy.generateSecret({length: 32, name: config.get('PROJECT_NAME')});
@@ -88,6 +89,24 @@ const isHighrollerBet = function (betAmount, profit, highrollerAmountForCurrency
     new BigNumber(profit).gte(highrollerAmountForCurrency);
 };
 
+const recommendedBitcoinTxnFee = {
+  lastFetched: null,
+  fee: null
+};
+
+const fetchRecommendedBitcoinTxnFee = async () => {
+  const shouldFetch = !recommendedBitcoinTxnFee.lastFetched ||
+    Date.now() - recommendedBitcoinTxnFee.lastFetched > config.get('CACHE_DURATION_RECOMMENDED_TXN_FEE');
+  if (shouldFetch) {
+    recommendedBitcoinTxnFee.fee = await requestPromise({
+      uri: 'https://bitcoinfees.earn.com/api/v1/fees/recommended',
+      json: true
+    });
+    recommendedBitcoinTxnFee.lastFetched = Date.now();
+  }
+  return recommendedBitcoinTxnFee.fee;
+};
+
 module.exports = {
   getIp,
   getFingerPrint,
@@ -100,5 +119,6 @@ module.exports = {
   getCurrencyToQueryFromAddressTable,
   getAddressQr,
   maskUsernameFromBets,
-  isHighrollerBet
+  isHighrollerBet,
+  fetchRecommendedBitcoinTxnFee
 };
