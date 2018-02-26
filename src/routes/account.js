@@ -576,5 +576,41 @@ module.exports = (currencyCache) => {
     res.end();
   });
 
+  router.post('/send-tip', async function (req, res, next) {
+    req.checkBody('currency')
+      .exists()
+      .isInt()
+      .custom(value => !!currencyCache.findById(value));
+
+    req.checkBody('username')
+      .exists();
+
+    req.checkBody('amount')
+      .exists()
+      .custom(amount => require('./validators/amountValidator')(amount));
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const currency = currencyCache.findById(req.body.currency);
+
+    if (new BigNumber(currency.min_withdraw_limit).gt(new BigNumber(req.body.amount))) {
+      return res.status(400).json({error: 'Requested amount is less than minimum tip limit'});
+    }
+
+    try {
+      await db.sendTip(req.currentUser.id, req.body.username, req.body.amount, req.body.currency);
+    } catch (e) {
+      if (e.message === 'INSUFFICIENT_BALANCE' || e.message === 'USERNAME_DOES_NOT_EXIST') {
+        return res.status(400).json({error: e.message});
+      }
+      throw e;
+    }
+
+    res.end();
+  });
+
   return router;
 };

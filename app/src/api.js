@@ -175,5 +175,8 @@ export default {
   },
   toggleDisplayHighrollersInChat (option) {
     return post('/api/account/toggle-display-highrollers-in-chat', {option});
+  },
+  sendTip (data) {
+    return post('/api/account/send-tip', data);
   }
 };
