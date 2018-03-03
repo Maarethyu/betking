@@ -8,6 +8,7 @@
     <ValidateTwoFactorModal />
     <BetDetailsModal :id="betId" />
     <UserLookupModal :username="username" />
+    <SendTipModal :username="tipUserName" />
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import ForgotPasswordModal from './ForgotPasswordModal';
 import ValidateTwoFactorModal from './ValidateTwoFactorModal';
 import BetDetailsModal from './BetDetailsModal';
 import UserLookupModal from './UserLookupModal';
+import SendTipModal from './SendTipModal';
 
 import bus from 'src/bus';
 
@@ -33,11 +35,13 @@ export default {
     ForgotPasswordModal,
     ValidateTwoFactorModal,
     BetDetailsModal,
-    UserLookupModal
+    UserLookupModal,
+    SendTipModal
   },
   data: () => ({
     betId: null,
-    username: null
+    username: null,
+    tipUserName: ''
   }),
   mounted () {
     bus.$on('show-bet-details-modal', (id) => {
@@ -56,6 +60,15 @@ export default {
 
     bus.$on('user-lookup-modal-closed', () => {
       this.username = null;
+    });
+
+    bus.$on('show-send-tip-modal', (name) => {
+      this.tipUserName = name;
+      this.$root.$emit('bv::show::modal', 'sendTipModal');
+    });
+
+    this.$on('send-tip-modal-closed', () => {
+      this.tipUserName = '';
     });
   }
 
