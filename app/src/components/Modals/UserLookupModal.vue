@@ -38,7 +38,7 @@
 
         <b-row v-if="loggedInUser !== user.username && isAuthenticated">
           <b-col cols="4">
-            <b-btn variant="default" disabled><i class="fa fa-btc"></i>&nbsp;Send Tip</b-btn>
+            <b-btn variant="default" @click="sendTip"><i class="fa fa-btc"></i>&nbsp;Send Tip</b-btn>
           </b-col>
 
           <b-col cols="4">
@@ -268,6 +268,9 @@ export default {
     },
     isUserBanned (username) {
       return this.bannedUsernames.indexOf(username) > -1;
+    },
+    sendTip () {
+      bus.$emit('show-send-tip-modal', this.user.username);
     }
   }
 };

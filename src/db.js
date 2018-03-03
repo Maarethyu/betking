@@ -576,6 +576,28 @@ const toggleDisplayHighrollersInChat = async (userId, showHighrollers) => {
   await db.none('UPDATE users SET show_highrollers_in_chat = $1 WHERE id = $2', [showHighrollers, userId]);
 };
 
+const sendTip = async (userId, username, amount, currency) => {
+  await db.tx(t => {
+    // Reduce balance from logged in user's account, throw error if insufficient balance.
+    return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amount, userId, currency])
+      .then(res => {
+        if (!res) {
+          throw new Error('INSUFFICIENT_BALANCE');
+        }
+
+        return t.oneOrNone('SELECT id FROM users WHERE username = $1', [username])
+          .then(res => {
+            if (!res) {
+              throw new Error('USERNAME_DOES_NOT_EXIST');
+            }
+
+            // Insert / Update balance for recepient user.
+            return t.none('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3) ON CONFLICT (user_id, currency) DO UPDATE SET balance = user_balances.balance + $3', [res.id, currency, amount]);
+          });
+      });
+  });
+};
+
 module.exports = {
   isEmailAlreadyTaken,
   isUserNameAlreadyTaken,
@@ -626,6 +648,7 @@ module.exports = {
   isAddressWhitelisted,
   setConfirmWithdrawalByEmail,
   confirmWithdrawByToken,
+  sendTip,
   /* DICE */
   getLatestUserDiceBets,
   getLatestDiceBets,

@@ -178,5 +178,8 @@ export default {
   },
   fetchRecommendedFee () {
     return get('/api/recommended-btc-txn-fee');
+  },
+  sendTip (data) {
+    return post('/api/account/send-tip', data);
   }
 };
