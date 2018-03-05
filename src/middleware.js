@@ -81,10 +81,20 @@ const requireAdminSecret = async (req, res, next) => {
   next();
 };
 
+const allowCustomerByCountry = async (req, res, next) => {
+  const cfCountryHeader = req.header('CF-IPCountry');
+  if (!cfCountryHeader || config.get('DISALLOWED_COUNTRIES').indexOf(cfCountryHeader) === -1) {
+    next();
+  } else {
+    res.status(400).json({error: 'Betting / deposits not allowed from your country'});
+  }
+};
+
 module.exports = {
   attachCurrentUserToRequest,
   requireLoggedIn,
   require2fa,
   requireWhitelistedIp,
-  requireAdminSecret
+  requireAdminSecret,
+  allowCustomerByCountry
 };
