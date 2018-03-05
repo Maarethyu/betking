@@ -71,7 +71,7 @@ module.exports = (currencyCache) => {
       email: req.currentUser.email,
       isEmailVerified: req.currentUser.email_verified,
       is2faEnabled: req.currentUser.is_2fa_enabled,
-      confirmWithdrawals: req.currentUser.confirm_wd,
+      confirmWithdrawals: req.currentUser.confirm_withdrawal,
       dateJoined: req.currentUser.date_joined,
       statsHidden: req.currentUser.stats_hidden,
       bettingDisabled: req.currentUser.betting_disabled,
@@ -284,7 +284,7 @@ module.exports = (currencyCache) => {
       return res.status(400).json({errors: validationResult.array()});
     }
 
-    if (req.currentUser.confirm_wd && (!req.currentUser.email || !req.currentUser.email_verified)) {
+    if (req.currentUser.confirm_withdrawal && (!req.currentUser.email || !req.currentUser.email_verified)) {
       return res.status(400).json({error: 'You have asked to confirm withdrawals by email but you do not have a verified email id added to profile'});
     }
 
@@ -301,8 +301,8 @@ module.exports = (currencyCache) => {
 
     const withdrawalFee = new BigNumber(currency.withdrawal_fee).toString();
 
-    const withdrawalStatus = req.currentUser.confirm_wd ? 'pending_email_verification' : 'pending';
-    const verificationToken = req.currentUser.confirm_wd ? uuidV4() : null;
+    const withdrawalStatus = req.currentUser.confirm_withdrawal ? 'pending_email_verification' : 'pending';
+    const verificationToken = req.currentUser.confirm_withdrawal ? uuidV4() : null;
     const amountReceived = new BigNumber(req.body.amount)
       .minus(withdrawalFee)
       .toString();

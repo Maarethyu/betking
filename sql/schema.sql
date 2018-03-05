@@ -9,7 +9,7 @@ CREATE TABLE users (
   stats_hidden boolean NOT NULL default false,
   betting_disabled boolean NOT NULL default false,
   affiliate_id text NULL,
-  confirm_wd boolean NOT NULL DEFAULT false,
+  confirm_withdrawal boolean NOT NULL DEFAULT false,
   ignored_users text[],
   show_highrollers_in_chat boolean NOT NULL DEFAULT true,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW(),
