@@ -254,8 +254,8 @@ const createWithdrawalEntry = async (userId, currency, withdrawalFee, amount, am
   });
 };
 
-const setConfirmWithdrawalByEmail = async (userId, confirmWd) => {
-  await db.oneOrNone('UPDATE users SET confirm_wd = $1 WHERE id = $2 AND email IS NOT NULL AND email_verified = true RETURNING *', [confirmWd, userId])
+const setConfirmWithdrawalByEmail = async (userId, confirmWithdrawal) => {
+  await db.oneOrNone('UPDATE users SET confirm_withdrawal = $1 WHERE id = $2 AND email IS NOT NULL AND email_verified = true RETURNING *', [confirmWithdrawal, userId])
     .then(row => {
       if (!row) {
         throw new Error('VALID_USER_NOT_FOUND');

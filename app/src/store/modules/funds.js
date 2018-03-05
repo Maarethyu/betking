@@ -48,13 +48,13 @@ const mutations = {
   [types.SET_CURRENCIES] (state, currencies) {
     state.currencies = currencies.map(c => Object.assign({}, c, {
       // value: c.id,
-      maxWdLimit: new BigNumber(c.max_withdraw_limit)
+      maxWithdrawalLimit: new BigNumber(c.max_withdraw_limit)
         .div(new BigNumber(10).pow(c.scale))
         .toNumber(),
-      minWdLimit: new BigNumber(c.min_withdraw_limit)
+      minWithdrawalLimit: new BigNumber(c.min_withdraw_limit)
         .div(new BigNumber(10).pow(c.scale))
         .toNumber(),
-      wdFee: new BigNumber(c.withdrawal_fee)
+      withdrawalFee: new BigNumber(c.withdrawal_fee)
         .div(new BigNumber(10).pow(c.scale))
         .toNumber(),
       minTip: new BigNumber(c.min_tip)

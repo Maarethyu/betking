@@ -108,7 +108,7 @@ export default {
   toggleEmailWithdrawalConfirmation (option, otp) {
     return post('/api/account/set-confirm-withdraw-by-email', {option, otp});
   },
-  confirmWd (token) {
+  confirmWithdrawal (token) {
     return post('/api/confirm-withdraw', {token});
   },
   fetchWalletInfo (limit, skip, sort) {

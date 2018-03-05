@@ -52,7 +52,7 @@
     },
     mounted () {
       bus.$on('WITHDRAWAL_REQUESTED', () => {
-        this.$refs.table.refresh();
+        this.fetchPendingWithdrawals(1);
       });
     },
     data: () => ({
