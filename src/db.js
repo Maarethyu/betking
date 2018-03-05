@@ -137,8 +137,14 @@ const createVerifyEmailToken = async (userId, email) => {
 
 const resetUserPasswordByToken = async (token, newPasswordHash) => {
   await db.tx(t => {
-    return t.one('UPDATE reset_tokens SET used = true, expired_at = NOW() where id = $1 AND used = false AND expired_at > NOW() RETURNING user_id', token)
-      .then(result => t.one('UPDATE users SET password = $1 WHERE id = $2 RETURNING *', [newPasswordHash, result.user_id]))
+    return t.oneOrNone('UPDATE reset_tokens SET used = true, expired_at = NOW() where id = $1 AND used = false AND expired_at > NOW() RETURNING user_id', token)
+      .then(result => {
+        if (!result) {
+          throw new Error('INVALID_TOKEN');
+        }
+
+        return t.one('UPDATE users SET password = $1 WHERE id = $2 RETURNING *', [newPasswordHash, result.user_id]);
+      })
       .then(user => t.batch([
         t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', user.id),
         t.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1', user.id)
@@ -212,10 +218,15 @@ const markEmailAsVerified = async (token) => {
   await db.tx(t => {
     return t.one('SELECT u.email, e.user_id FROM users AS u INNER JOIN verify_email_tokens AS e ON u.id = e.user_id WHERE e.id = $1', token)
       .then(res => t.batch([
-        t.one('UPDATE verify_email_tokens SET used = $1, expired_at = NOW() where id = $2 AND used = false AND expired_at > NOW() AND email = $3 RETURNING email', [true, token, res.email]),
+        t.oneOrNone('UPDATE verify_email_tokens SET used = $1, expired_at = NOW() where id = $2 AND used = false AND expired_at > NOW() AND email = $3 RETURNING email', [true, token, res.email]),
         t.none('UPDATE users SET email_verified = $1 WHERE id = $2', [true, res.user_id]),
         t.none('UPDATE verify_email_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW() AND id != $2', [res.user_id, token])
-      ]));
+      ]))
+      .then(res => {
+        if (!res[0]) {
+          throw new Error('INVALID_TOKEN');
+        }
+      });
   });
 };
 
