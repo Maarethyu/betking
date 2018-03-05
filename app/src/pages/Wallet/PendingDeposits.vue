@@ -4,8 +4,7 @@
       id="wallet-pending-deposits"
       stacked="sm"
       :per-page="perPage"
-      :current-page="currentPage"
-      :items="fetchPendingDeposits"
+      :items="renderData"
       :fields="fields"
       :show-empty="true"
       :no-provider-sorting="true"
@@ -25,7 +24,7 @@
         </b-row>
       </template>
     </b-table>
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="right" />
+    <b-pagination :total-rows="totalRows" :per-page="perPage" align="right" @change="fetchPendingDeposits" />
   </div>
 </template>
 
@@ -51,8 +50,6 @@
       'b-col': bCol
     },
     data: () => ({
-      perPage: 10,
-      currentPage: 1,
       totalRows: 0,
       isBusy: false,
       fields: [
@@ -62,6 +59,24 @@
         {key: 'amount', label: 'Amount', formatter: 'formatAmount'}
       ]
     }),
+    props: {
+      data: {
+        type: Object,
+        required: true,
+        default: []
+      },
+      perPage: {
+        type: Number,
+        default: 10
+      }
+    },
+    watch: {
+      data (dataFromProps) {
+        if (!dataFromProps.results) return;
+        this.totalRows = parseInt(dataFromProps.count, 10);
+        this.renderData = dataFromProps.results;
+      }
+    },
     computed: mapGetters({
       currencies: 'currencies',
     }),
@@ -78,10 +93,10 @@
       formatDate (ts) {
         return moment(ts).format('LLL');
       },
-      fetchPendingDeposits (ctx) {
-        const offset = (ctx.currentPage - 1) * ctx.perPage;
+      fetchPendingDeposits (page) {
+        const offset = (page - 1) * this.perPage;
 
-        return api.fetchPendingDeposits(ctx.perPage, offset, 'created_at')
+        return api.fetchPendingDeposits(this.perPage, offset, 'created_at')
           .then(res => {
             if (res && res.data && Array.isArray(res.data.results)) {
               this.totalRows = parseInt(res.data.count, 10);

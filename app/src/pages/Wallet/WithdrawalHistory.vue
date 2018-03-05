@@ -4,8 +4,7 @@
       id="wallet-withdrawal-history"
       stacked="sm"
       :per-page="perPage"
-      :current-page="currentPage"
-      :items="fetchWithdrawalHistory"
+      :items="renderData"
       :fields="fields"
       :show-empty="true"
       :no-provider-sorting="true"
@@ -25,7 +24,7 @@
         </b-row>
       </template>
     </b-table>
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="right" />
+    <b-pagination :total-rows="totalRows" :per-page="perPage" align="right" @change="fetchWithdrawalHistory" />
   </div>
 </template>
 
@@ -51,8 +50,6 @@
       'b-col': bCol
     },
     data: () => ({
-      perPage: 10,
-      currentPage: 1,
       totalRows: 0,
       isBusy: false,
       fields: [
@@ -63,6 +60,24 @@
         {key: 'status', label: 'Status'}
       ]
     }),
+    props: {
+      data: {
+        type: Object,
+        required: true,
+        default: []
+      },
+      perPage: {
+        type: Number,
+        default: 10
+      }
+    },
+    watch: {
+      data (dataFromProps) {
+        if (!dataFromProps.results) return;
+        this.totalRows = parseInt(dataFromProps.count, 10);
+        this.renderData = dataFromProps.results;
+      }
+    },
     computed: mapGetters({
       currencies: 'currencies',
     }),
@@ -79,14 +94,14 @@
       formatDate (ts) {
         return moment(ts).format('LLL');
       },
-      fetchWithdrawalHistory (ctx) {
-        const offset = (ctx.currentPage - 1) * ctx.perPage;
+      fetchWithdrawalHistory (page) {
+        const offset = (page - 1) * this.perPage;
 
-        return api.fetchWithdrawalHistory(ctx.perPage, offset, 'created_at')
+        api.fetchWithdrawalHistory(this.perPage, offset, 'created_at')
           .then(res => {
             if (res && res.data && Array.isArray(res.data.results)) {
               this.totalRows = parseInt(res.data.count, 10);
-              return res.data.results;
+              this.renderData = res.data.results;
             }
           })
           .catch(error => {
