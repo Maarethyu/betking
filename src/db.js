@@ -281,21 +281,14 @@ const addDeposit = async (currencyToQuery, currency, amount, address, txid) => {
             return userId;
           });
       })
-      .then(userId => {
-        // Add a tx entry in user_deposits
-        return t.one('INSERT INTO user_deposits (id, user_id, currency, amount, address, txid) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [uuidV4(), userId, currency, amount, address, txid]);
-      })
-      .then(row => {
-        /* Update or Insert Balance */
-        // TODO: We can have a better query for this which uses upsert / on conflict update ?
-        return t.oneOrNone('SELECT id FROM user_balances WHERE user_id = $1 AND currency = $2', [row.user_id, row.currency])
-          .then(res => {
-            if (!res) {
-              return t.one('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3) RETURNING *', [row.user_id, row.currency, row.amount]);
-            }
-
-            return t.one('UPDATE user_balances SET balance = balance + $1 WHERE id = $2 RETURNING *', [row.amount, res.id]);
-          });
+      .then(userId => t.batch([
+        t.one('INSERT INTO user_deposits (id, user_id, currency, amount, address, txid) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [uuidV4(), userId, currency, amount, address, txid]),
+        t.one('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3) ON CONFLICT (user_id, currency) DO UPDATE SET balance = user_balances.balance + $3 RETURNING *', [userId, currency, amount])
+      ]))
+      .then(res => {
+        if (res.length === 2) {
+          return res[1];
+        }
       });
   });
 
