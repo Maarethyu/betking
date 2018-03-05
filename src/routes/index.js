@@ -80,7 +80,7 @@ module.exports = (currencyCache) => {
 
       if (isOtpValid) {
         try {
-          await db.insertTwoFactorCode(user.id, req.body.otp);
+          await db.saveUsedTwoFactorCode(user.id, req.body.otp);
           await db.log2faAttempt(user.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
           isTwoFactorOk = true;
         } catch (e) {

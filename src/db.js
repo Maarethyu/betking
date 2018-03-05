@@ -109,7 +109,7 @@ const disableTwoFactor = async (userId, newMfaKey) => {
   await db.none('UPDATE users SET mfa_key = $1, is_2fa_enabled = false WHERE id = $2', [newMfaKey, userId]);
 };
 
-const insertTwoFactorCode = async (userId, code) => {
+const saveUsedTwoFactorCode = async (userId, code) => {
   await db.none('INSERT INTO mfa_passcodes (user_id, passcode) values ($1, $2)', [userId, code])
     .catch(e => {
       if (e.code === '23505') {
@@ -619,7 +619,7 @@ module.exports = {
   createResetToken,
   findLatestActiveResetToken,
   resetUserPasswordByToken,
-  insertTwoFactorCode,
+  saveUsedTwoFactorCode,
   addIpInWhitelist,
   removeIpFromWhitelist,
   getWhitelistedIps,

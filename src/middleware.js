@@ -42,7 +42,7 @@ const require2fa = async (req, res, next) => {
 
     if (isOtpValid) {
       try {
-        await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
+        await db.saveUsedTwoFactorCode(req.currentUser.id, req.body.otp);
         next();
       } catch (e) {
         if (e.message === 'CODE_ALREADY_USED') {
