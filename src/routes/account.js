@@ -27,19 +27,29 @@ const {
   validateBooleanOption
 } = require('./validators/validators');
 
-const getWalletTransactions = (dbQuery) => async (req, res, next) => {
+const getWalletTransactions = (dbQuery) => async (req) => {
   validateLimit(req);
   validateSkip(req);
   validateSort(req, ['amount', 'created_at']);
 
   const validationResult = await req.getValidationResult();
   if (!validationResult.isEmpty()) {
-    return res.status(400).json({errors: validationResult.array()});
+    return {errors: validationResult.array()};
   }
 
   const {results, count} = await dbQuery(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
 
-  res.json({results, count});
+  return {results, count};
+};
+
+const sendWalletTransactions = (dbQuery) => async (req, res, next) => {
+  const result = await getWalletTransactions(dbQuery)(req);
+
+  if (result.errors) {
+    return res.status(400).json({errors: result.errors});
+  }
+
+  res.json(result);
 };
 
 module.exports = (currencyCache) => {
@@ -360,11 +370,22 @@ module.exports = (currencyCache) => {
     }
   );
 
-  router.get('/pending-withdrawals', getWalletTransactions(db.getPendingWithdrawals));
+  router.get('/wallet', async function (req, res, next) {
+    // TODO: Get pending deposits from db
+    res.json({
+      pendingWithdrawals: await getWalletTransactions(db.getPendingWithdrawals)(req, res, next),
+      withdrawalHistory: await getWalletTransactions(db.getWithdrawalHistory)(req, res, next),
+      depositHistory: await getWalletTransactions(db.getDepositHistory)(req, res, next),
+      pendingDeposits: {},
+      whitelistedAddresses: await db.getWhitelistedAddresses(req.currentUser.id)
+    });
+  });
 
-  router.get('/withdrawal-history', getWalletTransactions(db.getWithdrawalHistory));
+  router.get('/pending-withdrawals', sendWalletTransactions(db.getPendingWithdrawals));
 
-  router.get('/deposit-history', getWalletTransactions(db.getDepositHistory));
+  router.get('/withdrawal-history', sendWalletTransactions(db.getWithdrawalHistory));
+
+  router.get('/deposit-history', sendWalletTransactions(db.getDepositHistory));
 
   router.get('/whitelisted-address', async function (req, res, next) {
     const whitelistedAddresses = await db.getWhitelistedAddresses(req.currentUser.id);

@@ -3,8 +3,7 @@
     <b-table
       stacked="sm"
       :per-page="perPage"
-      :current-page="currentPage"
-      :items="fetchPendingWithdrawals"
+      :items="renderData"
       :fields="fields"
       :show-empty="true"
       ref="table"
@@ -25,7 +24,7 @@
       </template>
     </b-table>
 
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="right" />
+    <b-pagination :total-rows="totalRows" :per-page="perPage" align="right" @change="fetchPendingWithdrawals" />
   </div>
 </template>
 
@@ -57,10 +56,9 @@
       });
     },
     data: () => ({
-      perPage: 10,
-      currentPage: 1,
       totalRows: 0,
       isBusy: false,
+      renderData: [],
       fields: [
         {key: 'show_details', label: '+'},
         {key: 'created_at', label: 'Date', formatter: 'formatDate'},
@@ -69,9 +67,27 @@
         {key: 'status', label: 'Status'}
       ]
     }),
+    props: {
+      data: {
+        type: Object,
+        required: true,
+        default: []
+      },
+      perPage: {
+        type: Number,
+        default: 10
+      }
+    },
     computed: mapGetters({
       currencies: 'currencies',
     }),
+    watch: {
+      data (dataFromProps) {
+        if (!dataFromProps.results) return;
+        this.totalRows = parseInt(dataFromProps.count, 10);
+        this.renderData = dataFromProps.results;
+      }
+    },
     methods: {
       formatBigAmount,
       addCommas,
@@ -85,14 +101,14 @@
       formatDate (ts) {
         return moment(ts).format('LLL');
       },
-      fetchPendingWithdrawals (ctx) {
-        const offset = (ctx.currentPage - 1) * ctx.perPage;
+      fetchPendingWithdrawals (page) {
+        const offset = (page - 1) * this.perPage;
 
-        return api.fetchPendingWithdrawals(ctx.perPage, offset, 'created_at')
+        return api.fetchPendingWithdrawals(this.perPage, offset, 'created_at')
           .then(res => {
             if (res && res.data && Array.isArray(res.data.results)) {
               this.totalRows = parseInt(res.data.count, 10);
-              return res.data.results;
+              this.renderData = res.data.results;
             }
           })
           .catch(error => {

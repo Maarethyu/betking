@@ -111,6 +111,9 @@ export default {
   confirmWd (token) {
     return post('/api/confirm-withdraw', {token});
   },
+  fetchWalletInfo (limit, skip, sort) {
+    return get(`/api/account/wallet?limit=${limit}&skip=${skip}&sort=${sort}`);
+  },
   fetchPendingWithdrawals (limit, skip, sort) {
     return get(`/api/account/pending-withdrawals?limit=${limit}&skip=${skip}&sort=${sort}`);
   },
