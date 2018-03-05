@@ -58,7 +58,7 @@ module.exports = (currencyCache) => {
     });
   });
 
-  router.post('/bet', mw.requireLoggedIn, mw.requireWhitelistedIp, async function (req, res, next) {
+  router.post('/bet', mw.allowCustomerByCountry, mw.requireLoggedIn, mw.requireWhitelistedIp, async function (req, res, next) {
     req.checkBody('currency', 'Invalid currency')
       .exists()
       .isInt()

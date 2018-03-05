@@ -228,7 +228,7 @@ module.exports = (currencyCache) => {
     res.json({balances});
   });
 
-  router.get('/deposit-address', async function (req, res, next) {
+  router.get('/deposit-address', mw.allowCustomerByCountry, async function (req, res, next) {
     req.checkQuery('currency', 'Invalid currency')
       .exists()
       .isInt()
