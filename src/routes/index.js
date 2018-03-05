@@ -80,7 +80,7 @@ module.exports = (currencyCache) => {
 
       if (isOtpValid) {
         try {
-          await db.insertTwoFactorCode(user.id, req.body.otp);
+          await db.saveUsedTwoFactorCode(user.id, req.body.otp);
           await db.log2faAttempt(user.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
           isTwoFactorOk = true;
         } catch (e) {
@@ -245,7 +245,11 @@ module.exports = (currencyCache) => {
 
       res.status(200).json({message: 'Password changed successfully'});
     } catch (e) {
-      res.status(409).json({error: 'Invalid token'});
+      if (e.message === 'INVALID_TOKEN') {
+        return res.status(409).json({error: 'Invalid token'});
+      }
+
+      throw e;
     }
   });
 
@@ -262,8 +266,11 @@ module.exports = (currencyCache) => {
 
       res.status(200).json({message: 'Email successfully verified.'});
     } catch (e) {
-      console.log(e);
-      res.status(409).json({error: 'Invalid token'});
+      if (e.message === 'INVALID_TOKEN') {
+        return res.status(409).json({error: 'Invalid token'});
+      }
+
+      throw e;
     }
   });
 

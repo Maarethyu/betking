@@ -188,7 +188,7 @@ module.exports = (currencyCache) => {
 
     await db.enableTwofactor(req.currentUser.id);
 
-    await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
+    await db.saveUsedTwoFactorCode(req.currentUser.id, req.body.otp);
 
     res.end();
   });
@@ -253,7 +253,7 @@ module.exports = (currencyCache) => {
     res.json({balances});
   });
 
-  router.get('/deposit-address', async function (req, res, next) {
+  router.get('/deposit-address', mw.allowCustomerByCountry, async function (req, res, next) {
     validateCurrencyInQuery(req, currencyCache);
 
     const validationResult = await req.getValidationResult();

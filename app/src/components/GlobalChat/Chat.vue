@@ -310,9 +310,8 @@
     },
     methods: {
       loadChatMessages () {
-        if (this.channels.indexOf(this.currentLanguage) === -1) {
-          this.addChannel(this.currentLanguage);
-        }
+        this.$store.dispatch('clearChatChannels');
+        this.addChannel(this.currentLanguage);
       },
       filterMessages (messages) {
         return messages.filter(m => (this.ignoredUsers.indexOf(m.username) === -1 && m.type !== 'HIGHROLLER') ||
@@ -320,7 +319,9 @@
       },
       switchChatLanguage (language) {
         this.currentLanguage = language;
-        this.loadChatMessages();
+        if (this.channels.indexOf(this.currentLanguage) === -1) {
+          this.addChannel(this.currentLanguage);
+        }
         this.showWelcomeMessage();
       },
       addChannel (language) {
