@@ -202,6 +202,10 @@ const actions = {
     commit(types.SET_IS_CHAT_OPENED, isChatOpened);
   },
 
+  clearChatChannels ({commit}) {
+    commit(types.CLEAR_CHAT_CHANNELS);
+  },
+
   loadChatMessages ({commit, state, rootState}, {language}) {
     state.webSocket.emit('joinChat', {language, requesterName: rootState.account.username});
   },
@@ -341,6 +345,10 @@ const mutations = {
     state.chatChannels[language].messages.push(...messages);
     Vue.set(state.chatChannels, 'users', users);
     Vue.set(state.chatChannels, 'anonymousUsers', anonymousUsers);
+  },
+
+  [types.CLEAR_CHAT_CHANNELS] (state) {
+    state.chatChannels = {};
   },
 
   [types.SET_CHAT_ANONYMOUS_USER_COUNT] (state, count) {
