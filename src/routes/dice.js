@@ -66,17 +66,7 @@ module.exports = (currencyCache) => {
 
     req.checkBody('target', 'Invalid target')
       .exists()
-      .custom(value => {
-        let isTargetValid = false;
-
-        Object.keys(dice.targets).forEach(target => {
-          if (dice.targets[target] === value) {
-            isTargetValid = true;
-          }
-        });
-
-        return isTargetValid;
-      });
+      .custom(value => (value === dice.targets.hi || value === dice.targets.lo));
 
     req.checkBody('chance', 'Invalid chance')
       .exists()
