@@ -2,6 +2,9 @@
   <b-row>
     <b-col cols="10" offset="1">
     <h1>Whitelisted IPs</h1>
+
+    <div v-if="errors.global" class="alert alert-danger">{{errors.global}}</div>
+
     <br>
       <b-table
         id="whitelisted-ips-table"
@@ -47,7 +50,7 @@
   import bButton from 'bootstrap-vue/es/components/button/button';
   import bFormInput from 'bootstrap-vue/es/components/form-input/form-input';
   import bFormInvalidFeedback from 'bootstrap-vue/es/components/form/form-invalid-feedback';
-  
+
   import {getSecondFactorAuth} from 'src/helpers';
   import api from 'src/api';
   import {mapGetters} from 'vuex';
@@ -124,7 +127,7 @@
           });
 
           if (response.data.error) {
-            newErrors.ip = response.data.error;
+            newErrors.global = response.data.error;
           }
 
           this.errors = newErrors;

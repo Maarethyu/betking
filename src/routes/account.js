@@ -162,7 +162,7 @@ module.exports = (currencyCache) => {
 
     await db.enableTwofactor(req.currentUser.id);
 
-    await db.insertTwoFactorCode(req.currentUser.id, req.body.otp);
+    await db.saveUsedTwoFactorCode(req.currentUser.id, req.body.otp);
 
     res.end();
   });
