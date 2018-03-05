@@ -27,6 +27,21 @@ const {
   validateBooleanOption
 } = require('./validators/validators');
 
+const getWalletTransactions = (dbQuery) => async (req, res, next) => {
+  validateLimit(req);
+  validateSkip(req);
+  validateSort(req, ['amount', 'created_at']);
+
+  const validationResult = await req.getValidationResult();
+  if (!validationResult.isEmpty()) {
+    return res.status(400).json({errors: validationResult.array()});
+  }
+
+  const {results, count} = await dbQuery(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
+
+  res.json({results, count});
+};
+
 module.exports = (currencyCache) => {
   const router = express.Router();
 
@@ -345,50 +360,11 @@ module.exports = (currencyCache) => {
     }
   );
 
-  router.get('/pending-withdrawals', async function (req, res, next) {
-    validateLimit(req);
-    validateSkip(req);
-    validateSort(req, ['amount', 'created_at']);
+  router.get('/pending-withdrawals', getWalletTransactions(db.getPendingWithdrawals));
 
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
+  router.get('/withdrawal-history', getWalletTransactions(db.getWithdrawalHistory));
 
-    const {results, count} = await db.getPendingWithdrawals(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
-
-    res.json({results, count});
-  });
-
-  router.get('/withdrawal-history', async function (req, res, next) {
-    validateLimit(req);
-    validateSkip(req);
-    validateSort(req, ['amount', 'created_at']);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const {results, count} = await db.getWithdrawalHistory(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
-
-    res.json({results, count});
-  });
-
-  router.get('/deposit-history', async function (req, res, next) {
-    validateLimit(req);
-    validateSkip(req);
-    validateSort(req, ['amount', 'created_at']);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const {results, count} = await db.getDepositHistory(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
-
-    res.json({results, count});
-  });
+  router.get('/deposit-history', getWalletTransactions(db.getDepositHistory));
 
   router.get('/whitelisted-address', async function (req, res, next) {
     const whitelistedAddresses = await db.getWhitelistedAddresses(req.currentUser.id);
