@@ -105,8 +105,8 @@ export default {
   getDepositAddress (currency) {
     return get(`/api/account/deposit-address?currency=${currency}`);
   },
-  toggleEmailWithdrawalConfirmation (confirmWd, otp) {
-    return post('/api/account/set-confirm-withdraw-by-email', {confirmWd, otp});
+  toggleEmailWithdrawalConfirmation (option, otp) {
+    return post('/api/account/set-confirm-withdraw-by-email', {option, otp});
   },
   confirmWd (token) {
     return post('/api/confirm-withdraw', {token});
@@ -133,8 +133,8 @@ export default {
   addWhitelistedAddress (currency, address, otp) {
     return post('/api/account/whitelisted-address/add', {currency, address, otp});
   },
-  toggleStatsHidden (statsHidden) {
-    return post('/api/account/toggle-stats-hidden', {statsHidden});
+  toggleStatsHidden (option) {
+    return post('/api/account/toggle-stats-hidden', {option});
   },
   disableBetting () {
     return post('/api/account/disable-betting');

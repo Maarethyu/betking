@@ -7,7 +7,25 @@ const helpers = require('../helpers');
 const mw = require('../middleware');
 const mailer = require('../mailer');
 const {eventEmitter, types} = require('../eventEmitter');
-const {validateUsername} = require('./validators/validators');
+const {
+  validateUsername,
+  validateEmail,
+  validateEmailAvailable,
+  validateLimit,
+  validateSkip,
+  validateExistingPassword,
+  validatePassword,
+  validatePassword2,
+  validateSort,
+  validateSessionId,
+  validateOtp,
+  validateIp,
+  validateCurrencyInQuery,
+  validateCurrency,
+  validateAddress,
+  validateAmount,
+  validateBooleanOption
+} = require('./validators/validators');
 
 module.exports = (currencyCache) => {
   const router = express.Router();
@@ -38,19 +56,12 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/change-email', async function (req, res, next) {
-    req.check('email', 'Invalid Email').exists()
-      .trim()
-      .isLength({max: 255})
-      .isEmail();
+    validateEmail(req, false);
+    validateEmailAvailable(req, db, false);
 
-    const errors = req.validationErrors();
-    if (errors) {
-      return res.status(400).json({errors});
-    }
-
-    const emailExists = await db.isEmailAlreadyTaken(req.body.email);
-    if (emailExists) {
-      return res.status(409).json({error: 'Email already exists'});
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
     }
 
     await db.updateEmail(req.currentUser.id, req.body.email);
@@ -72,19 +83,13 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/change-password', async function (req, res, next) {
-    req.check('existingPassword', 'Invalid existing password').exists()
-      .trim()
-      .isLength({min: 6, max: 50});
+    validateExistingPassword(req);
+    validatePassword(req);
+    validatePassword2(req);
 
-    req.check('password', 'Invalid Password').exists()
-      .isLength({min: 6, max: 50});
-
-    req.check('password2', 'Passwords do not match').exists()
-      .equals(req.body.password);
-
-    const errors = req.validationErrors();
-    if (errors) {
-      return res.status(400).json({errors});
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
     }
 
     const isPasswordCorrect = await bcrypt.compare(req.body.existingPassword, req.currentUser.password);
@@ -112,13 +117,11 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/logout-session', async function (req, res, next) {
-    req.check('id', 'Invalid session id').exists()
-      .trim()
-      .isUUID(4);
+    validateSessionId(req);
 
-    const errors = req.validationErrors();
-    if (errors) {
-      return res.status(400).json({errors});
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
     }
 
     await db.logoutSession(req.currentUser.id, req.body.id);
@@ -147,9 +150,7 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Two factor authentication is already enabled'});
     }
 
-    req.check('otp').exists()
-      .isInt()
-      .isLength({min: 6, max: 6});
+    validateOtp(req, false);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -180,11 +181,7 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/add-whitelisted-ip', async function (req, res, next) {
-    req.check('ip', 'Invalid ip')
-      .exists()
-      .trim()
-      .isIP()
-      .optional({checkFalsy: true});
+    validateIp(req, true);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -200,9 +197,12 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/remove-whitelisted-ip', mw.require2fa, async function (req, res, next) {
-    req.check('ip', 'Invalid ip').exists()
-      .trim()
-      .isIP();
+    validateIp(req, false);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
 
     await db.removeIpFromWhitelist(req.body.ip, req.currentUser.id);
 
@@ -229,10 +229,7 @@ module.exports = (currencyCache) => {
   });
 
   router.get('/deposit-address', async function (req, res, next) {
-    req.checkQuery('currency', 'Invalid currency')
-      .exists()
-      .isInt()
-      .custom(value => !!currencyCache.findById(value));
+    validateCurrencyInQuery(req, currencyCache);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -253,20 +250,9 @@ module.exports = (currencyCache) => {
 
   // TODO: Add isCustomerAllowed middleware (check for CF-IPCountry ?)
   router.post('/withdraw', mw.require2fa, async function (req, res, next) {
-    req.checkBody('currency', 'Invalid currency')
-      .exists()
-      .isInt()
-      .custom(value => !!currencyCache.findById(value));
-
-    const currencyConfig = currencyCache.findById(req.body.currency);
-
-    req.checkBody('address', 'Invalid address')
-      .exists()
-      .custom(address => require('./validators/addressValidator')(address, currencyConfig));
-
-    req.checkBody('amount')
-      .exists()
-      .custom(amount => require('./validators/amountValidator')(amount));
+    validateCurrency(req, currencyCache);
+    validateAddress(req, currencyCache);
+    validateAmount(req);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -331,15 +317,14 @@ module.exports = (currencyCache) => {
 
   router.post('/set-confirm-withdraw-by-email',
     async function (req, res, next) {
-      req.checkBody('confirmWd', 'Invalid confirm withdrawal option').exists()
-        .isBoolean();
+      validateBooleanOption(req);
 
       const validationResult = await req.getValidationResult();
       if (!validationResult.isEmpty()) {
         return res.status(400).json({errors: validationResult.array()});
       }
 
-      if (!req.body.confirmWd) {
+      if (!req.body.option) {
         mw.require2fa(req, res, next);
       } else {
         next();
@@ -347,7 +332,7 @@ module.exports = (currencyCache) => {
     },
     async function (req, res, next) {
       try {
-        await db.setConfirmWithdrawalByEmail(req.currentUser.id, req.body.confirmWd);
+        await db.setConfirmWithdrawalByEmail(req.currentUser.id, req.body.option);
 
         res.end();
       } catch (e) {
@@ -361,20 +346,9 @@ module.exports = (currencyCache) => {
   );
 
   router.get('/pending-withdrawals', async function (req, res, next) {
-    req.checkQuery('limit', 'Invalid limit param')
-      .exists()
-      .isInt()
-      .optional({checkFalsy: true});
-
-    req.checkQuery('skip', 'Invalid skip param')
-      .exists()
-      .isInt()
-      .optional({checkFalsy: true});
-
-    req.checkQuery('sort', 'Invalid sort param')
-      .exists()
-      .isIn(['amount', 'created_at'])
-      .optional({checkFalsy: true});
+    validateLimit(req);
+    validateSkip(req);
+    validateSort(req, ['amount', 'created_at']);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -387,20 +361,9 @@ module.exports = (currencyCache) => {
   });
 
   router.get('/withdrawal-history', async function (req, res, next) {
-    req.checkQuery('limit', 'Invalid limit param')
-      .exists()
-      .isInt()
-      .optional({checkFalsy: true});
-
-    req.checkQuery('skip', 'Invalid skip param')
-      .exists()
-      .isInt()
-      .optional({checkFalsy: true});
-
-    req.checkQuery('sort', 'Invalid sort param')
-      .exists()
-      .isIn(['amount', 'created_at'])
-      .optional({checkFalsy: true});
+    validateLimit(req);
+    validateSkip(req);
+    validateSort(req, ['amount', 'created_at']);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -413,20 +376,9 @@ module.exports = (currencyCache) => {
   });
 
   router.get('/deposit-history', async function (req, res, next) {
-    req.checkQuery('limit', 'Invalid limit param')
-      .exists()
-      .isInt()
-      .optional({checkFalsy: true});
-
-    req.checkQuery('skip', 'Invalid skip param')
-      .exists()
-      .isInt()
-      .optional({checkFalsy: true});
-
-    req.checkQuery('sort', 'Invalid sort param')
-      .exists()
-      .isIn(['amount', 'created_at'])
-      .optional({checkFalsy: true});
+    validateLimit(req);
+    validateSkip(req);
+    validateSort(req, ['amount', 'created_at']);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -445,16 +397,8 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/whitelisted-address/add', mw.require2fa, async function (req, res, next) {
-    req.checkBody('currency', 'Invalid currency')
-      .exists()
-      .isInt()
-      .custom(value => !!currencyCache.findById(value));
-
-    const currencyConfig = currencyCache.findById(req.body.currency);
-
-    req.checkBody('address', 'Invalid address')
-      .exists()
-      .custom(address => require('./validators/addressValidator')(address, currencyConfig));
+    validateCurrency(req, currencyCache);
+    validateAddress(req, currencyCache);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -479,10 +423,7 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/whitelisted-address/remove', mw.require2fa, async function (req, res, next) {
-    req.checkBody('currency', 'Invalid currency')
-      .exists()
-      .isInt()
-      .custom(value => !!currencyCache.findById(value));
+    validateCurrency(req, currencyCache);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -498,20 +439,18 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/toggle-stats-hidden', async function (req, res, next) {
-    req.checkBody('statsHidden', 'Invalid option')
-      .exists()
-      .isBoolean();
+    validateBooleanOption(req);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
       return res.status(400).json({errors: validationResult.array()});
     }
 
-    await db.toggleStatsHidden(req.currentUser.id, req.body.statsHidden);
+    await db.toggleStatsHidden(req.currentUser.id, req.body.option);
 
     eventEmitter.emit(types.TOGGLE_STATS_HIDDEN, {
       username: req.currentUser.username,
-      statsHidden: req.body.statsHidden
+      statsHidden: req.body.option
     });
 
     res.end();
@@ -562,9 +501,7 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/toggle-display-highrollers-in-chat', async function (req, res, next) {
-    req.checkBody('option', 'INVALID_OPTION')
-      .exists()
-      .isBoolean();
+    validateBooleanOption(req);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -577,17 +514,9 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/send-tip', async function (req, res, next) {
-    req.checkBody('currency')
-      .exists()
-      .isInt()
-      .custom(value => !!currencyCache.findById(value));
-
-    req.checkBody('username')
-      .exists();
-
-    req.checkBody('amount')
-      .exists()
-      .custom(amount => require('./validators/amountValidator')(amount));
+    validateCurrency(req, currencyCache);
+    validateUsername(req);
+    validateAmount(req);
 
     const validationResult = await req.getValidationResult();
     if (!validationResult.isEmpty()) {
