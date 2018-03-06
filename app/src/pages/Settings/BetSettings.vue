@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="bet-settings">
-      <h3>Make your bets and stats private</h3>
+    <div>
+      <h5>Make your bets and stats private</h5>
       <b-row>
         <b-col cols="10" md="4">
           <span v-if="profile.statsHidden">Your bets and stats are hidden from other users</span>
@@ -22,9 +22,10 @@
           </b-button>
         </b-col>
       </b-row>
+      <hr>
     </div>
-    <div class="bet-settings">
-      <h3>Show/Hide highroller bets in chat</h3>
+    <div>
+      <h5>Show/Hide highroller bets in chat</h5>
       <b-row>
         <b-col cols="10" md="4">
           <span v-if="showHighrollerBets">Highroller bets are shown in chats</span>
@@ -45,9 +46,10 @@
           </b-button>
         </b-col>
       </b-row>
+      <hr>
     </div>
-    <div class="bet-settings no-border">
-      <h3>Disable Betting</h3>
+    <div>
+      <h5>Disable Betting</h5>
       <b-row>
         <b-col cols="10">
           <span v-if="profile.bettingDisabled">Betting disabled on account</span>
@@ -116,13 +118,4 @@
   };
 </script>
 
-<style lang="scss" scoped>
-  .bet-settings {
-    border-bottom: solid 1px gray;
-    padding-bottom: 25px;
-    &.no-border {
-      border-bottom: none;
-    }
-  }
-</style>
 

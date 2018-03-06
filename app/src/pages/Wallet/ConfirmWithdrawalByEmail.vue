@@ -3,6 +3,8 @@
     <div v-if="errors.confirmWd" class="alert alert-danger">{{ errors.confirmWd }}</div>
     <p>
       Should withdrawals require confirmation via email?
+    </p>
+    <div class="text-left">
       <b-button variant="danger" size="sm"
         v-if="profile.confirmWithdrawals"
         @click="toggleEmailWithdrawalConfirmation(false)">
@@ -13,7 +15,7 @@
         @click="toggleEmailWithdrawalConfirmation(true)">
         Enable
       </b-button>
-    </p>
+    </div>
   </div>
 </template>
 

@@ -6,46 +6,40 @@
       ref="table"
       class="whitelisted-address"
       stacked="md"
+      head-variant="dark"
       :items="fetchWhitelistedAddresses"
       :fields="fields"
       :show-empty="true"
-      :foot-clone="true"
       :no-provider-sorting="true"
       empty-text="You don't have any whitelisted addresses"
-      striped small outlined fixed hover>
+      small outlined fixed hover>
 
       <template slot="+" slot-scope="row">
         <b-button variant="default" size="sm" @click="removeWhitelistedAddress(row.item.currency)">
           Remove
         </b-button>
       </template>
-
-      <template slot="FOOT_currency" slot-scope="data">
-        <CurrencySelector @change="updateCurrency" :default="activeCurrency"></CurrencySelector>
-      </template>
-
-      <template slot="FOOT_address" slot-scope="data">
-        <b-form-input v-model="activeAddress" placeholder="Address" :state="activeAddress && !errors.address" />
-        <b-form-invalid-feedback>{{errors.address}}</b-form-invalid-feedback>
-      </template>
-
-      <template slot="FOOT_+" slot-scope="data">
-        <b-button variant="default"  @click="addWhitelistedAddress()" :disabled="activeCurrency === null || !activeAddress">
-          Add
-        </b-button>
-      </template>
     </b-table>
+    <div class="address-table-footer">
+      <CurrencySelector @change="updateCurrency" :default="activeCurrency"></CurrencySelector>
+      <b-form-input v-model="activeAddress" placeholder="Address" :state="activeAddress && !errors.address" />
+      <b-form-invalid-feedback>{{errors.address}}</b-form-invalid-feedback>
+      <b-button variant="default" class="btn-gray" @click="addWhitelistedAddress()" :disabled="activeCurrency === null || !activeAddress">
+        Add
+      </b-button>
+    </div>
   </div>
 </template>
 
 <style lang="scss">
   .whitelisted-address {
-    tfoot {
-      display: table-footer-group!important;
-    }
     &__currency {
       width: 25%;
     }
+  }
+  .address-table-footer {
+    display: flex;
+    flex-direction: row;
   }
 </style>
 
@@ -79,8 +73,8 @@
       successMessage: '',
       otp: null,
       fields: [
-        {key: 'currency', label: 'Currency', formatter: 'showCurrencySymbol', class: 'whitelisted-address__currency'},
-        {key: 'address', label: 'Address'},
+        {key: 'currency', label: 'CURRENCY', formatter: 'showCurrencySymbol', class: 'whitelisted-address__currency'},
+        {key: 'address', label: 'ADDRESS'},
         '+'
       ]
     }),

@@ -32,12 +32,12 @@
 
     <ChangeEmailModal @email-changed="fetchMe"></ChangeEmailModal>
     <ChangePasswordModal @password-changed="fetchMe"></ChangePasswordModal>
+    <hr>
 	</div>
 </template>
 
 <style lang="scss">
   .user-profile {
-    border-bottom: solid 1px gray;
     padding-bottom: 25px;
     .row {
       margin-top: 15px;
@@ -52,8 +52,8 @@
       font: -moz-field;
       font: -webkit-small-control;
       padding: 2px 3px;
-      width: 200px;
-      height: 20px;
+      width: 350px;
+      height: 26px;
       margin-right: 15px;
     }
   }

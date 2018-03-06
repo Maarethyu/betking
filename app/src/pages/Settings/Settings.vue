@@ -1,6 +1,6 @@
 <template>
   <b-container class="settings account-pages">
-    <h3>PROFILE</h3>
+    <h5>PROFILE</h5>
     <Profile />
     <BetSettings />
   </b-container>
@@ -20,10 +20,3 @@
     }
   };
 </script>
-<style lang="scss">
-  .account-pages {
-    h3 {
-      margin-top: 25px;
-    }
-  }
-</style>

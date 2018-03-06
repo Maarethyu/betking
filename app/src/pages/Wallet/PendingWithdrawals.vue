@@ -2,6 +2,7 @@
   <div>
     <b-table
       stacked="sm"
+      head-variant="dark"
       :per-page="perPage"
       :current-page="currentPage"
       :items="fetchPendingWithdrawals"
@@ -9,7 +10,11 @@
       :show-empty="true"
       ref="table"
       empty-text="You don't have any pending withdrawals"
-      responsive striped small outlined hover>
+      responsive small outlined hover>
+
+      <template slot="HEAD_show_details" slot-scope="data">
+        <i class="fa fa-plus"></i>
+      </template>
 
       <template slot="show_details" slot-scope="row">
         <b-button size="sm" variant="default" @click.stop="row.toggleDetails">
@@ -25,7 +30,7 @@
       </template>
     </b-table>
 
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="right" />
+    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" />
   </div>
 </template>
 
@@ -62,11 +67,11 @@
       totalRows: 0,
       isBusy: false,
       fields: [
-        {key: 'show_details', label: '+'},
-        {key: 'created_at', label: 'Date', formatter: 'formatDate'},
-        {key: 'currency', label: 'Currency', formatter: 'showCurrencySymbol'},
-        {key: 'amount', label: 'Amount', formatter: 'formatAmount'},
-        {key: 'status', label: 'Status'}
+        'show_details',
+        {key: 'created_at', label: 'DATE', formatter: 'formatDate'},
+        {key: 'currency', label: 'CURRENCY', formatter: 'showCurrencySymbol'},
+        {key: 'amount', label: 'AMOUNT', formatter: 'formatAmount'},
+        {key: 'status', label: 'STATUS'}
       ]
     }),
     computed: mapGetters({

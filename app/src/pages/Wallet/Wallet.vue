@@ -1,44 +1,65 @@
 <template>
-  <b-row>
-    <b-col cols="10" offset="1">
-      <h3>Balances</h3>
-  	  <Balances />
-    </b-col>
+  <b-container class="account-pages">
+    <b-row>
+      <b-col cols="12">
+        <h5>Balances</h5>
+        <Balances />
+        <hr>
+      </b-col>
+    </b-row>
 
-    <b-col cols="10" offset="1" md="5" offset-md="1">
-      <h3>Pending Withdrawals</h3>
-  	  <PendingWithdrawals />
-    </b-col>
+    <b-row>
+      <b-col cols="12">
+        <h5>Withdrawals</h5>
+      </b-col>
+      <b-col cols="12">
+        <div class="table-title">Pending Withdrawals</div>
+        <PendingWithdrawals />
+        <header></header>
+      </b-col>
 
-    <b-col cols="10" offset="1" md="5" offset-md="0">
-      <h3>Pending Deposits</h3>
-  	  <PendingDeposits />
-    </b-col>
+      <b-col cols="12">
+        <div class="table-title">Withdrawal History</div>
+        <WithdrawalHistory />
+      </b-col>
 
-    <b-col cols="10" offset="1" md="5" offset-md="1">
-      <h3>Withdrawal History</h3>
-  	  <WithdrawalHistory />
-    </b-col>
+      <b-row>
+        <b-col cols="12">
+          <b-row class="align-center">
+            <b-col cols="12" class="col-md-8">
+              <div class="table-title">Withdrawal Whitelist</div>
+              <WithdrawalWhitelist />
+            </b-col>
 
-    <b-col cols="10" offset="1" md="5" offset-md="0">
-      <h3>Deposit History</h3>
-  	  <DepositHistory />
-    </b-col>
+            <b-col cols="12" class="col-md-4">
+              <div class="table-title">Confirm Withdrawals by Email</div>
+              <ConfirmWithdrawalByEmail />
+            </b-col>
+          </b-row>
+          <hr>
+        </b-col>
+      </b-row>
+    </b-row>
 
-    <b-col cols="10" offset="1" md="5" offset-md="1">
-      <h3>Withdrawal Whitelist</h3>
-      <WithdrawalWhitelist />
-    </b-col>
+    <b-row>
+      <b-col cols="12">
+        <h5>Deposits</h5>
+      </b-col>
+      <b-col cols="12">
+        <div class="table-title">Pending Deposits</div>
+        <PendingDeposits />
+      </b-col>
 
-    <b-col cols="10" offset="1" md="5" offset-md="0">
-      <h3>Confirm Withdrawals by Email</h3>
-      <ConfirmWithdrawalByEmail />
-    </b-col>
-
-  </b-row>
+      <b-col cols="12">
+        <div class="table-title">Deposit History</div>
+        <DepositHistory />
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
+  import bContainer from 'bootstrap-vue/es/components/layout/container';
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
 
@@ -53,6 +74,7 @@
   export default {
     name: 'UserWallet',
     components: {
+      'b-container': bContainer,
       'b-row': bRow,
       'b-col': bCol,
       Balances,
@@ -65,3 +87,17 @@
     }
   };
 </script>
+
+<style lang="scss">
+  .account-pages {
+    .table-title {
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .align-center {
+      align-items: center;
+      margin: 0;
+    }
+  }
+</style>
+
