@@ -128,6 +128,12 @@ const mutations = {
     }
 
     state.activeCurrencyBalance = currency.balance;
+  },
+
+  [types.RESET_FUNDS_STORE] (state) {
+    state.currencies = state.currencies.map(c => Object.assign({}, c, {
+      balance: 0
+    }));
   }
 };
 

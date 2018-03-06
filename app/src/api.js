@@ -9,7 +9,7 @@ const csrfToken = () => {
 
 const errorHandler = function (error) {
   if (error.response && error.response.status === 401) {
-    store.dispatch('clearAuthState');
+    store.dispatch('resetStores');
     routeUserOnLogout();
   }
 
