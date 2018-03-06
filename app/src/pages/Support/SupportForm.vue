@@ -54,6 +54,7 @@
   import bCol from 'bootstrap-vue/es/components/layout/col';
 
   import api from 'src/api';
+  import bus from 'src/bus';
 
   import {mapGetters} from 'vuex';
 
@@ -91,6 +92,7 @@
           .then((res) => {
             this.ticketId = res.data.ticketId;
             this.resetForm();
+            bus.$emit('SUPPORT_TICKET_RAISED');
           })
           .catch(err => {
             if (err.response) {

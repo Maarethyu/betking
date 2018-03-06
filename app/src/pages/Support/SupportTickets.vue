@@ -49,6 +49,7 @@
 
   import moment from 'moment';
   import api from 'src/api';
+  import bus from 'src/bus';
 
   export default {
     name: 'SupportTickets',
@@ -59,6 +60,11 @@
       'b-pagination': bPagination,
       'b-button': bButton,
       'b-badge': bBadge
+    },
+    mounted () {
+      bus.$on('SUPPORT_TICKET_RAISED', () => {
+        this.$refs.table.refresh();
+      });
     },
     data: () => ({
       perPage: 10,
