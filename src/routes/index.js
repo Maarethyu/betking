@@ -41,13 +41,14 @@ const apiLimiter = new RateLimit({
 });
 
 module.exports = (currencyCache) => {
+  const userService = new UserService(db);
+
   router.post('/login', async function (req, res, next) {
     const errors = validateLoginData(req);
     if (errors) {
       return res.status(400).json({errors});
     }
 
-    const userService = new UserService(db);
     const user = await userService.getUserByLoginMethod(req.body.loginmethod, req.body.username, req.body.email);
 
     if (!user) {
@@ -161,7 +162,8 @@ module.exports = (currencyCache) => {
       return res.status(401).json({error: 'Invalid Captcha'});
     }
 
-    const affiliateId = req.cookies.aff_id || null;
+    const affiliateId = await userService.extractAffiliateId(req.cookies.aff_id);
+    console.log(affiliateId);
 
     const hash = await bcrypt.hash(req.body.password, 10);
 

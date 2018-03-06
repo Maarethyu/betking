@@ -181,5 +181,14 @@ export default {
   },
   sendTip (data) {
     return post('/api/account/send-tip', data);
+  },
+  getAffiliateSummary () {
+    return get('/api/account/affiliate-summary');
+  },
+  getAffiliateUsers (limit, skip) {
+    return get(`/api/account/affiliate-users?limit=${limit}&skip=${skip}`);
+  },
+  getAffiliateAmountDue (affiliateId) {
+    return get(`/api/account/affiliate-amount-due?affiliateId=${affiliateId}`);
   }
 };

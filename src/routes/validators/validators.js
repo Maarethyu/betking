@@ -167,6 +167,11 @@ const validateBooleanOption = function (req) {
     .isBoolean();
 };
 
+const validateAffiliateId = function (req) {
+  req.checkQuery('affiliateId', 'Invalid affiliate id').exists()
+    .isInt();
+};
+
 const validateLoginData = function (req) {
   validatePassword(req);
   validateLoginMethod(req);
@@ -199,5 +204,6 @@ module.exports = {
   validateAddress,
   validateAmount,
   validateBooleanOption,
+  validateAffiliateId,
   validateLoginData
 };

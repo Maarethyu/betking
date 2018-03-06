@@ -45,7 +45,7 @@
   import bus from 'src/bus';
 
   export default {
-    name: 'PendingWithdrawals',
+    name: 'DepositHistory',
     components: {
       'b-table': bTable,
       'b-pagination': bPagination,
