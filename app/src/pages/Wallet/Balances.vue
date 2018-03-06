@@ -75,7 +75,6 @@
       }
     },
     mounted () {
-      this.fetchBalances();
       this.formatAmount = this.formatAmount.bind(this);
     },
     methods: {
@@ -90,9 +89,6 @@
         }
 
         return true;
-      },
-      fetchBalances () {
-        this.$store.dispatch('fetchAllBalances');
       },
       openDepositModal (currency) {
         this.$store.dispatch('showDepositModal', currency);

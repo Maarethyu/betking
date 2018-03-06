@@ -6,8 +6,7 @@
       ref="table"
       head-variant="dark"
       :per-page="perPage"
-      :current-page="currentPage"
-      :items="fetchDepositHistory"
+      :items="renderData"
       :fields="fields"
       :show-empty="true"
       :no-provider-sorting="true"
@@ -32,7 +31,7 @@
         </b-row>
       </template>
     </b-table>
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" />
+    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" @change="fetchDepositHistory" />
   </div>
 </template>
 
@@ -50,7 +49,7 @@
   import bus from 'src/bus';
 
   export default {
-    name: 'PendingWithdrawals',
+    name: 'DepositHistory',
     components: {
       'b-table': bTable,
       'b-pagination': bPagination,
@@ -59,10 +58,9 @@
       'b-col': bCol
     },
     data: () => ({
-      perPage: 10,
-      currentPage: 1,
       totalRows: 0,
       isBusy: false,
+      renderData: [],
       fields: [
         'show_details',
         {key: 'created_at', label: 'DATE', formatter: 'formatDate'},
@@ -70,9 +68,27 @@
         {key: 'amount', label: 'AMOUNT', formatter: 'formatAmount'}
       ]
     }),
+    props: {
+      data: {
+        type: Object,
+        required: true,
+        default: []
+      },
+      perPage: {
+        type: Number,
+        default: 10
+      }
+    },
+    watch: {
+      data (dataFromProps) {
+        if (!dataFromProps.results) return;
+        this.totalRows = parseInt(dataFromProps.count, 10);
+        this.renderData = dataFromProps.results;
+      }
+    },
     mounted () {
       bus.$on('DEPOSIT_CONFIRMED', () => {
-        this.$refs.table.refresh();
+        this.fetchDepositHistory(1);
       });
     },
     computed: mapGetters({
@@ -91,14 +107,14 @@
       formatDate (ts) {
         return moment(ts).format('LLL');
       },
-      fetchDepositHistory (ctx) {
-        const offset = (ctx.currentPage - 1) * ctx.perPage;
+      fetchDepositHistory (page) {
+        const offset = (page - 1) * this.perPage;
 
-        return api.fetchDepositHistory(ctx.perPage, offset, 'created_at')
+        api.fetchDepositHistory(this.perPage, offset, 'created_at')
           .then(res => {
             if (res && res.data && Array.isArray(res.data.results)) {
               this.totalRows = parseInt(res.data.count, 10);
-              return res.data.results;
+              this.renderData = res.data.results;
             }
           })
           .catch(error => {

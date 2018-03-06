@@ -39,11 +39,11 @@
     }),
     mounted () {
       this.token = getUrlParams().token;
-      this.confirmWd();
+      this.confirmWithdrawal();
     },
     methods: {
-      confirmWd () {
-        api.confirmWd(this.token)
+      confirmWithdrawal () {
+        api.confirmWithdrawal(this.token)
         .then(res => {
           this.message = 'Withdrawal confirmed successfully';
         })

@@ -71,6 +71,8 @@
   import WithdrawalWhitelist from './WithdrawalWhitelist';
   import ConfirmWithdrawalByEmail from './ConfirmWithdrawalByEmail';
 
+  import api from 'src/api';
+
   export default {
     name: 'UserWallet',
     components: {
@@ -84,6 +86,29 @@
       PendingDeposits,
       WithdrawalWhitelist,
       ConfirmWithdrawalByEmail
+    },
+    data: () => ({
+      pendingWithdrawals: {},
+      withdrawalHistory: {},
+      depositHistory: {},
+      pendingDeposits: {},
+      whitelistedAddresses: [],
+      perPage: 10
+    }),
+    mounted () {
+      this.fetchWalletInfo();
+    },
+    methods: {
+      fetchWalletInfo () {
+        api.fetchWalletInfo(this.perPage, 0, 'created_at')
+          .then(res => {
+            this.pendingWithdrawals = res.data.pendingWithdrawals;
+            this.withdrawalHistory = res.data.withdrawalHistory;
+            this.depositHistory = res.data.depositHistory;
+            this.pendingDeposits = res.data.pendingDeposits;
+            this.whitelistedAddresses = res.data.whitelistedAddresses;
+          });
+      }
     }
   };
 </script>

@@ -5,8 +5,7 @@
       stacked="sm"
       head-variant="dark"
       :per-page="perPage"
-      :current-page="currentPage"
-      :items="fetchWithdrawalHistory"
+      :items="renderData"
       :fields="fields"
       :show-empty="true"
       :no-provider-sorting="true"
@@ -30,7 +29,8 @@
         </b-row>
       </template>
     </b-table>
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" />
+
+    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" @change="fetchWithdrawalHistory"/>
   </div>
 </template>
 
@@ -47,7 +47,7 @@
   import api from 'src/api';
 
   export default {
-    name: 'PendingWithdrawals',
+    name: 'WithdrawalHistory',
     components: {
       'b-table': bTable,
       'b-pagination': bPagination,
@@ -56,10 +56,9 @@
       'b-col': bCol
     },
     data: () => ({
-      perPage: 10,
-      currentPage: 1,
       totalRows: 0,
       isBusy: false,
+      renderData: [],
       fields: [
         'show_details',
         {key: 'created_at', label: 'DATE', formatter: 'formatDate'},
@@ -68,6 +67,24 @@
         {key: 'status', label: 'STATUS'}
       ]
     }),
+    props: {
+      data: {
+        type: Object,
+        required: true,
+        default: []
+      },
+      perPage: {
+        type: Number,
+        default: 10
+      }
+    },
+    watch: {
+      data (dataFromProps) {
+        if (!dataFromProps.results) return;
+        this.totalRows = parseInt(dataFromProps.count, 10);
+        this.renderData = dataFromProps.results;
+      }
+    },
     computed: mapGetters({
       currencies: 'currencies',
     }),
@@ -84,14 +101,14 @@
       formatDate (ts) {
         return moment(ts).format('LLL');
       },
-      fetchWithdrawalHistory (ctx) {
-        const offset = (ctx.currentPage - 1) * ctx.perPage;
+      fetchWithdrawalHistory (page) {
+        const offset = (page - 1) * this.perPage;
 
-        return api.fetchWithdrawalHistory(ctx.perPage, offset, 'created_at')
+        api.fetchWithdrawalHistory(this.perPage, offset, 'created_at')
           .then(res => {
             if (res && res.data && Array.isArray(res.data.results)) {
               this.totalRows = parseInt(res.data.count, 10);
-              return res.data.results;
+              this.renderData = res.data.results;
             }
           })
           .catch(error => {

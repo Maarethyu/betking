@@ -41,13 +41,14 @@ const apiLimiter = new RateLimit({
 });
 
 module.exports = (currencyCache) => {
+  const userService = new UserService(db);
+
   router.post('/login', async function (req, res, next) {
     const errors = validateLoginData(req);
     if (errors) {
       return res.status(400).json({errors});
     }
 
-    const userService = new UserService(db);
     const user = await userService.getUserByLoginMethod(req.body.loginmethod, req.body.username, req.body.email);
 
     if (!user) {
@@ -80,7 +81,7 @@ module.exports = (currencyCache) => {
 
       if (isOtpValid) {
         try {
-          await db.insertTwoFactorCode(user.id, req.body.otp);
+          await db.saveUsedTwoFactorCode(user.id, req.body.otp);
           await db.log2faAttempt(user.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
           isTwoFactorOk = true;
         } catch (e) {
@@ -134,7 +135,7 @@ module.exports = (currencyCache) => {
       isEmailVerified: user.email_verified,
       dateJoined: user.date_joined,
       is2faEnabled: user.is_2fa_enabled,
-      confirmWithdrawals: user.confirm_wd,
+      confirmWithdrawals: user.confirm_withdrawal,
       statsHidden: user.stats_hidden,
       bettingDisabled: user.betting_disabled,
       showHighrollerBets: user.show_highrollers_in_chat,
@@ -161,7 +162,8 @@ module.exports = (currencyCache) => {
       return res.status(401).json({error: 'Invalid Captcha'});
     }
 
-    const affiliateId = req.cookies.aff_id || null;
+    const affiliateId = await userService.extractAffiliateId(req.cookies.aff_id);
+    console.log(affiliateId);
 
     const hash = await bcrypt.hash(req.body.password, 10);
 
@@ -185,7 +187,7 @@ module.exports = (currencyCache) => {
         isEmailVerified: user.email_verified,
         dateJoined: user.date_joined,
         is2faEnabled: user.is_2fa_enabled,
-        confirmWithdrawals: user.confirm_wd,
+        confirmWithdrawals: user.confirm_withdrawal,
         statsHidden: user.stats_hidden,
         bettingDisabled: user.betting_disabled,
         showHighrollerBets: user.show_highrollers_in_chat,
@@ -245,7 +247,11 @@ module.exports = (currencyCache) => {
 
       res.status(200).json({message: 'Password changed successfully'});
     } catch (e) {
-      res.status(409).json({error: 'Invalid token'});
+      if (e.message === 'INVALID_TOKEN') {
+        return res.status(409).json({error: 'Invalid token'});
+      }
+
+      throw e;
     }
   });
 
@@ -262,8 +268,11 @@ module.exports = (currencyCache) => {
 
       res.status(200).json({message: 'Email successfully verified.'});
     } catch (e) {
-      console.log(e);
-      res.status(409).json({error: 'Invalid token'});
+      if (e.message === 'INVALID_TOKEN') {
+        return res.status(409).json({error: 'Invalid token'});
+      }
+
+      throw e;
     }
   });
 

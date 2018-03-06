@@ -7,7 +7,7 @@
       class="whitelisted-address"
       stacked="md"
       head-variant="dark"
-      :items="fetchWhitelistedAddresses"
+      :items="renderData"
       :fields="fields"
       :show-empty="true"
       :no-provider-sorting="true"
@@ -66,6 +66,7 @@
       CurrencySelector
     },
     data: () => ({
+      renderData: [],
       activeCurrency: -1,
       activeAddress: null,
       whitelistedAddresses: [],
@@ -82,6 +83,17 @@
       currencies: 'currencies',
       is2faEnabled: 'is2faEnabled'
     }),
+    props: {
+      data: {
+        type: Array,
+        default: []
+      }
+    },
+    watch: {
+      data (dataFromProps) {
+        this.renderData = dataFromProps;
+      }
+    },
     methods: {
       getSecondFactorAuth,
       formatCurrency,
@@ -90,12 +102,12 @@
       },
       refreshTable () {
         this.refreshForms();
-        this.$refs.table.refresh();
+        this.fetchWhitelistedAddresses();
       },
       fetchWhitelistedAddresses () {
-        return api.fetchWhitelistedAddresses()
+        api.fetchWhitelistedAddresses()
           .then(res => {
-            return res.data.whitelistedAddresses;
+            this.renderData = res.data.whitelistedAddresses;
           });
       },
       async removeWhitelistedAddress (currency) {

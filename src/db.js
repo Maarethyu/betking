@@ -109,7 +109,7 @@ const disableTwoFactor = async (userId, newMfaKey) => {
   await db.none('UPDATE users SET mfa_key = $1, is_2fa_enabled = false WHERE id = $2', [newMfaKey, userId]);
 };
 
-const insertTwoFactorCode = async (userId, code) => {
+const saveUsedTwoFactorCode = async (userId, code) => {
   await db.none('INSERT INTO mfa_passcodes (user_id, passcode) values ($1, $2)', [userId, code])
     .catch(e => {
       if (e.code === '23505') {
@@ -137,8 +137,14 @@ const createVerifyEmailToken = async (userId, email) => {
 
 const resetUserPasswordByToken = async (token, newPasswordHash) => {
   await db.tx(t => {
-    return t.one('UPDATE reset_tokens SET used = true, expired_at = NOW() where id = $1 AND used = false AND expired_at > NOW() RETURNING user_id', token)
-      .then(result => t.one('UPDATE users SET password = $1 WHERE id = $2 RETURNING *', [newPasswordHash, result.user_id]))
+    return t.oneOrNone('UPDATE reset_tokens SET used = true, expired_at = NOW() where id = $1 AND used = false AND expired_at > NOW() RETURNING user_id', token)
+      .then(result => {
+        if (!result) {
+          throw new Error('INVALID_TOKEN');
+        }
+
+        return t.one('UPDATE users SET password = $1 WHERE id = $2 RETURNING *', [newPasswordHash, result.user_id]);
+      })
       .then(user => t.batch([
         t.none('UPDATE reset_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW()', user.id),
         t.none('UPDATE sessions set logged_out_at = NOW() WHERE user_id = $1', user.id)
@@ -160,11 +166,15 @@ const getWhitelistedIps = async (userId) => {
 };
 
 const isIpWhitelisted = async (ip, userId) => {
-  /* Return true if user has no whitelisted ip entry OR if whitelisted ip matches ip, else false */
-  const result = await db.oneOrNone('SELECT ip_address = $1 as whitelisted FROM whitelisted_ips WHERE user_id = $2', [ip, userId])
-    .then(row => (!row || row.whitelisted));
+  const {has_user_whitelisted_ip} = await db.one('SELECT EXISTS(SELECT id from whitelisted_ips WHERE user_id = $1) AS has_user_whitelisted_ip', userId);
 
-  return result;
+  if (!has_user_whitelisted_ip) {
+    return true;
+  }
+
+  const {is_whitelisted} = await db.one('SELECT EXISTS(SELECT id from whitelisted_ips WHERE user_id = $1 AND ip_address = $2) AS is_whitelisted', [userId, ip]);
+
+  return is_whitelisted;
 };
 
 const logoutAllSessionsWithoutWhitelistedIps = async (userId) => {
@@ -212,10 +222,15 @@ const markEmailAsVerified = async (token) => {
   await db.tx(t => {
     return t.one('SELECT u.email, e.user_id FROM users AS u INNER JOIN verify_email_tokens AS e ON u.id = e.user_id WHERE e.id = $1', token)
       .then(res => t.batch([
-        t.one('UPDATE verify_email_tokens SET used = $1, expired_at = NOW() where id = $2 AND used = false AND expired_at > NOW() AND email = $3 RETURNING email', [true, token, res.email]),
+        t.oneOrNone('UPDATE verify_email_tokens SET used = $1, expired_at = NOW() where id = $2 AND used = false AND expired_at > NOW() AND email = $3 RETURNING email', [true, token, res.email]),
         t.none('UPDATE users SET email_verified = $1 WHERE id = $2', [true, res.user_id]),
         t.none('UPDATE verify_email_tokens SET expired_at = NOW() WHERE user_id = $1 AND expired_at > NOW() AND id != $2', [res.user_id, token])
-      ]));
+      ]))
+      .then(res => {
+        if (!res[0]) {
+          throw new Error('INVALID_TOKEN');
+        }
+      });
   });
 };
 
@@ -243,8 +258,8 @@ const createWithdrawalEntry = async (userId, currency, withdrawalFee, amount, am
   });
 };
 
-const setConfirmWithdrawalByEmail = async (userId, confirmWd) => {
-  await db.oneOrNone('UPDATE users SET confirm_wd = $1 WHERE id = $2 AND email IS NOT NULL AND email_verified = true RETURNING *', [confirmWd, userId])
+const setConfirmWithdrawalByEmail = async (userId, confirmWithdrawal) => {
+  await db.oneOrNone('UPDATE users SET confirm_withdrawal = $1 WHERE id = $2 AND email IS NOT NULL AND email_verified = true RETURNING *', [confirmWithdrawal, userId])
     .then(row => {
       if (!row) {
         throw new Error('VALID_USER_NOT_FOUND');
@@ -281,21 +296,14 @@ const addDeposit = async (currencyToQuery, currency, amount, address, txid) => {
             return userId;
           });
       })
-      .then(userId => {
-        // Add a tx entry in user_deposits
-        return t.one('INSERT INTO user_deposits (id, user_id, currency, amount, address, txid) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [uuidV4(), userId, currency, amount, address, txid]);
-      })
-      .then(row => {
-        /* Update or Insert Balance */
-        // TODO: We can have a better query for this which uses upsert / on conflict update ?
-        return t.oneOrNone('SELECT id FROM user_balances WHERE user_id = $1 AND currency = $2', [row.user_id, row.currency])
-          .then(res => {
-            if (!res) {
-              return t.one('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3) RETURNING *', [row.user_id, row.currency, row.amount]);
-            }
-
-            return t.one('UPDATE user_balances SET balance = balance + $1 WHERE id = $2 RETURNING *', [row.amount, res.id]);
-          });
+      .then(userId => t.batch([
+        t.one('INSERT INTO user_deposits (id, user_id, currency, amount, address, txid) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [uuidV4(), userId, currency, amount, address, txid]),
+        t.one('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3) ON CONFLICT (user_id, currency) DO UPDATE SET balance = user_balances.balance + $3 RETURNING *', [userId, currency, amount])
+      ]))
+      .then(res => {
+        if (res.length === 2) {
+          return res[1];
+        }
       });
   });
 
@@ -451,6 +459,28 @@ const doDiceBet = async (userId, betAmount, currency, profit, roll, target, chan
   return result;
 };
 
+const updateMonthlyBetStats = async (userId, date, betAmount, currency, profit, gameType) => {
+  // TODO: review for race condition, review if we need db.tx() here
+  await db.tx(t => {
+    return t.oneOrNone(`
+      UPDATE monthly_bet_stats
+      SET total_wagered = total_wagered + $1, total_profit = total_profit + $2
+      WHERE game_type = $3 AND currency = $4 AND start_of_month = date_trunc(\'MONTH\', $5::date) AND player_id = $6
+      RETURNING id`,
+      [betAmount, profit, gameType, currency, date, userId]
+    ).then(res => {
+      if (!res) {
+        return t.none(`
+          INSERT INTO monthly_bet_stats
+          (player_id, start_of_month, total_wagered, currency, total_profit, game_type)
+          VALUES ($1, date_trunc(\'MONTH\', $2::date), $3, $4, $5, $6)`,
+          [userId, date, betAmount, currency, profit, gameType]
+        );
+      }
+    });
+  });
+};
+
 const setNewDiceClientSeed = async (userId, newClientSeed) => {
   return db.tx(t => {
     /* Set in_use = false for current active seed */
@@ -598,6 +628,68 @@ const sendTip = async (userId, username, amount, currency) => {
   });
 };
 
+const getAffiliateSummary = async (username, userId) => {
+  const result = await db.any(`SELECT total_claimed, amount_due, payments.currency as payment_currency, payments_due.currency as payments_due_currency from
+    (
+      SELECT SUM(earnings) as total_claimed, currency
+      from users
+      inner join
+      affiliate_payments on affiliate_payments.affiliate_user_id = users.id
+      WHERE users.affiliate_id = $1
+      GROUP by affiliate_payments.currency
+    ) as payments
+    full outer join
+    (
+      SELECT SUM(total_wagered) as amount_due, currency
+      from users
+      inner join
+      monthly_bet_stats on monthly_bet_stats.player_id = users.id
+      WHERE users.affiliate_id = $1
+      AND monthly_bet_stats.start_of_month > (
+        SELECT COALESCE(MAX(payment_till_date)::DATE, NOW() - interval '1 month') FROM affiliate_payments WHERE user_id = $2
+      )
+      GROUP by monthly_bet_stats.currency
+    ) as payments_due
+    on payments.currency = payments_due.currency`,
+    [username, userId]
+  );
+
+  return result;
+};
+
+const getAffiliateUsers = async (username, limit, offset) => {
+  const results = await db.any(`SELECT COALESCE(SUM(earnings), 0) as earnings, currency, username, users.id as user_id
+    from users
+    left join
+    affiliate_payments on affiliate_payments.affiliate_user_id = users.id
+    WHERE users.affiliate_id = $1
+    GROUP by affiliate_payments.currency, users.username, users.id
+    ORDER BY COALESCE(SUM(earnings), 0) DESC
+    LIMIT $2 OFFSET $3`,
+    [username, limit, offset]
+  );
+
+  const {count} = await db.one('SELECT COUNT(*) FROM users WHERE users.affiliate_id = $1', username);
+
+  return {results, count};
+};
+
+const getAmountDueByAffiliate = async (username, userId, affiliateUserId) => {
+  const result = await db.any(`SELECT COALESCE(SUM(total_wagered), 0) as amount_due, currency
+    from users
+    inner join
+    monthly_bet_stats on monthly_bet_stats.player_id = users.id
+    WHERE users.affiliate_id = $1 AND monthly_bet_stats.player_id = $2
+    AND monthly_bet_stats.start_of_month > (
+      SELECT COALESCE(MAX(payment_till_date)::DATE, NOW() - interval '1 month') FROM affiliate_payments WHERE user_id = $3 AND affiliate_user_id = $2
+    )
+    GROUP by monthly_bet_stats.currency`,
+    [username, affiliateUserId, userId]
+  );
+
+  return result;
+};
+
 module.exports = {
   isEmailAlreadyTaken,
   isUserNameAlreadyTaken,
@@ -619,7 +711,7 @@ module.exports = {
   createResetToken,
   findLatestActiveResetToken,
   resetUserPasswordByToken,
-  insertTwoFactorCode,
+  saveUsedTwoFactorCode,
   addIpInWhitelist,
   removeIpFromWhitelist,
   getWhitelistedIps,
@@ -658,6 +750,7 @@ module.exports = {
   getActiveDiceSeed,
   addNewDiceSeed,
   doDiceBet,
+  updateMonthlyBetStats,
   setNewDiceClientSeed,
   generateNewSeed,
   toggleStatsHidden,
@@ -665,6 +758,9 @@ module.exports = {
   getBetStatsByCurrency,
   // BETS
   getBetDetails,
+  getAffiliateSummary,
+  getAffiliateUsers,
+  getAmountDueByAffiliate,
   // STATS
   getUserStats,
   computeWonLast24Hours,

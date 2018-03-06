@@ -134,7 +134,7 @@
           });
 
           if (response.data.error) {
-            newErrors.ip = response.data.error;
+            newErrors.global = response.data.error;
           }
 
           this.errors = newErrors;

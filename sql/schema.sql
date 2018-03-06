@@ -9,7 +9,7 @@ CREATE TABLE users (
   stats_hidden boolean NOT NULL default false,
   betting_disabled boolean NOT NULL default false,
   affiliate_id text NULL,
-  confirm_wd boolean NOT NULL DEFAULT false,
+  confirm_withdrawal boolean NOT NULL DEFAULT false,
   ignored_users text[],
   show_highrollers_in_chat boolean NOT NULL DEFAULT true,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW(),
@@ -236,6 +236,29 @@ CREATE TABLE chats (
   username text NOT NULL,
   message text NOT NULL,
   language text NOT NULL,
-  date timestamp with time zone NOT NULL  DEFAULT NOW(),
+  date timestamp with time zone NOT NULL DEFAULT NOW(),
   is_hidden boolean DEFAULT false NOT NULL
+);
+
+CREATE TABLE monthly_bet_stats (
+  id bigserial PRIMARY KEY,
+  player_id bigint NOT NULL REFERENCES users(id),
+  start_of_month date NOT NULL,
+  total_wagered numeric (36, 0) NOT NULL,
+  currency integer NOT NULL REFERENCES currencies(id) NOT NULL,
+  total_profit numeric (36, 0) NOT NULL,
+  game_type text NOT NULL,
+  check (extract (day from start_of_month) = 1)
+);
+
+CREATE UNIQUE INDEX unique_player_id_currency_start_of_month ON monthly_bet_stats(player_id, currency, start_of_month);
+
+CREATE TABLE affiliate_payments (
+  id bigserial PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  affiliate_user_id bigint NOT NULL REFERENCES users(id),
+  payment_till_date date NOT NULL,
+  earnings numeric (36, 0) NOT NULL,
+  currency integer NOT NULL REFERENCES currencies(id),
+  created_at timestamp with time zone NOT NULL DEFAULT NOW()
 );

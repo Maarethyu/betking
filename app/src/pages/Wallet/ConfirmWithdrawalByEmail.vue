@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="errors.confirmWd" class="alert alert-danger">{{ errors.confirmWd }}</div>
+    <div v-if="errors.confirmWithdrawal" class="alert alert-danger">{{ errors.confirmWithdrawal }}</div>
     <p>
       Should withdrawals require confirmation via email?
     </p>
@@ -58,14 +58,14 @@
 
             if (e.response.data.error === 'VALID_USER_NOT_FOUND') {
               this.errors = {
-                confirmWd: 'You must add an email id to profile and verify it'
+                confirmWithdrawal: 'You must add an email id to profile and verify it'
               };
 
               return;
             }
 
             this.errors = {
-              confirmWd: e.response.data.error
+              confirmWithdrawal: e.response.data.error
             };
           });
       }

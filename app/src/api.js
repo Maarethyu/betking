@@ -9,7 +9,7 @@ const csrfToken = () => {
 
 const errorHandler = function (error) {
   if (error.response && error.response.status === 401) {
-    store.dispatch('clearAuthState');
+    store.dispatch('resetStores');
     routeUserOnLogout();
   }
 
@@ -105,11 +105,14 @@ export default {
   getDepositAddress (currency) {
     return get(`/api/account/deposit-address?currency=${currency}`);
   },
-  toggleEmailWithdrawalConfirmation (confirmWd, otp) {
-    return post('/api/account/set-confirm-withdraw-by-email', {confirmWd, otp});
+  toggleEmailWithdrawalConfirmation (option, otp) {
+    return post('/api/account/set-confirm-withdraw-by-email', {option, otp});
   },
-  confirmWd (token) {
+  confirmWithdrawal (token) {
     return post('/api/confirm-withdraw', {token});
+  },
+  fetchWalletInfo (limit, skip, sort) {
+    return get(`/api/account/wallet?limit=${limit}&skip=${skip}&sort=${sort}`);
   },
   fetchPendingWithdrawals (limit, skip, sort) {
     return get(`/api/account/pending-withdrawals?limit=${limit}&skip=${skip}&sort=${sort}`);
@@ -133,8 +136,8 @@ export default {
   addWhitelistedAddress (currency, address, otp) {
     return post('/api/account/whitelisted-address/add', {currency, address, otp});
   },
-  toggleStatsHidden (statsHidden) {
-    return post('/api/account/toggle-stats-hidden', {statsHidden});
+  toggleStatsHidden (option) {
+    return post('/api/account/toggle-stats-hidden', {option});
   },
   disableBetting () {
     return post('/api/account/disable-betting');
@@ -178,5 +181,14 @@ export default {
   },
   sendTip (data) {
     return post('/api/account/send-tip', data);
+  },
+  getAffiliateSummary () {
+    return get('/api/account/affiliate-summary');
+  },
+  getAffiliateUsers (limit, skip) {
+    return get(`/api/account/affiliate-users?limit=${limit}&skip=${skip}`);
+  },
+  getAffiliateAmountDue (affiliateId) {
+    return get(`/api/account/affiliate-amount-due?affiliateId=${affiliateId}`);
   }
 };

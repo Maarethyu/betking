@@ -7,7 +7,7 @@ import bus from 'src/bus';
 import api from 'src/api';
 import {addBetToList} from 'src/helpers';
 
-const state = {
+const initialState = () => ({
   clientSeed: '',
   serverSeedHash: '',
   nonce: null,
@@ -23,7 +23,7 @@ const state = {
   autoBettingEnabled: false,
   autoBetStarted: false,
   autoBetSettings: {}
-};
+});
 
 // getters
 const getters = {
@@ -205,11 +205,18 @@ const mutations = {
 
   [types.SET_AUTO_BET_SETTINGS] (state, autoBetSettings) {
     state.autoBetSettings = autoBetSettings;
+  },
+
+  [types.RESET_DICE_STORE] (state) {
+    const s = initialState();
+    Object.keys(s).forEach(key => {
+      state[key] = s[key];
+    });
   }
 };
 
 export default {
-  state,
+  state: initialState(),
   getters,
   actions,
   mutations
