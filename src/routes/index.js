@@ -318,6 +318,8 @@ module.exports = (currencyCache) => {
 
     const result = await db.addSupportTicket(req.body.name, req.body.email, req.body.message, userId);
 
+    mailer.sendSupportTicketRaisedEmail(req.body.name, req.body.email, req.body.message, result.id);
+
     res.json({ticketId: result.id});
   });
 
