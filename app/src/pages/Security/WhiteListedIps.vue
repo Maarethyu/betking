@@ -1,53 +1,62 @@
 <template>
-  <b-row>
-    <b-col cols="10" offset="1">
-    <h1>Whitelisted IPs</h1>
-    <br>
-      <b-table
-        id="whitelisted-ips-table"
-        stacked="sm"
-        :items="getWhitelistedIpAddresses"
-        :fields="fields"
-        :show-empty="true"
-        :no-provider-sorting="true"
-        :foot-clone="true"
-        ref="table"
-        empty-text="You don't have any whitelisted ips"
-        responsive striped small outlined hover>
+  <b-container class="whitelisted-ip">
+    <b-row>
+      <b-col>
+      <h5>Whitelisted IPs</h5>
+        <b-table
+          id="whitelisted-ips-table"
+          stacked="sm"
+          head-variant="dark"
+          :items="getWhitelistedIpAddresses"
+          :fields="fields"
+          :show-empty="true"
+          :no-provider-sorting="true"
+          ref="table"
+          empty-text="You don't have any whitelisted ips"
+          responsive small outlined hover>
 
-        <template slot="+" slot-scope="row">
-          <b-button size="sm" variant="danger"  @click="deleteIp(row.item.ip_address)">
-            Remove
-          </b-button>
-        </template>
+          <template slot="+" slot-scope="row">
+            <b-button size="sm" variant="danger"  @click="deleteIp(row.item.ip_address)">
+              Remove
+            </b-button>
+          </template>
 
-        <template slot="FOOT_ip_address" slot-scope="data">
-          <b-form-input size="sm" v-model="newIp" placeholder="IP Address" :state="newIp && !errors.ip" />
-          <b-form-invalid-feedback>{{errors.ip}}</b-form-invalid-feedback>
-        </template>
+          <template slot="FOOT_ip_address" slot-scope="data">
+          </template>
 
-        <template slot="FOOT_+" slot-scope="data">
-          <b-button size="sm" variant="default"  @click="addIp(newIp)" :disabled="newIp === null || !newIp">
-            Add
-          </b-button>
-          <b-button size="sm" variant="default"  @click="addIp()">
-            Add Current
-          </b-button>
-        </template>
+          <template slot="FOOT_+" slot-scope="data">
+          </template>
 
-      </b-table>
-    </b-col>
-  </b-row>
+        </b-table>
+      </b-col>
+    </b-row>
+    <b-row class="add-ip">
+      <b-col class="col-sm-6" md="9">
+        <b-form-input size="sm" v-model="newIp" placeholder="IP Address" :state="newIp && !errors.ip" />
+        <b-form-invalid-feedback>{{errors.ip}}</b-form-invalid-feedback>
+      </b-col>
+      <b-col class="col-sm-6" md="3">
+        <b-button size="sm" variant="default" class="btn-gray" @click="addIp(newIp)" :disabled="newIp === null || !newIp">
+          Add
+        </b-button>
+        <b-button size="sm" variant="default" class="btn-gray float-right" @click="addIp()">
+          Add Current
+        </b-button>
+      </b-col>
+    </b-row>
+    <hr>
+  </b-container>
 </template>
 
 <script>
+  import bContainer from 'bootstrap-vue/es/components/layout/container';
   import bTable from 'bootstrap-vue/es/components/table/table';
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
   import bButton from 'bootstrap-vue/es/components/button/button';
   import bFormInput from 'bootstrap-vue/es/components/form-input/form-input';
   import bFormInvalidFeedback from 'bootstrap-vue/es/components/form/form-invalid-feedback';
-  
+
   import {getSecondFactorAuth} from 'src/helpers';
   import api from 'src/api';
   import {mapGetters} from 'vuex';
@@ -56,6 +65,7 @@
   export default {
     name: 'WhitelistedIps',
     components: {
+      'b-container': bContainer,
       'b-table': bTable,
       'b-row': bRow,
       'b-col': bCol,
@@ -133,3 +143,14 @@
     }
   };
 </script>
+
+<style lang="scss">
+.whitelisted-ip {
+  .add-ip {
+    input {
+      background: none;
+    }
+  }
+}
+</style>
+

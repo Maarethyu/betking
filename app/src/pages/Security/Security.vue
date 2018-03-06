@@ -1,11 +1,8 @@
 <template>
-  <div>
+  <div class="account-pages">
     <Sessions />
-    <br />
     <SetSecondFactorAuth />
-    <br />
     <WhiteListedIps />
-    <br />
     <LoginAttempts />
   </div>
 </template>
