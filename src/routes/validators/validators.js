@@ -167,6 +167,12 @@ const validateBooleanOption = function (req) {
     .isBoolean();
 };
 
+const textValidator = function (req, fieldName) {
+  req.checkBody(fieldName, `Invalid ${fieldName}`).exists()
+    .custom(value => typeof value === 'string')
+    .isLength({min: 1, max: 4000});
+};
+
 const validateLoginData = function (req) {
   validatePassword(req);
   validateLoginMethod(req);
@@ -199,5 +205,6 @@ module.exports = {
   validateAddress,
   validateAmount,
   validateBooleanOption,
+  textValidator,
   validateLoginData
 };

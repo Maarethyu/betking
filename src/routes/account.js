@@ -538,5 +538,19 @@ module.exports = (currencyCache) => {
     res.end();
   });
 
+  router.get('/support-tickets', async function (req, res, next) {
+    validateLimit(req);
+    validateSkip(req);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const result = await db.getSupportTicketsForUser(req.currentUser.id, req.query.limit || 10, req.query.skip || 0);
+
+    res.json(result);
+  });
+
   return router;
 };

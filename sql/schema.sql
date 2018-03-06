@@ -239,3 +239,14 @@ CREATE TABLE chats (
   date timestamp with time zone NOT NULL  DEFAULT NOW(),
   is_hidden boolean DEFAULT false NOT NULL
 );
+
+CREATE TABLE support_tickets (
+  id bigserial PRIMARY KEY,
+  name text NOT NULL,
+  email text NOT NULL,
+  message text NOT NULL,
+  status text NOT NULL DEFAULT 'open',
+  comment text,
+  user_id bigint REFERENCES users(id),
+  date timestamp with time zone NOT NULL DEFAULT NOW()
+);

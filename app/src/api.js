@@ -181,5 +181,11 @@ export default {
   },
   sendTip (data) {
     return post('/api/account/send-tip', data);
+  },
+  raiseSupportTicket (name, email, message) {
+    return post('/api/support', {name, email, message});
+  },
+  fetchSupportTickets (limit, skip) {
+    return get(`/api/account/support-tickets?limit=${limit}&skip=${skip}`);
   }
 };

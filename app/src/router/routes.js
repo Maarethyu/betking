@@ -15,6 +15,7 @@ const routes = [
       {path: '/dice', component: () => import('pages/Dice/Dice'), name: 'dice'},
       {path: '/stats', component: () => import('pages/Stats'), name: 'stats'},
       {path: '/all-bets', component: () => import('pages/AllBets'), name: 'allBets'},
+      {path: '/support', component: () => import('pages/Support/Support'), name: 'support'},
 
       /* Pages which need user to be logged out */
 
