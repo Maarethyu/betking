@@ -40,7 +40,7 @@ const getters = {
   showHighrollerBets: state => state.showHighrollerBets,
   ignoredUsers: state => state.ignoredUsers,
   is2faEnabled: state => state.is2faEnabled,
-  fingerprint: statte => state.fingerprint
+  fingerprint: state => state.fingerprint
 };
 
 // actions
@@ -66,16 +66,16 @@ const actions = {
     routeUserOnLogin();
   },
 
-  logout ({commit}) {
+  logout ({commit, dispatch}) {
     return api.logout()
       .then(() => {
-        commit(types.UPDATE_AUTHSTATE, false);
+        dispatch('resetStores');
         routeUserOnLogout();
       })
       .catch(error => {
         if (error.response && error.response.status === 401) {
           // User is already logged out
-          commit(types.UPDATE_AUTHSTATE, false);
+          dispatch('resetStores');
           routeUserOnLogout();
         } else {
           throw error;
@@ -83,19 +83,23 @@ const actions = {
       });
   },
 
-  clearAuthState ({commit}) {
+  resetStores ({commit}) {
     commit(types.UPDATE_AUTHSTATE, false);
+    commit(types.RESET_DICE_STORE);
+    commit(types.RESET_FUNDS_STORE);
+    commit(types.RESET_MODALS_STORE);
+    // commit(types.RESET_SOCKET_STORE);
   },
 
-  logoutAll ({commit}) {
+  logoutAll ({commit, dispatch}) {
     return api.logoutAll()
       .then(() => {
-        commit(types.UPDATE_AUTHSTATE, false);
+        dispatch('resetStores');
         routeUserOnLogout();
       })
       .catch(error => {
         if (error.response && error.response.status === 401) {
-          commit(types.UPDATE_AUTHSTATE, false);
+          dispatch('resetStores');
           routeUserOnLogout();
         } else {
           throw error;
