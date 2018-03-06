@@ -166,11 +166,15 @@ const getWhitelistedIps = async (userId) => {
 };
 
 const isIpWhitelisted = async (ip, userId) => {
-  /* Return true if user has no whitelisted ip entry OR if whitelisted ip matches ip, else false */
-  const result = await db.oneOrNone('SELECT ip_address = $1 as whitelisted FROM whitelisted_ips WHERE user_id = $2', [ip, userId])
-    .then(row => (!row || row.whitelisted));
+  const {has_user_whitelisted_ip} = await db.one('SELECT EXISTS(SELECT id from whitelisted_ips WHERE user_id = $1) AS has_user_whitelisted_ip', userId);
 
-  return result;
+  if (!has_user_whitelisted_ip) {
+    return true;
+  }
+
+  const {is_whitelisted} = await db.one('SELECT EXISTS(SELECT id from whitelisted_ips WHERE user_id = $1 AND ip_address = $2) AS is_whitelisted', [userId, ip]);
+
+  return is_whitelisted;
 };
 
 const logoutAllSessionsWithoutWhitelistedIps = async (userId) => {
