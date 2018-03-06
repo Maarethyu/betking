@@ -140,6 +140,8 @@ module.exports = (currencyCache) => {
         stats_hidden: req.currentUser.stats_hidden
       };
       eventEmitter.emit(types.DICE_BET, eventPayload);
+
+      await db.updateMonthlyBetStats(req.currentUser.id, result.date, betAmount.toString(), currency, profit, 'dice');
     } catch (e) {
       if (e.message === 'INSUFFICIENT_BALANCE') {
         return res.status(400).json({error: 'Balance too low'});

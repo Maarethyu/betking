@@ -13,6 +13,20 @@ class UserService {
       return null;
     }
   }
+
+  async extractAffiliateId (affiliateId) {
+    if (!affiliateId) {
+      return null;
+    }
+    if (affiliateId.indexOf('u:') === 0) {
+      const user = await this.db.getUserByName(affiliateId.replace('u:', ''));
+      if (!user) {
+        return null;
+      }
+      return user.username;
+    }
+    return affiliateId;
+  }
 }
 
 module.exports = UserService;
