@@ -22,7 +22,8 @@ const routes = [
       /* Pages which need user authentication */
       {path: 'settings', component: () => import('pages/Settings/Settings'), name: 'settings', meta: {requiresAuth: true}},
       {path: 'wallet', component: () => import('pages/Wallet/Wallet'), name: 'wallet', meta: {requiresAuth: true}},
-      {path: 'security', component: () => import('pages/Security/Security'), name: 'security', meta: {requiresAuth: true}}
+      {path: 'security', component: () => import('pages/Security/Security'), name: 'security', meta: {requiresAuth: true}},
+      {path: 'affiliates', component: () => import('pages/Affiliate/Affiliate'), name: 'affiliates', meta: {requiresAuth: true}}
     ]
   },
   /* Pages which do not need user session to be fetched */

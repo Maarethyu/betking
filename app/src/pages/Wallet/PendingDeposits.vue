@@ -52,6 +52,7 @@
     data: () => ({
       totalRows: 0,
       isBusy: false,
+      renderData: [],
       fields: [
         {key: 'show_details', label: '+'},
         {key: 'created_at', label: 'Date', formatter: 'formatDate'},

@@ -9,7 +9,7 @@ const csrfToken = () => {
 
 const errorHandler = function (error) {
   if (error.response && error.response.status === 401) {
-    store.dispatch('clearAuthState');
+    store.dispatch('resetStores');
     routeUserOnLogout();
   }
 
@@ -187,5 +187,14 @@ export default {
   },
   fetchSupportTickets (limit, skip) {
     return get(`/api/account/support-tickets?limit=${limit}&skip=${skip}`);
+  },
+  getAffiliateSummary () {
+    return get('/api/account/affiliate-summary');
+  },
+  getAffiliateUsers (limit, skip) {
+    return get(`/api/account/affiliate-users?limit=${limit}&skip=${skip}`);
+  },
+  getAffiliateAmountDue (affiliateId) {
+    return get(`/api/account/affiliate-amount-due?affiliateId=${affiliateId}`);
   }
 };

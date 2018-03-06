@@ -41,7 +41,7 @@
   import api from 'src/api';
 
   export default {
-    name: 'PendingWithdrawals',
+    name: 'WithdrawalHistory',
     components: {
       'b-table': bTable,
       'b-pagination': bPagination,
@@ -52,6 +52,7 @@
     data: () => ({
       totalRows: 0,
       isBusy: false,
+      renderData: [],
       fields: [
         {key: 'show_details', label: '+'},
         {key: 'created_at', label: 'Date', formatter: 'formatDate'},

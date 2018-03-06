@@ -173,6 +173,11 @@ const textValidator = function (req, fieldName) {
     .isLength({min: 1, max: 4000});
 };
 
+const validateAffiliateId = function (req) {
+  req.checkQuery('affiliateId', 'Invalid affiliate id').exists()
+    .isInt();
+};
+
 const validateLoginData = function (req) {
   validatePassword(req);
   validateLoginMethod(req);
@@ -206,5 +211,6 @@ module.exports = {
   validateAmount,
   validateBooleanOption,
   textValidator,
+  validateAffiliateId,
   validateLoginData
 };

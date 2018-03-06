@@ -24,7 +24,8 @@ const {
   validateCurrency,
   validateAddress,
   validateAmount,
-  validateBooleanOption
+  validateBooleanOption,
+  validateAffiliateId
 } = require('./validators/validators');
 
 const getWalletTransactions = (dbQuery) => async (req) => {
@@ -550,6 +551,48 @@ module.exports = (currencyCache) => {
     const result = await db.getSupportTicketsForUser(req.currentUser.id, req.query.limit || 10, req.query.skip || 0);
 
     res.json(result);
+  });
+
+  router.get('/affiliate-summary', async function (req, res, next) {
+    validateLimit(req);
+    validateSkip(req);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const summary = await db.getAffiliateSummary(req.currentUser.username, req.currentUser.id);
+    const affiliateUsers = await db.getAffiliateUsers(req.currentUser.username, req.query.limit || 10, req.query.skip || 0);
+
+    res.json({summary, affiliateUsers});
+  });
+
+  router.get('/affiliate-users', async function (req, res, next) {
+    validateLimit(req);
+    validateSkip(req);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const affiliateUsers = await db.getAffiliateUsers(req.currentUser.username, req.query.limit || 10, req.query.skip || 0);
+
+    res.json({affiliateUsers});
+  });
+
+  router.get('/affiliate-amount-due', async function (req, res, next) {
+    validateAffiliateId(req);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const amountsDueByCurrency = await db.getAmountDueByAffiliate(req.currentUser.username, req.currentUser.id, req.query.affiliateId);
+
+    res.json({amountsDueByCurrency});
   });
 
   return router;
