@@ -1,9 +1,7 @@
 <template>
-  <b-container class="settings">
-    <h3>Profile</h3>
+  <b-container class="settings account-pages">
+    <h5>PROFILE</h5>
     <Profile />
-
-    <br />
     <BetSettings />
   </b-container>
 </template>

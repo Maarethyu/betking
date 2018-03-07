@@ -3,14 +3,18 @@
     <b-table
       id="wallet-deposit-history"
       stacked="sm"
+      ref="table"
+      head-variant="dark"
       :per-page="perPage"
       :items="renderData"
       :fields="fields"
       :show-empty="true"
       :no-provider-sorting="true"
       empty-text="You haven't made any deposits"
-      responsive striped small outlined hover>
-
+      responsive small outlined hover>
+      <template slot="HEAD_show_details" slot-scope="data">
+        <i class="fa fa-plus"></i>
+      </template>
       <template slot="show_details" slot-scope="row">
         <b-button size="sm" variant="default" @click.stop="row.toggleDetails">
           {{ row.detailsShowing ? '-' : '+'}}
@@ -27,7 +31,7 @@
         </b-row>
       </template>
     </b-table>
-    <b-pagination :total-rows="totalRows" :per-page="perPage" @change="fetchDepositHistory" align="right" />
+    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" @change="fetchDepositHistory" />
   </div>
 </template>
 
@@ -58,10 +62,10 @@
       isBusy: false,
       renderData: [],
       fields: [
-        {key: 'show_details', label: '+'},
-        {key: 'created_at', label: 'Date', formatter: 'formatDate'},
-        {key: 'currency', label: 'Currency', formatter: 'showCurrencySymbol'},
-        {key: 'amount', label: 'Amount', formatter: 'formatAmount'}
+        'show_details',
+        {key: 'created_at', label: 'DATE', formatter: 'formatDate'},
+        {key: 'currency', label: 'CURRENCY', formatter: 'showCurrencySymbol'},
+        {key: 'amount', label: 'AMOUNT', formatter: 'formatAmount'}
       ]
     }),
     props: {

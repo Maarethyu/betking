@@ -53,7 +53,7 @@
       },
       defaultName: {
         type: String,
-        default: 'Choose Currency'
+        default: 'Currency'
       },
       showAllCurrenciesOption: {
         type: Boolean,

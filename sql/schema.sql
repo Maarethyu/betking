@@ -240,6 +240,17 @@ CREATE TABLE chats (
   is_hidden boolean DEFAULT false NOT NULL
 );
 
+CREATE TABLE support_tickets (
+  id bigserial PRIMARY KEY,
+  name text NOT NULL,
+  email text NOT NULL,
+  message text NOT NULL,
+  status text NOT NULL DEFAULT 'open',
+  comment text,
+  user_id bigint REFERENCES users(id),
+  date timestamp with time zone NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE monthly_bet_stats (
   id bigserial PRIMARY KEY,
   player_id bigint NOT NULL REFERENCES users(id),

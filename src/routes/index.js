@@ -15,7 +15,8 @@ const {
   validateEmail,
   validateEmailAvailable,
   validateToken,
-  validateRecaptcha} = require('./validators/validators');
+  validateRecaptcha,
+  textValidator} = require('./validators/validators');
 const UserService = require('../services/userService');
 const captchaValidator = require('./validators/captchaValidator');
 const milliSecondsInYear = 31536000000;
@@ -33,10 +34,10 @@ const createSession = async function (res, userId, rememberMe, ip, fingerprint) 
 };
 
 const apiLimiter = new RateLimit({
-  windowMs: 1000,
+  windowMs: config.get('RATE_LIMITER_REGISTER_WINDOW_IN_MS'),
   max: config.get('REGISTER_RATE_LIMIT'),
-  delayAfter: 1,
-  delayMs: 200,
+  delayAfter: config.get('RATE_LIMITER_DELAY_AFTER'),
+  delayMs: config.get('RATE_LIMITER_DELAY_IN_MS'),
   keyGenerator: helpers.getIp
 });
 
@@ -175,9 +176,8 @@ module.exports = (currencyCache, txnFeeCache) => {
       await createSession(res, user.id, false, helpers.getIp(req), helpers.getFingerPrint(req));
 
       if (user.email) {
-        mailer.sendWelcomeEmail(user.username, user.email);
         const verifyEmailToken = await db.createVerifyEmailToken(user.id, user.email);
-        mailer.sendVerificationEmail(user.username, user.email, verifyEmailToken.id);
+        mailer.sendWelcomeEmail(user.username, user.email, verifyEmailToken.id);
       }
 
       res.json({
@@ -310,6 +310,25 @@ module.exports = (currencyCache, txnFeeCache) => {
     } catch (e) {
       return res.status(400).json({error: 'Could not fetch recommended transaction fee'});
     }
+  });
+
+  router.post('/support', async function (req, res, next) {
+    textValidator(req, 'name');
+    textValidator(req, 'message');
+    validateEmail(req, false);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const userId = req.currentUser ? req.currentUser.id : null;
+
+    const result = await db.addSupportTicket(req.body.name, req.body.email, req.body.message, userId);
+
+    mailer.sendSupportTicketRaisedEmail(req.body.name, req.body.email, req.body.message, result.id);
+
+    res.json({ticketId: result.id});
   });
 
   return router;

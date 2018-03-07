@@ -1,45 +1,61 @@
 <template>
-  <b-row>
-    <b-col cols="10" offset="1">
-      <h1>Two factor authentication</h1>
+  <b-container>
+    <div></div>
+    <b-row>
+      <b-col>
+        <h5>Two factor authentication</h5>
+        <div v-if="error" class="alert alert-danger">{{ error }}</div>
+      </b-col>
+    </b-row>
+    <template v-if="is2faEnabled">
+      <b-row>
+        <b-col cols="8">
+          <h5>Disable Two factor auth</h5>
+          <b-form v-on:submit.prevent="disableTwoFactorAuth">
+            <b-form-group label="Code from Google authenticator" label-for="code">
+              <b-form-input id="code" placeholder="Code" name="otp" v-model="otp" :state="!error && otp" />
+              <b-button variant="danger" type="submit">Disable</b-button>
+            </b-form-group>
+          </b-form>
+        </b-col>
+      </b-row>
+    </template>
 
-      <div v-if="error" class="alert alert-danger">{{ error }}</div>
-
-      <template v-if="is2faEnabled">
-        <div class="alert alert-success">Two factor authentication is enabled</div>
-        <br>
-        <h3>Disable Two factor auth</h3>
-        <b-form v-on:submit.prevent="disableTwoFactorAuth">
-          <b-form-group label="Code from Google authenticator" label-for="code">
-            <b-form-input id="code" placeholder="Code" name="otp" v-model="otp" :state="!error && otp" />
-          </b-form-group>
-          <br>
-          <b-button variant="danger" type="submit">Disable</b-button>
-        </b-form>
-      </template>
-
-      <template v-else>
-        <h5>Two factor authentication is NOT enabled</h5>
-        <br>
-        <div class="text-center">
-          <img :src="newQr" width="300">
-          <br>
-          <br>
+    <template v-else>
+      <b-row>
+        <b-col class="col-sm-12" md="8">
+          <b-row>
+            <b-col cols="12">
+              <div>Code from Google authenticator</div>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="9">
+              <b-form v-on:submit.prevent="enableTwoFactorAuth">
+                <b-form-group>
+                  <b-form-input id="code" placeholder="Code" name="otp" v-model="otp" :state="!error && otp" />
+                </b-form-group>
+              </b-form>
+            </b-col>
+            <b-col cols="3">
+              <b-button class="float-right" variant="success" type="submit">Enable</b-button>
+            </b-col>
+          </b-row>
           <CopyToClipboard v-bind:text="newKey"></CopyToClipboard>
-        </div>
-        <br>
-        <b-form v-on:submit.prevent="enableTwoFactorAuth">
-          <b-form-group label="Code from Google authenticator" label-for="code">
-            <b-form-input id="code" placeholder="Code" name="otp" v-model="otp" :state="!error && otp" />
-          </b-form-group>
-          <b-button class="float-right" variant="success" type="submit">Enable</b-button>
-        </b-form>
-      </template>
-    </b-col>
-  </b-row>
+        </b-col>
+        <b-col cols="12" md="4">
+          <div class="text-center">
+            <img :src="newQr" width="200">
+          </div>
+        </b-col>
+      </b-row>
+    </template>
+    <hr>
+  </b-container>
 </template>
 
 <script>
+  import bContainer from 'bootstrap-vue/es/components/layout/container';
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
   import bForm from 'bootstrap-vue/es/components/form/form';
@@ -54,6 +70,7 @@
   export default {
     name: 'Set2fa',
     components: {
+      'b-container': bContainer,
       'b-row': bRow,
       'b-col': bCol,
       'b-form': bForm,
@@ -138,3 +155,4 @@
     }
   };
 </script>
+

@@ -50,10 +50,15 @@ const templates = {
     <p>${config.get('PROJECT_NAME')} Team</p>
   `,
 
-  welcomeEmail: (username) => `
+  welcomeEmail: (username, token) => `
     <p>Dear ${username}</p>
 
     <p>Welcome to ${config.get('PROJECT_NAME')}!</p>
+    <p>Click on the link below to verify your email</p>
+    <br>
+    <a href="${config.get('MAILER_HOST')}/verify-email?token=${token}">
+      ${config.get('MAILER_HOST')}/verify-email?token=${token}
+    </a>
   `,
 
   verificationEmail: (username, token) => `
@@ -74,6 +79,14 @@ const templates = {
     <a href="${config.get('MAILER_HOST')}/confirm-withdrawal?token=${token}">
       ${config.get('MAILER_HOST')}/confirm-withdrawal?token=${token}
     </a>
+  `,
+
+  supportTicketRaised: (name, message, ticketId) => `
+    <p>Dear ${name}</p>
+    <p>Thank you for reaching out to ${config.get('PROJECT_NAME')} support.</p>
+    <p>Your support ticket has been registered. Your ticket number is <strong>${ticketId}</strong>.
+    Please use this ticket number for further correspondence. </p>
+    <p><strong>Message:</strong> ${message}</p>
   `
 };
 
@@ -95,11 +108,11 @@ const sendNewLoginEmail = function (username, ip, userAgent, email) {
     .catch(logEmailErrors(email, 'new login'));
 };
 
-const sendWelcomeEmail = function (username, email) {
+const sendWelcomeEmail = function (username, email, token) {
   return sendMail(
     email,
     `${config.get('PROJECT_NAME')} | Welcome To ${config.get('PROJECT_NAME')}`,
-    templates.welcomeEmail(username)
+    templates.welcomeEmail(username, token)
   )
     .catch(logEmailErrors(email, 'welcome'));
 };
@@ -122,10 +135,20 @@ const sendWithdrawConfirmationEmail = function (username, email, token, currency
     .catch(logEmailErrors(email, 'withdrawal confirmation'));
 };
 
+const sendSupportTicketRaisedEmail = function (name, email, message, ticketId) {
+  return sendMail(
+    email,
+    `${config.get('PROJECT_NAME')} | Your support ticket #${ticketId}`,
+    templates.supportTicketRaised(name, message, ticketId)
+  )
+    .catch(logEmailErrors(email, 'support email'));
+};
+
 module.exports = {
   sendResetPasswordEmail,
   sendNewLoginEmail,
   sendWelcomeEmail,
   sendVerificationEmail,
-  sendWithdrawConfirmationEmail
+  sendWithdrawConfirmationEmail,
+  sendSupportTicketRaisedEmail
 };
