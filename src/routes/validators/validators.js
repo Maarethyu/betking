@@ -167,6 +167,12 @@ const validateBooleanOption = function (req) {
     .isBoolean();
 };
 
+const textValidator = function (req, fieldName) {
+  req.checkBody(fieldName, `Invalid ${fieldName}`).exists()
+    .custom(value => typeof value === 'string')
+    .isLength({min: 1, max: 4000});
+};
+
 const validateAffiliateId = function (req) {
   req.checkQuery('affiliateId', 'Invalid affiliate id').exists()
     .isInt();
@@ -204,6 +210,7 @@ module.exports = {
   validateAddress,
   validateAmount,
   validateBooleanOption,
+  textValidator,
   validateAffiliateId,
   validateLoginData
 };

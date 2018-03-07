@@ -15,7 +15,8 @@ const {
   validateEmail,
   validateEmailAvailable,
   validateToken,
-  validateRecaptcha} = require('./validators/validators');
+  validateRecaptcha,
+  textValidator} = require('./validators/validators');
 const UserService = require('../services/userService');
 const captchaValidator = require('./validators/captchaValidator');
 const milliSecondsInYear = 31536000000;
@@ -300,6 +301,25 @@ module.exports = (currencyCache) => {
 
       throw e;
     }
+  });
+
+  router.post('/support', async function (req, res, next) {
+    textValidator(req, 'name');
+    textValidator(req, 'message');
+    validateEmail(req, false);
+
+    const validationResult = await req.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      return res.status(400).json({errors: validationResult.array()});
+    }
+
+    const userId = req.currentUser ? req.currentUser.id : null;
+
+    const result = await db.addSupportTicket(req.body.name, req.body.email, req.body.message, userId);
+
+    mailer.sendSupportTicketRaisedEmail(req.body.name, req.body.email, req.body.message, result.id);
+
+    res.json({ticketId: result.id});
   });
 
   return router;
