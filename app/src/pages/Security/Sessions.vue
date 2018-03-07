@@ -1,35 +1,34 @@
 <template>
-  <b-row>
-    <b-col cols="10" offset="1">
-  	  <h1>Sessions</h1>
+  <b-container>
+    <b-row>
+      <b-col>
+        <h5 class="mt-35">Sessions</h5>
 
-      <br>
+        <b-table
+          id="sessions-table"
+          stacked="sm"
+          :items="getSessions"
+          :fields="fields"
+          ref="table"
+          head-variant="dark"
+          :no-provider-sorting="true"
+          responsive small outlined hover>
 
-      <b-button variant="danger" v-on:click="logoutCurrent()">Logout Current</b-button>
-      <b-button variant="danger" v-on:click="logoutAll()">Logout All</b-button>
-
-      <br>
-      <br>
-
-      <b-table
-        id="sessions-table"
-        stacked="sm"
-        :items="getSessions"
-        :fields="fields"
-        ref="table"
-        :no-provider-sorting="true"
-        responsive striped small outlined hover>
-
-        <template slot="x"  slot-scope="row">
-          <b-button v-if="!row.item.is_current" size="sm" variant="danger" @click="logoutOne(row.item.id)">Logout</b-button>
-          <b-badge v-if="row.item.is_current" variant="success">Current</b-badge>
-        </template>
-      </b-table>
-    </b-col>
-  </b-row>
+          <template slot="x"  slot-scope="row">
+            <b-button v-if="!row.item.is_current" size="sm" variant="danger" class="accounts-btn" @click="logoutOne(row.item.id)">Logout</b-button>
+            <b-badge v-if="row.item.is_current" variant="success" class="status-badge" >Current</b-badge>
+          </template>
+        </b-table>
+        <b-button variant="danger" class="accounts-btn" v-on:click="logoutCurrent()">Logout Current</b-button>
+        <b-button variant="danger" class="accounts-btn" v-on:click="logoutAll()">Logout All</b-button>
+        <hr>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
+  import bContainer from 'bootstrap-vue/es/components/layout/container';
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
   import bButton from 'bootstrap-vue/es/components/button/button';
@@ -42,6 +41,7 @@
   export default {
     name: 'Sessions',
     components: {
+      'b-container': bContainer,
       'b-row': bRow,
       'b-col': bCol,
       'b-button': bButton,
@@ -52,8 +52,8 @@
       message: '',
       errors: '',
       fields: [
-        'id',
-        {key: 'created_at', label: 'Date', formatter: 'formatDate'},
+        {key: 'id', label: 'ID'},
+        {key: 'created_at', label: 'DATE', formatter: 'formatDate'},
         'x'
       ]
     }),
@@ -107,3 +107,17 @@
     }
   };
 </script>
+
+<style lang="scss">
+  #sessions-table {
+    .status-badge {
+      height: 20px;
+      padding: 5px 12px;
+      line-height: 1;
+      font-size: 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.5);
+      text-shadow: 0 -1px rgba(0, 0, 0, 0.33);
+    }
+  }
+</style>

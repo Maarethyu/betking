@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="balances-table">
     <b-form-checkbox id="hide-zero-balances" v-model="hideZeroBalances">
       Hide Zero Balances
     </b-form-checkbox>
@@ -12,14 +12,18 @@
       :fields="fields"
       :sort-by.sync="sortBy"
       :sort-desc.sync="sortDesc"
-      responsive striped small outlined hover>
+      head-variant="dark"
+      responsive small outlined hover>
+      <template slot="HEAD_id" slot-scope="data">
+        <i class="fa fa-plus"></i>
+      </template>
       <template slot="id" slot-scope="data">
-        <b-button  size="sm" variant="default" @click="openDepositModal(data.item.id)">+</b-button>
-        <b-button  size="sm" variant="default" @click="openWithdrawModal(data.item.id)">-</b-button>
+        <span @click="openDepositModal(data.item.id)"><i class="fa fa-plus"></i></span>
+        <span @click="openWithdrawModal(data.item.id)"><i class="fa fa-minus"></i></span>
       </template>
     </b-table>
 
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="right" />
+    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" />
   </div>
 </template>
 
@@ -47,10 +51,10 @@
       sortBy: 'balance',
       sortDesc: true,
       fields: [
-        {key: 'id', label: '+'},
-        {key: 'name', label: 'Name', sortable: true},
-        {key: 'symbol', label: 'Symbol', sortable: true},
-        {key: 'balance', label: 'Balance', formatter: 'formatBalance', sortable: true}
+        'id',
+        {key: 'name', label: 'CURRENCY NAME', sortable: true},
+        {key: 'symbol', label: 'CURRENCY SYMBOL', sortable: true},
+        {key: 'balance', label: 'BALANCE', formatter: 'formatBalance', sortable: true}
       ]
     }),
     computed: {
@@ -96,3 +100,13 @@
     }
   };
 </script>
+
+<style lang="scss">
+  #balances-table {
+    .custom-control-label::after {
+      background: #f5f5f5;
+      border: solid 1px gray;
+    }
+  }
+</style>
+

@@ -1,61 +1,71 @@
 <template>
   <div>
-    <h3>Make your bets and stats private</h3>
-    <b-row>
-      <b-col cols="10" md="4">
-        <span v-if="profile.statsHidden">Your bets and stats are hidden from other users</span>
-        <span v-else>Your bets and stats are visible to other users</span>
-      </b-col>
-      <b-col cols="2">
-        <b-button variant="danger" size="sm"
-          v-if="profile.statsHidden"
-          @click="toggleStatsHidden(false)">
-          Hide
-        </b-button>
-        <b-button variant="success" size="sm"
-          v-if="!profile.statsHidden"
-          @click="toggleStatsHidden(true)">
-          Show
-        </b-button>
-      </b-col>
-    </b-row>
-
-    <br>
-    <h3>Show/Hide highroller bets in chat</h3>
-    <b-row>
-      <b-col cols="10" md="4">
-        <span v-if="showHighrollerBets">Highroller bets are shown in chats</span>
-        <span v-else>Highroller bets are hidden from chat</span>
-      </b-col>
-      <b-col cols="2">
-        <b-button variant="danger" size="sm"
-          v-if="showHighrollerBets"
-          @click="toggleDisplayHighrollersInChat(false)">
-          Hide
-        </b-button>
-        <b-button variant="success" size="sm"
-          v-if="!showHighrollerBets"
-          @click="toggleDisplayHighrollersInChat(true)">
-          Show
-        </b-button>
-      </b-col>
-    </b-row>
-
-    <br>
-    <h3>Disable Betting</h3>
-    <b-row>
-      <b-col cols="10" md="4">
-        <span v-if="profile.bettingDisabled">Betting disabled on account</span>
-        <span v-else>You can disable betting on account. Warning, this cannot be reversed.</span>
-      </b-col>
-      <b-col cols="2">
-        <b-button variant="danger" size="sm"
-          v-if="!profile.bettingDisabled"
-          @click="disableBetting">
-          Disable
-        </b-button>
-      </b-col>
-    </b-row>
+    <div>
+      <h5>Make your bets and stats private</h5>
+      <b-row>
+        <b-col cols="10" md="4">
+          <span v-if="profile.statsHidden">Your bets and stats are hidden from other users</span>
+          <span v-else>Your bets and stats are visible to other users</span>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="2">
+          <b-button variant="danger" size="sm" class="accounts-btn mt-15"
+            v-if="profile.statsHidden"
+            @click="toggleStatsHidden(false)">
+            HIDE
+          </b-button>
+          <b-button variant="success" class="accounts-btn mt-15"
+            v-if="!profile.statsHidden"
+            @click="toggleStatsHidden(true)">
+            SHOW
+          </b-button>
+        </b-col>
+      </b-row>
+      <hr>
+    </div>
+    <div>
+      <h5>Show/Hide highroller bets in chat</h5>
+      <b-row>
+        <b-col cols="10" md="4">
+          <span v-if="showHighrollerBets">Highroller bets are shown in chats</span>
+          <span v-else>Highroller bets are hidden from chat</span>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="2">
+          <b-button variant="danger" class="accounts-btn mt-15"
+            v-if="showHighrollerBets"
+            @click="toggleDisplayHighrollersInChat(false)">
+            HIDE
+          </b-button>
+          <b-button variant="success" class="accounts-btn mt-15"
+            v-if="!showHighrollerBets"
+            @click="toggleDisplayHighrollersInChat(true)">
+            SHOW
+          </b-button>
+        </b-col>
+      </b-row>
+      <hr>
+    </div>
+    <div>
+      <h5>Disable Betting</h5>
+      <b-row>
+        <b-col cols="10">
+          <span v-if="profile.bettingDisabled">Betting disabled on account</span>
+          <span v-else>You can disable betting on account. Warning, this cannot be reversed.</span>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="2">
+          <b-button variant="danger" class="accounts-btn mt-15"
+            v-if="!profile.bettingDisabled"
+            @click="disableBetting">
+            DISABLE
+          </b-button>
+        </b-col>
+      </b-row>
+    </div>
   </div>
 </template>
 
@@ -107,3 +117,5 @@
     }
   };
 </script>
+
+

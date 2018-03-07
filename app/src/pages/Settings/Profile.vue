@@ -1,46 +1,61 @@
 <template>
   <div class="user-profile">
-    <b-row no-gutters>
+    <b-row>
       <b-col cols="3">Username:</b-col>
-      <b-col cols="9">{{profile.username}}</b-col>
+      <b-col cols="9">
+        <span class="input-like-div">{{profile.username}}</span>
+      </b-col>
     </b-row>
 
-    <b-row no-gutters align-v="center">
+    <b-row align-v="center">
       <b-col cols="3">Password:</b-col>
       <b-col cols="9">
-        *********
-        <b-button size="sm" variant="default" v-b-modal.changePasswordModal>Change</b-button>
+        <span class="input-like-div">********</span>
+        <b-button size="sm" class="btn-gray accounts-btn" v-b-modal.changePasswordModal>CHANGE</b-button>
       </b-col>
     </b-row>
 
-    <b-row no-gutters align-v="center">
+    <b-row align-v="center">
       <b-col cols="3">Email:</b-col>
       <b-col cols="9">
-        {{profile.email}}
-        <template v-if="profile.email && profile.isEmailVerified">
-          <b-badge variant="success">Verified</b-badge>
-        </template>
-        <template v-if="profile.email && !profile.isEmailVerified">
-          <b-badge variant="danger">Not verified</b-badge>
-          <a href="javascript:void(0);" @click="sendVerificationLink">(resend link?)</a>
-        </template>
-        <b-button size="sm" variant="default" v-b-modal.changeEmailModal>Change</b-button>
+        <span class="input-like-div">{{profile.email}}</span>
+        <b-button size="sm" class="btn-gray accounts-btn" v-b-modal.changeEmailModal>CHANGE</b-button>
       </b-col>
     </b-row>
 
-    <b-row no-gutters>
+    <b-row>
       <b-col cols="3">Date Joined:</b-col>
-      <b-col cols="9">{{formatDate(profile.dateJoined)}}</b-col>
+      <b-col cols="9">
+        <span class="input-like-div">{{formatDate(profile.dateJoined)}}</span>
+      </b-col>
     </b-row>
 
     <ChangeEmailModal @email-changed="fetchMe"></ChangeEmailModal>
     <ChangePasswordModal @password-changed="fetchMe"></ChangePasswordModal>
+    <hr>
 	</div>
 </template>
 
 <style lang="scss">
   .user-profile {
-    max-width: 700px;
+    padding-bottom: 25px;
+    .row {
+      margin-top: 15px;
+    }
+    .input-like-div {
+      -moz-appearance: textfield;
+      -webkit-appearance: textfield;
+      background-color: white;
+      background-color: -moz-field;
+      border: 1px solid darkgray;
+      box-shadow: 1px 1px 1px 0 lightgray inset;
+      font: -moz-field;
+      font: -webkit-small-control;
+      padding: 2px 3px;
+      width: 350px;
+      height: 26px;
+      margin-right: 15px;
+    }
   }
 </style>
 

@@ -390,3 +390,20 @@ input[type='number'] {
     margin: 0;
   }
 }
+
+.account-pages {
+  margin: 35px auto;
+  h5 {
+    text-transform: uppercase;
+  }
+  hr {
+    margin: 35px 0;
+  }
+}
+
+.page-link {
+  &.btn-primary {
+    background-color: #66737e !important;
+    border-color: #66737e !important;
+  }
+}
