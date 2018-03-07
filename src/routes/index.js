@@ -175,9 +175,8 @@ module.exports = (currencyCache) => {
       await createSession(res, user.id, false, helpers.getIp(req), helpers.getFingerPrint(req));
 
       if (user.email) {
-        mailer.sendWelcomeEmail(user.username, user.email);
         const verifyEmailToken = await db.createVerifyEmailToken(user.id, user.email);
-        mailer.sendVerificationEmail(user.username, user.email, verifyEmailToken.id);
+        mailer.sendWelcomeEmail(user.username, user.email, verifyEmailToken.id);
       }
 
       res.json({
