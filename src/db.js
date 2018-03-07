@@ -166,15 +166,15 @@ const getWhitelistedIps = async (userId) => {
 };
 
 const isIpWhitelisted = async (ip, userId) => {
-  const {has_user_whitelisted_ip} = await db.one('SELECT EXISTS(SELECT id from whitelisted_ips WHERE user_id = $1) AS has_user_whitelisted_ip', userId);
+  const {has_user_whitelisted_ip: hasUserWhitelistedIp} = await db.one('SELECT EXISTS(SELECT id from whitelisted_ips WHERE user_id = $1) AS has_user_whitelisted_ip', userId);
 
-  if (!has_user_whitelisted_ip) {
+  if (!hasUserWhitelistedIp) {
     return true;
   }
 
-  const {is_whitelisted} = await db.one('SELECT EXISTS(SELECT id from whitelisted_ips WHERE user_id = $1 AND ip_address = $2) AS is_whitelisted', [userId, ip]);
+  const {is_whitelisted: isWhitelisted} = await db.one('SELECT EXISTS(SELECT id from whitelisted_ips WHERE user_id = $1 AND ip_address = $2) AS is_whitelisted', [userId, ip]);
 
-  return is_whitelisted;
+  return isWhitelisted;
 };
 
 const logoutAllSessionsWithoutWhitelistedIps = async (userId) => {
@@ -465,7 +465,7 @@ const updateMonthlyBetStats = async (userId, date, betAmount, currency, profit, 
     return t.oneOrNone(`
       UPDATE monthly_bet_stats
       SET total_wagered = total_wagered + $1, total_profit = total_profit + $2
-      WHERE game_type = $3 AND currency = $4 AND start_of_month = date_trunc(\'MONTH\', $5::date) AND player_id = $6
+      WHERE game_type = $3 AND currency = $4 AND start_of_month = date_trunc('MONTH', $5::date) AND player_id = $6
       RETURNING id`,
       [betAmount, profit, gameType, currency, date, userId]
     ).then(res => {
@@ -473,7 +473,7 @@ const updateMonthlyBetStats = async (userId, date, betAmount, currency, profit, 
         return t.none(`
           INSERT INTO monthly_bet_stats
           (player_id, start_of_month, total_wagered, currency, total_profit, game_type)
-          VALUES ($1, date_trunc(\'MONTH\', $2::date), $3, $4, $5, $6)`,
+          VALUES ($1, date_trunc('MONTH', $2::date), $3, $4, $5, $6)`,
           [userId, date, betAmount, currency, profit, gameType]
         );
       }
