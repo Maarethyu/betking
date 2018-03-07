@@ -121,6 +121,7 @@ CREATE TABLE currencies (
   max_withdraw_limit numeric (36, 0) NOT NULL,
   min_withdraw_limit numeric (36, 0) NOT NULL,
   withdrawal_fee numeric (36, 0) NOT NULL,
+  no_throttle_amount numeric (36, 0) NOT NULL,
   min_tip numeric (36, 0) NOT NULL,
   address_type address_type NOT NULL
 );

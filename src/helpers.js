@@ -88,6 +88,10 @@ const isHighrollerBet = function (betAmount, profit, highrollerAmountForCurrency
     new BigNumber(profit).gte(highrollerAmountForCurrency);
 };
 
+const sleep = async function (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 module.exports = {
   getIp,
   getFingerPrint,
@@ -100,5 +104,6 @@ module.exports = {
   getCurrencyToQueryFromAddressTable,
   getAddressQr,
   maskUsernameFromBets,
-  isHighrollerBet
+  isHighrollerBet,
+  sleep
 };

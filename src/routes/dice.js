@@ -4,6 +4,7 @@ const db = require('../db');
 const mw = require('../middleware');
 const dice = require('../games/dice');
 const {eventEmitter, types} = require('../eventEmitter');
+const helpers = require('../helpers');
 
 module.exports = (currencyCache) => {
   const router = express.Router();
@@ -103,6 +104,14 @@ module.exports = (currencyCache) => {
       const currencyName = currencyCache.getFieldById(currency, 'name');
       const minBetAmountFloat = minBetAmount.dividedBy(new BigNumber(10).pow(currencyCache.getFieldById(currency, 'scale')));
       return res.status(400).json({error: `Min bet amount for ${currencyName} is ${minBetAmountFloat}`});
+    }
+
+    const noThrottleAmount = new BigNumber(currencyCache.getFieldById(req.body.currency, 'no_throttle_amount'));
+    if (betAmount.lt(noThrottleAmount)) {
+      const throttleTimeFactor = new BigNumber(Math.log10(noThrottleAmount.dividedBy(betAmount)).toString())
+        .plus(new BigNumber(1))
+        .toFixed(0, 3);
+      await helpers.sleep(new BigNumber(10).pow(new BigNumber(throttleTimeFactor)));
     }
 
     const potentialProfit = betAmount.times(multiplier).minus(betAmount);
