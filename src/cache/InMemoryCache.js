@@ -2,6 +2,7 @@ const CurrencyCache = require('./CurrencyCache');
 const StatsCache = require('./StatsCache');
 const BetsCache = require('./BetsCache');
 const ExchangeRateCache = require('./ExchangeRateCache');
+const RecommendedBitcoinTxnFeeCache = require('./RecommendedBitcoinTxnFeeCache');
 
 class Cache {
   constructor (db) {
@@ -9,12 +10,14 @@ class Cache {
     this.statsCache = new StatsCache(db);
     this.betsCache = new BetsCache(db);
     this.exchangeRateCache = new ExchangeRateCache();
+    this.recommendedBitcoinTxnFeeCache = new RecommendedBitcoinTxnFeeCache();
 
     this.cacheItems = [
       this.currencyCache,
       this.statsCache,
       this.betsCache,
-      this.exchangeRateCache
+      this.exchangeRateCache,
+      this.recommendedBitcoinTxnFeeCache
     ];
   }
 

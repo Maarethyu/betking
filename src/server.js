@@ -64,7 +64,7 @@ const startHttpServer = function () {
   router.use('/dice', require('./routes/dice')(cache.currencyCache));
   router.use('/stats', require('./routes/stats')(cache.statsCache, cache.exchangeRateCache));
   router.use('/bets', require('./routes/bets')());
-  router.use('', csrfProtection, require('./routes/index')(cache.currencyCache));
+  router.use('', csrfProtection, require('./routes/index')(cache.currencyCache, cache.recommendedBitcoinTxnFeeCache));
   app.use('/api', router);
 
   // TODO - review

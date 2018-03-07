@@ -40,7 +40,7 @@ const apiLimiter = new RateLimit({
   keyGenerator: helpers.getIp
 });
 
-module.exports = (currencyCache) => {
+module.exports = (currencyCache, txnFeeCache) => {
   const userService = new UserService(db);
 
   router.post('/login', async function (req, res, next) {
@@ -305,7 +305,7 @@ module.exports = (currencyCache) => {
 
   router.get('/recommended-btc-txn-fee', async function (req, res, next) {
     try {
-      const recommendedFee = await helpers.fetchRecommendedBitcoinTxnFee();
+      const recommendedFee = await txnFeeCache.fetchRecommendedBitcoinTxnFee();
       return res.json({recommendedFee});
     } catch (e) {
       return res.status(400).json({error: 'Could not fetch recommended transaction fee'});
