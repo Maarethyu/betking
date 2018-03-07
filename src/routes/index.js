@@ -33,10 +33,10 @@ const createSession = async function (res, userId, rememberMe, ip, fingerprint) 
 };
 
 const apiLimiter = new RateLimit({
-  windowMs: 1000,
+  windowMs: config.get('RATE_LIMITER_REGISTER_WINDOW_IN_MS'),
   max: config.get('REGISTER_RATE_LIMIT'),
-  delayAfter: 1,
-  delayMs: 200,
+  delayAfter: config.get('RATE_LIMITER_DELAY_AFTER'),
+  delayMs: config.get('RATE_LIMITER_DELAY_IN_MS'),
   keyGenerator: helpers.getIp
 });
 
