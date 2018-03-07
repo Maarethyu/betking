@@ -50,10 +50,15 @@ const templates = {
     <p>${config.get('PROJECT_NAME')} Team</p>
   `,
 
-  welcomeEmail: (username) => `
+  welcomeEmail: (username, token) => `
     <p>Dear ${username}</p>
 
     <p>Welcome to ${config.get('PROJECT_NAME')}!</p>
+    <p>Click on the link below to verify your email</p>
+    <br>
+    <a href="${config.get('MAILER_HOST')}/verify-email?token=${token}">
+      ${config.get('MAILER_HOST')}/verify-email?token=${token}
+    </a>
   `,
 
   verificationEmail: (username, token) => `
@@ -95,11 +100,11 @@ const sendNewLoginEmail = function (username, ip, userAgent, email) {
     .catch(logEmailErrors(email, 'new login'));
 };
 
-const sendWelcomeEmail = function (username, email) {
+const sendWelcomeEmail = function (username, email, token) {
   return sendMail(
     email,
     `${config.get('PROJECT_NAME')} | Welcome To ${config.get('PROJECT_NAME')}`,
-    templates.welcomeEmail(username)
+    templates.welcomeEmail(username, token)
   )
     .catch(logEmailErrors(email, 'welcome'));
 };
