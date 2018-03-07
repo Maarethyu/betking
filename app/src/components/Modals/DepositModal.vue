@@ -26,6 +26,11 @@
             Deposits are credited after one confirmation on the blockchain.
           </b-col>
         </b-row>
+        <b-row v-if="depositModalCurrency === 0">
+          <b-col class="text-danger">
+            A fee of {{cost}} btc is recommended for your deposit to be credited in the next block.
+          </b-col>
+        </b-row>
       </template>
       <template v-if="!depositAddress">
         <b-row>
@@ -49,7 +54,7 @@
   import bRow from 'bootstrap-vue/es/components/layout/row';
   import bCol from 'bootstrap-vue/es/components/layout/col';
 
-  import {formatCurrency} from 'src/helpers';
+  import {formatCurrency, formatBigAmount} from 'src/helpers';
   import api from 'src/api';
   import CopyToClipboard from '../CopyToClipboard';
 
@@ -69,25 +74,36 @@
       errors: {},
       errorMessage: '',
       depositAddressQr: '',
-      depositAddress: ''
+      depositAddress: '',
+      recommendedFee: null
     }),
     computed: {
       ...mapGetters({
         isDepositModalVisible: 'isDepositModalVisible',
         depositModalCurrency: 'depositModalCurrency',
         currencies: 'currencies'
-      })
+      }),
+      cost () {
+        if (this.recommendedFee) {
+          return this.formatBigAmount(this.recommendedFee * 226, 0);
+        }
+        return 0;
+      },
     },
     watch: {
       isDepositModalVisible (newValue) {
         this.showModal = newValue;
         if (newValue) {
           this.getDepositAddress(this.depositModalCurrency);
+          if (this.depositModalCurrency === 0) {
+            this.getRecommendedBitcoinTxnFee();
+          }
         }
       }
     },
     methods: {
       formatCurrency,
+      formatBigAmount,
       getDepositAddress (value) {
         this.errors = '';
         api.getDepositAddress(value)
@@ -101,6 +117,12 @@
             }
 
             throw e;
+          });
+      },
+      getRecommendedBitcoinTxnFee () {
+        api.fetchRecommendedFee()
+          .then(({data}) => {
+            this.recommendedFee = data && data.recommendedFee && data.recommendedFee.fastestFee;
           });
       },
       hideModal () {
