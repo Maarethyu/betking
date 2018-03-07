@@ -1,5 +1,12 @@
+const BigNumber = require('bignumber.js');
+
 const validatePassword = function (req) {
   req.checkBody('password', 'Invalid Password').exists()
+    .isLength({min: 6, max: 50});
+};
+
+const validateExistingPassword = function (req) {
+  req.checkBody('existingPassword', 'Invalid Existing Password').exists()
     .isLength({min: 6, max: 50});
 };
 
@@ -73,24 +80,110 @@ const validateRecaptcha = function (req) {
   req.check('g-recaptcha-response', 'Invalid captcha').exists();
 };
 
-const validateOtp = function (req) {
+const validateOtp = function (req, isOptional) {
   req.checkBody('otp', 'Invalid two factor code').exists()
     .isInt()
     .isLength({min: 6, max: 6})
+    .optional({checkFalsy: isOptional});
+};
+
+const validateLimit = function (req) {
+  req.checkQuery('limit', 'Invalid limit param')
+    .exists()
+    .isInt()
     .optional({checkFalsy: true});
+};
+
+const validateSkip = function (req) {
+  req.checkQuery('skip', 'Invalid skip param')
+    .exists()
+    .isInt()
+    .optional({checkFalsy: true});
+};
+
+const validateSort = function (req, sortableFields) {
+  req.checkQuery('sort', 'Invalid sort param')
+    .exists()
+    .isIn(sortableFields)
+    .optional({checkFalsy: true});
+};
+
+const validateSessionId = function (req) {
+  req.checkBody('id', 'Invalid session id').exists()
+    .trim()
+    .isUUID(4);
+};
+
+const validateIp = function (req, isOptional) {
+  req.checkBody('ip', 'Invalid ip')
+    .exists()
+    .trim()
+    .isIP()
+    .optional({checkFalsy: isOptional});
+};
+
+const validateCurrencyInQuery = function (req, currencyCache) {
+  req.checkQuery('currency', 'Invalid currency')
+    .exists()
+    .isInt()
+    .custom(value => !!currencyCache.findById(value));
+};
+
+const validateCurrency = function (req, currencyCache) {
+  req.checkBody('currency', 'Invalid currency')
+    .exists()
+    .isInt()
+    .custom(value => !!currencyCache.findById(value));
+};
+
+const validateAddress = function (req, currencyCache) {
+  const currencyConfig = currencyCache.findById(req.body.currency);
+
+  req.checkBody('address', 'Invalid address')
+    .exists()
+    .custom(address => require('./addressValidator')(address, currencyConfig));
+};
+
+const validateAmount = function (req) {
+  req.checkBody('amount')
+    .exists()
+    .custom(amount => {
+      if (!amount || !(typeof amount === 'number' || typeof amount === 'string')) {
+        return false;
+      }
+
+      try {
+        const amt = new BigNumber(amount);
+
+        return amt.isInteger() && amt.gt(0);
+      } catch (e) {
+        return false;
+      }
+    });
+};
+
+const validateBooleanOption = function (req) {
+  req.checkBody('option', 'Invalid option').exists()
+    .isBoolean();
+};
+
+const validateAffiliateId = function (req) {
+  req.checkQuery('affiliateId', 'Invalid affiliate id').exists()
+    .isInt();
 };
 
 const validateLoginData = function (req) {
   validatePassword(req);
   validateLoginMethod(req);
   validateRememberMe(req);
-  validateOtp(req);
+  validateOtp(req, true);
 
   return req.validationErrors();
 };
 
 module.exports = {
   validatePassword,
+  validateExistingPassword,
   validatePassword2,
   validateUsername,
   validateUsernameAvailable,
@@ -101,5 +194,16 @@ module.exports = {
   validateRememberMe,
   validateRecaptcha,
   validateOtp,
+  validateLimit,
+  validateSkip,
+  validateSort,
+  validateSessionId,
+  validateIp,
+  validateCurrencyInQuery,
+  validateCurrency,
+  validateAddress,
+  validateAmount,
+  validateBooleanOption,
+  validateAffiliateId,
   validateLoginData
 };

@@ -1,11 +1,11 @@
 import * as types from '../mutation-types';
 
-const state = {
+const initialState = () => ({
   withdrawalModalCurrency: null,
   isWithdrawalModalVisible: false,
   depositModalCurrency: null,
   isDepositModalVisible: false
-};
+});
 
 // getters
 const getters = {
@@ -54,11 +54,18 @@ const mutations = {
   [types.HIDE_DEPOSIT_MODAL] (state) {
     state.isDepositModalVisible = false;
     state.depositModalCurrency = null;
+  },
+
+  [types.RESET_MODALS_STORE] (state) {
+    const s = initialState();
+    Object.keys(s).forEach(key => {
+      state[key] = s[key];
+    });
   }
 };
 
 export default {
-  state,
+  state: initialState(),
   getters,
   actions,
   mutations

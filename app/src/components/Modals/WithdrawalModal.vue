@@ -11,11 +11,11 @@
       </b-row>
       <b-row v-if="withdrawalModalCurrency !== 0">
         <b-col cols="6">Withdrawal Fee</b-col>
-        <b-col>{{addCommas(formatAmount(wdFee, withdrawalModalCurrency))}}</b-col>
+        <b-col>{{addCommas(formatAmount(withdrawalFee, withdrawalModalCurrency))}}</b-col>
       </b-row>
       <b-row>
         <b-col cols="6">Minimum Withdrawal Amount</b-col>
-        <b-col>{{addCommas(formatAmount(minWdLimit, withdrawalModalCurrency))}}</b-col>
+        <b-col>{{addCommas(formatAmount(minWithdrawalLimit, withdrawalModalCurrency))}}</b-col>
       </b-row>
       <set-withdrawal-fee @onFeeChange="onFeeChange" v-if="withdrawalModalCurrency === 0" />
       <b-row v-if="isAmountValid">
@@ -50,7 +50,7 @@
 
             <b-form-group v-if="is2faEnabled" label="Two factor code" label-for="otp" :invalid-feedback="errors.otp"
               :state="!errors.otp">
-              <b-form-input id="otpWdModal" type="text" placeholder="OTP" name="otp" v-model="otp"/>
+              <b-form-input id="otpWithdrawalModal" type="text" placeholder="OTP" name="otp" v-model="otp"/>
             </b-form-group>
 
             <div class="submit-buttons pull-right">
@@ -115,13 +115,11 @@
       balance () {
         return this.currency && this.currency.balance;
       },
-      wdFee () {
-        return this.withdrawalModalCurrency === 0
-          ? this.fetchBitcoinWithdrawalCost()
-          : this.currency && this.currency.wdFee;
+      withdrawalFee () {
+        return this.currency && this.currency.withdrawalFee;
       },
-      minWdLimit () {
-        return this.currency && this.currency.minWdLimit;
+      minWithdrawalLimit () {
+        return this.currency && this.currency.minWithdrawalLimit;
       },
       isAmountValid () {
         if (!this.withdrawAmount) {
@@ -140,12 +138,12 @@
         if (!this.isAmountValid) {
           return null;
         } else {
-          return new BigNumber(this.withdrawAmount).minus(new BigNumber(this.wdFee))
+          return new BigNumber(this.withdrawAmount).minus(new BigNumber(this.withdrawalFee))
             .toString();
         }
       },
       isWithdrawalAmountGreaterThanMinimum () {
-        return new BigNumber(this.withdrawAmount).gte(new BigNumber(this.minWdLimit));
+        return new BigNumber(this.withdrawAmount).gte(new BigNumber(this.minWithdrawalLimit));
       },
       isWithdrawalAmountLessThanBalance () {
         return new BigNumber(this.withdrawAmount).lte(new BigNumber(this.balance));

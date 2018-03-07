@@ -7,27 +7,27 @@
 
     <b-col cols="10" offset="1" md="5" offset-md="1">
       <h3>Pending Withdrawals</h3>
-  	  <PendingWithdrawals />
+  	  <PendingWithdrawals :data="pendingWithdrawals" :perPage="perPage" />
     </b-col>
 
     <b-col cols="10" offset="1" md="5" offset-md="0">
       <h3>Pending Deposits</h3>
-  	  <PendingDeposits />
+  	  <PendingDeposits :data="pendingDeposits" :perPage="perPage" />
     </b-col>
 
     <b-col cols="10" offset="1" md="5" offset-md="1">
       <h3>Withdrawal History</h3>
-  	  <WithdrawalHistory />
+  	  <WithdrawalHistory :data="withdrawalHistory" :perPage="perPage" />
     </b-col>
 
     <b-col cols="10" offset="1" md="5" offset-md="0">
       <h3>Deposit History</h3>
-  	  <DepositHistory />
+  	  <DepositHistory :data="depositHistory" :perPage="perPage" />
     </b-col>
 
     <b-col cols="10" offset="1" md="5" offset-md="1">
       <h3>Withdrawal Whitelist</h3>
-      <WithdrawalWhitelist />
+      <WithdrawalWhitelist :data="whitelistedAddresses" />
     </b-col>
 
     <b-col cols="10" offset="1" md="5" offset-md="0">
@@ -50,6 +50,8 @@
   import WithdrawalWhitelist from './WithdrawalWhitelist';
   import ConfirmWithdrawalByEmail from './ConfirmWithdrawalByEmail';
 
+  import api from 'src/api';
+
   export default {
     name: 'UserWallet',
     components: {
@@ -62,6 +64,29 @@
       PendingDeposits,
       WithdrawalWhitelist,
       ConfirmWithdrawalByEmail
+    },
+    data: () => ({
+      pendingWithdrawals: {},
+      withdrawalHistory: {},
+      depositHistory: {},
+      pendingDeposits: {},
+      whitelistedAddresses: [],
+      perPage: 10
+    }),
+    mounted () {
+      this.fetchWalletInfo();
+    },
+    methods: {
+      fetchWalletInfo () {
+        api.fetchWalletInfo(this.perPage, 0, 'created_at')
+          .then(res => {
+            this.pendingWithdrawals = res.data.pendingWithdrawals;
+            this.withdrawalHistory = res.data.withdrawalHistory;
+            this.depositHistory = res.data.depositHistory;
+            this.pendingDeposits = res.data.pendingDeposits;
+            this.whitelistedAddresses = res.data.whitelistedAddresses;
+          });
+      }
     }
   };
 </script>

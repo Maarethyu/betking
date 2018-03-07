@@ -119,7 +119,7 @@ const sendWithdrawConfirmationEmail = function (username, email, token, currency
     `${config.get('PROJECT_NAME')} | Verify your withdrawal of ${amount} ${currencySymbol}`,
     templates.withdrawConfirmationEmail(username, token, amount, currencySymbol, address)
   )
-    .catch(logEmailErrors(email, 'wd confirmation'));
+    .catch(logEmailErrors(email, 'withdrawal confirmation'));
 };
 
 module.exports = {
