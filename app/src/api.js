@@ -179,6 +179,9 @@ export default {
   toggleDisplayHighrollersInChat (option) {
     return post('/api/account/toggle-display-highrollers-in-chat', {option});
   },
+  fetchRecommendedFee () {
+    return get('/api/recommended-btc-txn-fee');
+  },
   sendTip (data) {
     return post('/api/account/send-tip', data);
   },

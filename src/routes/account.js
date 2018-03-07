@@ -300,7 +300,11 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Cannot withdraw to a non-whitelisted address'});
     }
 
-    const withdrawalFee = new BigNumber(currency.withdrawal_fee).toString();
+    const withdrawalFeePerByte = req.body.withdrawalFeePerByte || 0;
+
+    const withdrawalFee = parseInt(req.body.currency, 10) === 0
+      ? new BigNumber(withdrawalFeePerByte * 226).toString()
+      : new BigNumber(currency.withdrawal_fee).toString();
 
     const withdrawalStatus = req.currentUser.confirm_withdrawal ? 'pending_email_verification' : 'pending';
     const verificationToken = req.currentUser.confirm_withdrawal ? uuidV4() : null;
