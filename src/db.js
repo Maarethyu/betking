@@ -213,6 +213,14 @@ const logEmailError = async (msg, stack, address, info) => {
     });
 };
 
+const logNoDepositAddressAvailableError = async (msg, stack, reqId, userId, currency) => {
+  await db.none('INSERT INTO error_logs (msg, stack, req_id, user_id, source, currency) VALUES ($1, $2, $3, $4, $5, $6)', [msg, stack, reqId, userId, 'ADDRESS_ERROR', currency])
+    .catch(error => {
+      // Do not throw error from here to prevent infinite loop
+      console.log('Error writing to error logs', error);
+    });
+}
+
 const getLoginAttempts = async (userId) => {
   const results = await db.any('SELECT * FROM login_attempts WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10', userId);
   return results;
@@ -322,8 +330,7 @@ const getDepositAddress = async (userId, currency) => {
         return t.oneOrNone('SELECT id FROM user_addresses WHERE user_id IS NULL AND currency = $1 ORDER BY id LIMIT 1', currency)
           .then(res => {
             if (!res) {
-              /* No address is free in db for the currency. Log this ? */
-              return null;
+              throw new Error('NO_DEPOSIT_ADDRESS_AVAILABLE');
             }
 
             // Assign the available address to current user (revalidate that the address is free) and return address
@@ -735,6 +742,7 @@ module.exports = {
   logUnhandledRejectionError,
   logUncaughtExceptionError,
   logEmailError,
+  logNoDepositAddressAvailableError,
   getLoginAttempts,
   createVerifyEmailToken,
   markEmailAsVerified,

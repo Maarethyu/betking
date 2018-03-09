@@ -264,14 +264,18 @@ module.exports = (currencyCache) => {
 
     const currency = parseInt(req.query.currency, 10);
     const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currencyCache, currency);
-    const address = await db.getDepositAddress(req.currentUser.id, currencyToQuery);
+    try {
+      const address = await db.getDepositAddress(req.currentUser.id, currencyToQuery);
+      const addressQr = await helpers.getAddressQr(address);
+      res.json({address, addressQr});
+    } catch (e) {
+      if (e.message === 'NO_DEPOSIT_ADDRESS_AVAILABLE') {
+        await db.logNoDepositAddressAvailableError(e.message, e.stack, req.id, req.currentUser && req.currentUser.id, req.query.currency);
+        return res.status(400).send({error: 'NO_DEPOSIT_ADDRESS_AVAILABLE'});
+      }
 
-    if (!address) {
-      return res.status(400).send({error: 'NO_DEPOSIT_ADDRESS_AVAILABLE'});
+      throw e;
     }
-    const addressQr = await helpers.getAddressQr(address);
-
-    res.json({address, addressQr});
   });
 
   // TODO: Add isCustomerAllowed middleware (check for CF-IPCountry ?)
