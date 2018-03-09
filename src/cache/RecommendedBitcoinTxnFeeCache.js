@@ -1,7 +1,7 @@
 const requestPromise = require('request-promise');
 const config = require('config');
 
-class recommendedBitcoinTxnFeeCache {
+class RecommendedBitcoinTxnFeeCache {
   constructor () {
     this.lastFetched = null;
     this.fee = null;
@@ -29,4 +29,4 @@ class recommendedBitcoinTxnFeeCache {
   }
 }
 
-module.exports = recommendedBitcoinTxnFeeCache;
+module.exports = RecommendedBitcoinTxnFeeCache;
