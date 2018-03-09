@@ -108,7 +108,8 @@ CREATE TABLE error_logs (
   req_id uuid NULL,
   user_id bigint NULL,
   mail_info text NULL,
-  to_email text NULL
+  to_email text NULL,
+  currency integer NULL
 );
 
 CREATE TYPE address_type as ENUM('bitcoin', 'ethereum');
