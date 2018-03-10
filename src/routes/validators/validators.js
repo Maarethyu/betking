@@ -178,13 +178,10 @@ const validateAffiliateId = function (req) {
     .isInt();
 };
 
-const validateLoginData = function (req) {
-  validatePassword(req);
-  validateLoginMethod(req);
-  validateRememberMe(req);
-  validateOtp(req, true);
-
-  return req.validationErrors();
+const validateBetId = function (req) {
+  req.checkQuery('id', 'Invalid id')
+    .exists()
+    .isInt();
 };
 
 module.exports = {
@@ -212,5 +209,5 @@ module.exports = {
   validateBooleanOption,
   textValidator,
   validateAffiliateId,
-  validateLoginData
+  validateBetId
 };

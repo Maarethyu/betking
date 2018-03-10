@@ -1,57 +1,16 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const BigNumber = require('bignumber.js');
-const uuidV4 = require('uuid/v4');
 const db = require('../db');
 const helpers = require('../helpers');
 const mw = require('../middleware');
 const mailer = require('../mailer');
-const {eventEmitter, types} = require('../eventEmitter');
+
 const {
-  validateUsername,
-  validateEmail,
-  validateEmailAvailable,
-  validateLimit,
-  validateSkip,
-  validateExistingPassword,
-  validatePassword,
-  validatePassword2,
-  validateSort,
-  validateSessionId,
-  validateOtp,
-  validateIp,
-  validateCurrencyInQuery,
-  validateCurrency,
-  validateAddress,
-  validateAmount,
-  validateBooleanOption,
-  validateAffiliateId
-} = require('./validators/validators');
-
-const getWalletTransactions = (dbQuery) => async (req) => {
-  validateLimit(req);
-  validateSkip(req);
-  validateSort(req, ['amount', 'created_at']);
-
-  const validationResult = await req.getValidationResult();
-  if (!validationResult.isEmpty()) {
-    return {errors: validationResult.array()};
-  }
-
-  const {results, count} = await dbQuery(req.currentUser.id, req.query.limit || 10, req.query.skip || 0, req.query.sort || 'created_at');
-
-  return {results, count};
-};
-
-const sendWalletTransactions = (dbQuery) => async (req, res, next) => {
-  const result = await getWalletTransactions(dbQuery)(req);
-
-  if (result.errors) {
-    return res.status(400).json({errors: result.errors});
-  }
-
-  res.json(result);
-};
+  validateChangeEmail,
+  validateChangePassword,
+  validateEnable2fa,
+  validateWhitelistedIp
+} = require('./validators/accountValidators');
 
 module.exports = (currencyCache) => {
   const router = express.Router();
@@ -59,36 +18,8 @@ module.exports = (currencyCache) => {
   router.use(mw.requireLoggedIn);
   router.use(mw.requireWhitelistedIp);
 
-  router.post('/logout', async function (req, res, next) {
-    await db.logoutSession(req.currentUser.id, req.cookies.session);
-    res.end();
-  });
-
-  router.get('/me', async function (req, res, next) {
-    res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-    res.json({
-      id: req.currentUser.id,
-      username: req.currentUser.username,
-      email: req.currentUser.email,
-      isEmailVerified: req.currentUser.email_verified,
-      is2faEnabled: req.currentUser.is_2fa_enabled,
-      confirmWithdrawals: req.currentUser.confirm_withdrawal,
-      dateJoined: req.currentUser.date_joined,
-      statsHidden: req.currentUser.stats_hidden,
-      bettingDisabled: req.currentUser.betting_disabled,
-      showHighrollerBets: req.currentUser.show_highrollers_in_chat,
-      ignoredUsers: req.currentUser.ignored_users
-    });
-  });
-
   router.post('/change-email', async function (req, res, next) {
-    validateEmail(req, false);
-    validateEmailAvailable(req, db, false);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
+    await validateChangeEmail(req);
 
     await db.updateEmail(req.currentUser.id, req.body.email);
 
@@ -109,14 +40,7 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/change-password', async function (req, res, next) {
-    validateExistingPassword(req);
-    validatePassword(req);
-    validatePassword2(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
+    await validateChangePassword(req);
 
     const isPasswordCorrect = await bcrypt.compare(req.body.existingPassword, req.currentUser.password);
     if (!isPasswordCorrect) {
@@ -127,36 +51,6 @@ module.exports = (currencyCache) => {
 
     await db.updatePassword(req.currentUser.id, newPasswordHash, req.cookies.session);
 
-    res.end();
-  });
-
-  router.get('/active-sessions', async function (req, res, next) {
-    const result = await db.getActiveSessions(req.currentUser.id);
-
-    const sessions = result.map(session => ({
-      id: session.id,
-      created_at: session.created_at,
-      is_current: session.id === req.cookies.session
-    }));
-
-    res.json({sessions});
-  });
-
-  router.post('/logout-session', async function (req, res, next) {
-    validateSessionId(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    await db.logoutSession(req.currentUser.id, req.body.id);
-
-    res.end();
-  });
-
-  router.post('/logout-all-sessions', async function (req, res, next) {
-    await db.logoutAllSessions(req.currentUser.id);
     res.end();
   });
 
@@ -176,12 +70,7 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Two factor authentication is already enabled'});
     }
 
-    validateOtp(req, false);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({error: 'Invalid two factor code'});
-    }
+    await validateEnable2fa(req);
 
     if (!helpers.isOtpValid(req.currentUser.mfa_key, req.body.otp)) {
       return res.status(400).json({error: 'Invalid two factor code'});
@@ -207,12 +96,7 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/add-whitelisted-ip', async function (req, res, next) {
-    validateIp(req, true);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
+    await validateWhitelistedIp(req, true);
 
     const ip = req.body.ip || helpers.getIp(req);
 
@@ -223,12 +107,7 @@ module.exports = (currencyCache) => {
   });
 
   router.post('/remove-whitelisted-ip', mw.require2fa, async function (req, res, next) {
-    validateIp(req, false);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
+    await validateWhitelistedIp(req, false);
 
     await db.removeIpFromWhitelist(req.body.ip, req.currentUser.id);
 
@@ -239,368 +118,6 @@ module.exports = (currencyCache) => {
     const ips = await db.getWhitelistedIps(req.currentUser.id);
 
     res.json({ips});
-  });
-
-  router.get('/get-login-attempts', async function (req, res, next) {
-    const loginAttempts = await db.getLoginAttempts(req.currentUser.id);
-
-    res.json({loginAttempts});
-  });
-
-  router.get('/balances', async function (req, res, next) {
-    // TODO: Do we need pagination for this api? It is always going to send limited amount of data
-    const balances = await db.getAllBalancesForUser(req.currentUser.id);
-
-    res.json({balances});
-  });
-
-  router.get('/deposit-address', mw.allowCustomerByCountry, async function (req, res, next) {
-    validateCurrencyInQuery(req, currencyCache);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const currency = parseInt(req.query.currency, 10);
-    const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currencyCache, currency);
-    try {
-      const address = await db.getDepositAddress(req.currentUser.id, currencyToQuery);
-      const addressQr = await helpers.getAddressQr(address);
-      res.json({address, addressQr});
-    } catch (e) {
-      if (e.message === 'NO_DEPOSIT_ADDRESS_AVAILABLE') {
-        await db.logNoDepositAddressAvailableError(e.message, e.stack, req.id, req.currentUser && req.currentUser.id, req.query.currency);
-        return res.status(400).send({error: 'NO_DEPOSIT_ADDRESS_AVAILABLE'});
-      }
-
-      throw e;
-    }
-  });
-
-  // TODO: Add isCustomerAllowed middleware (check for CF-IPCountry ?)
-  router.post('/withdraw', mw.require2fa, async function (req, res, next) {
-    validateCurrency(req, currencyCache);
-    validateAddress(req, currencyCache);
-    validateAmount(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    if (req.currentUser.confirm_withdrawal && (!req.currentUser.email || !req.currentUser.email_verified)) {
-      return res.status(400).json({error: 'You have asked to confirm withdrawals by email but you do not have a verified email id added to profile'});
-    }
-
-    const currency = currencyCache.findById(req.body.currency);
-
-    if (new BigNumber(currency.min_withdraw_limit).gt(new BigNumber(req.body.amount))) {
-      return res.status(400).json({error: 'Requested amount is less than minimum withdrawal limit'});
-    }
-
-    const isAddressWhitelisted = await db.isAddressWhitelisted(req.currentUser.id, req.body.currency, req.body.address);
-    if (!isAddressWhitelisted) {
-      return res.status(400).json({error: 'Cannot withdraw to a non-whitelisted address'});
-    }
-
-    const withdrawalFeePerByte = req.body.withdrawalFeePerByte || 0;
-
-    const withdrawalFee = parseInt(req.body.currency, 10) === 0
-      ? new BigNumber(withdrawalFeePerByte * 226).toString()
-      : new BigNumber(currency.withdrawal_fee).toString();
-
-    const withdrawalStatus = req.currentUser.confirm_withdrawal ? 'pending_email_verification' : 'pending';
-    const verificationToken = req.currentUser.confirm_withdrawal ? uuidV4() : null;
-    const amountReceived = new BigNumber(req.body.amount)
-      .minus(withdrawalFee)
-      .toString();
-
-    try {
-      await db.createWithdrawalEntry(
-        req.currentUser.id,
-        req.body.currency,
-        withdrawalFee,
-        req.body.amount,
-        amountReceived,
-        req.body.address,
-        withdrawalStatus,
-        verificationToken
-      );
-
-      if (withdrawalStatus === 'pending_email_verification') {
-        mailer.sendWithdrawConfirmationEmail(
-          req.currentUser.username,
-          req.currentUser.email,
-          verificationToken,
-          currency.symbol,
-          new BigNumber(amountReceived).div(new BigNumber(10).pow(currency.scale)),
-          req.body.address
-        );
-      }
-
-      res.end();
-    } catch (e) {
-      if (e.message === 'INSUFFICIENT_BALANCE') {
-        return res.status(400).json({error: 'Insufficient balance'});
-      }
-
-      throw e;
-    }
-  });
-
-  router.post('/set-confirm-withdraw-by-email',
-    async function (req, res, next) {
-      validateBooleanOption(req);
-
-      const validationResult = await req.getValidationResult();
-      if (!validationResult.isEmpty()) {
-        return res.status(400).json({errors: validationResult.array()});
-      }
-
-      if (!req.body.option) {
-        mw.require2fa(req, res, next);
-      } else {
-        next();
-      }
-    },
-    async function (req, res, next) {
-      try {
-        await db.setConfirmWithdrawalByEmail(req.currentUser.id, req.body.option);
-
-        res.end();
-      } catch (e) {
-        if (e.message === 'VALID_USER_NOT_FOUND') {
-          return res.status(400).send({error: e.message});
-        }
-
-        throw e;
-      }
-    }
-  );
-
-  router.get('/wallet', async function (req, res, next) {
-    // TODO: Get pending deposits from db
-    res.json({
-      pendingWithdrawals: await getWalletTransactions(db.getPendingWithdrawals)(req, res, next),
-      withdrawalHistory: await getWalletTransactions(db.getWithdrawalHistory)(req, res, next),
-      depositHistory: await getWalletTransactions(db.getDepositHistory)(req, res, next),
-      pendingDeposits: {},
-      whitelistedAddresses: await db.getWhitelistedAddresses(req.currentUser.id)
-    });
-  });
-
-  router.get('/pending-withdrawals', sendWalletTransactions(db.getPendingWithdrawals));
-
-  router.get('/withdrawal-history', sendWalletTransactions(db.getWithdrawalHistory));
-
-  router.get('/deposit-history', sendWalletTransactions(db.getDepositHistory));
-
-  router.get('/whitelisted-address', async function (req, res, next) {
-    const whitelistedAddresses = await db.getWhitelistedAddresses(req.currentUser.id);
-
-    res.json({whitelistedAddresses});
-  });
-
-  router.post('/whitelisted-address/add', mw.require2fa, async function (req, res, next) {
-    validateCurrency(req, currencyCache);
-    validateAddress(req, currencyCache);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    try {
-      await db.addWhitelistedAddress(
-        req.currentUser.id,
-        parseInt(req.body.currency, 10),
-        req.body.address
-      );
-
-      res.end();
-    } catch (e) {
-      if (e.message === 'CURRENCY_ALREADY_WHITELISTED') {
-        return res.status(400).json({error: e.message});
-      }
-
-      throw e;
-    }
-  });
-
-  router.post('/whitelisted-address/remove', mw.require2fa, async function (req, res, next) {
-    validateCurrency(req, currencyCache);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    await db.removeWhitelistedAddress(
-      req.currentUser.id,
-      parseInt(req.body.currency, 10)
-    );
-
-    res.end();
-  });
-
-  router.post('/toggle-stats-hidden', async function (req, res, next) {
-    validateBooleanOption(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    await db.toggleStatsHidden(req.currentUser.id, req.body.option);
-
-    eventEmitter.emit(types.TOGGLE_STATS_HIDDEN, {
-      username: req.currentUser.username,
-      statsHidden: req.body.option
-    });
-
-    res.end();
-  });
-
-  router.post('/disable-betting', async function (req, res, next) {
-    await db.disableBetting(req.currentUser.id);
-
-    res.end();
-  });
-
-  router.post('/ignore-user', async function (req, res, next) {
-    validateUsername(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const userExists = await db.getUserByName(req.body.username);
-
-    if (!userExists) {
-      return res.status(400).json({error: 'USER_NOT_FOUND'});
-    }
-
-    await db.ignoreUser(req.currentUser.id, req.body.username);
-
-    res.end();
-  });
-
-  router.post('/unignore-user', async function (req, res, next) {
-    validateUsername(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const userExists = await db.getUserByName(req.body.username);
-
-    if (!userExists) {
-      return res.status(400).json({error: 'USER_NOT_FOUND'});
-    }
-
-    await db.unIgnoreUser(req.currentUser.id, req.body.username);
-
-    res.end();
-  });
-
-  router.post('/toggle-display-highrollers-in-chat', async function (req, res, next) {
-    validateBooleanOption(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    await db.toggleDisplayHighrollersInChat(req.currentUser.id, req.body.option);
-
-    res.end();
-  });
-
-  router.post('/send-tip', async function (req, res, next) {
-    validateCurrency(req, currencyCache);
-    validateUsername(req);
-    validateAmount(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const currency = currencyCache.findById(req.body.currency);
-
-    if (new BigNumber(currency.min_withdraw_limit).gt(new BigNumber(req.body.amount))) {
-      return res.status(400).json({error: 'Requested amount is less than minimum tip limit'});
-    }
-
-    try {
-      await db.sendTip(req.currentUser.id, req.body.username, req.body.amount, req.body.currency);
-    } catch (e) {
-      if (e.message === 'INSUFFICIENT_BALANCE' || e.message === 'USERNAME_DOES_NOT_EXIST') {
-        return res.status(400).json({error: e.message});
-      }
-      throw e;
-    }
-
-    res.end();
-  });
-
-  router.get('/support-tickets', async function (req, res, next) {
-    validateLimit(req);
-    validateSkip(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const result = await db.getSupportTicketsForUser(req.currentUser.id, req.query.limit || 10, req.query.skip || 0);
-
-    res.json(result);
-  });
-
-  router.get('/affiliate-summary', async function (req, res, next) {
-    validateLimit(req);
-    validateSkip(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const summary = await db.getAffiliateSummary(req.currentUser.username, req.currentUser.id);
-    const affiliateUsers = await db.getAffiliateUsers(req.currentUser.username, req.query.limit || 10, req.query.skip || 0);
-
-    res.json({summary, affiliateUsers});
-  });
-
-  router.get('/affiliate-users', async function (req, res, next) {
-    validateLimit(req);
-    validateSkip(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const affiliateUsers = await db.getAffiliateUsers(req.currentUser.username, req.query.limit || 10, req.query.skip || 0);
-
-    res.json({affiliateUsers});
-  });
-
-  router.get('/affiliate-amount-due', async function (req, res, next) {
-    validateAffiliateId(req);
-
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
-
-    const amountsDueByCurrency = await db.getAmountDueByAffiliate(req.currentUser.username, req.currentUser.id, req.query.affiliateId);
-
-    res.json({amountsDueByCurrency});
   });
 
   return router;
