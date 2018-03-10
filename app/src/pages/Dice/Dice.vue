@@ -41,6 +41,7 @@
 
   import {getRandomAlphanumeric} from 'src/helpers';
   import {mapGetters} from 'vuex';
+  import bus from 'src/bus';
 
   const navItems = [{
     name: 'BetResults',
@@ -62,6 +63,7 @@
       SessionStats
     },
     beforeRouteLeave (to, from, next) {
+      bus.$emit('leaving-dice-page');
       this.$store.dispatch('stopAutoBet');
       next();
     },
