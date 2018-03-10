@@ -33,14 +33,38 @@ const post = function (uri, data = {}, newHeaders = {}) {
 };
 
 export default {
-  fetchUser () {
-    return get('/api/account/me');
-  },
   login (data) {
-    return post('/api/login', data);
+    return post('/api/auth/login', data);
   },
   logout () {
-    return post('/api/account/logout');
+    return post('/api/auth/logout');
+  },
+  forgotPassword (data) {
+    return post('/api/auth/forgot-password', data);
+  },
+  resetPassword (data) {
+    return post('/api/auth/reset-password', data);
+  },
+  register (data) {
+    return post('/api/auth/register', data);
+  },
+  verifyEmail (data) {
+    return post('/api/auth/verify-email', data);
+  },
+  fetchUser () {
+    return get('/api/sessions/me');
+  },
+  getSessions () {
+    return get('/api/sessions/active-sessions');
+  },
+  logoutOne (data) {
+    return post('/api/sessions/logout-session', data);
+  },
+  logoutAll () {
+    return post('/api/sessions/logout-all-sessions');
+  },
+  getLoginAttempts () {
+    return get('/api/sessions/get-login-attempts');
   },
   fetchNew2faKey () {
     return get('/api/account/2fa-key');
@@ -50,24 +74,6 @@ export default {
   },
   disable2fa (otp) {
     return post('/api/account/disable-2fa', {otp});
-  },
-  forgotPassword (data) {
-    return post('/api/forgot-password', data);
-  },
-  resetPassword (data) {
-    return post('/api/reset-password', data);
-  },
-  register (data) {
-    return post('/api/register', data);
-  },
-  getSessions () {
-    return get('/api/account/active-sessions');
-  },
-  logoutOne (data) {
-    return post('/api/account/logout-session', data);
-  },
-  logoutAll () {
-    return post('/api/account/logout-all-sessions');
   },
   changeEmail (data) {
     return post('/api/account/change-email', data);
@@ -84,63 +90,66 @@ export default {
   addIp (ip) {
     return post('/api/account/add-whitelisted-ip', {ip});
   },
-  getLoginAttempts () {
-    return get('/api/account/get-login-attempts');
-  },
   sendVerificationLink () {
     return post('/api/account/resend-verification-link');
   },
-  verifyEmail (data) {
-    return post('/api/verify-email', data);
-  },
   fetchCurrencies () {
-    return get('/api/config/currencies');
+    return get('/api/wallet/currencies');
   },
   fetchAllBalances () {
-    return get('/api/account/balances');
+    return get('/api/wallet/balances');
   },
   withdrawCurrency (data) {
-    return post('/api/account/withdraw', data);
+    return post('/api/wallet/withdraw', data);
   },
   getDepositAddress (currency) {
-    return get(`/api/account/deposit-address?currency=${currency}`);
+    return get(`/api/wallet/deposit-address?currency=${currency}`);
   },
   toggleEmailWithdrawalConfirmation (option, otp) {
-    return post('/api/account/set-confirm-withdraw-by-email', {option, otp});
+    return post('/api/wallet/set-confirm-withdraw-by-email', {option, otp});
   },
   confirmWithdrawal (token) {
-    return post('/api/confirm-withdraw', {token});
+    return post('/api/wallet/confirm-withdraw', {token});
   },
   fetchWalletInfo (limit, skip, sort) {
-    return get(`/api/account/wallet?limit=${limit}&skip=${skip}&sort=${sort}`);
+    return get(`/api/wallet/wallet-info?limit=${limit}&skip=${skip}&sort=${sort}`);
   },
   fetchPendingWithdrawals (limit, skip, sort) {
-    return get(`/api/account/pending-withdrawals?limit=${limit}&skip=${skip}&sort=${sort}`);
+    return get(`/api/wallet/pending-withdrawals?limit=${limit}&skip=${skip}&sort=${sort}`);
   },
   fetchWithdrawalHistory (limit, skip, sort) {
-    return get(`/api/account/withdrawal-history?limit=${limit}&skip=${skip}&sort=${sort}`);
+    return get(`/api/wallet/withdrawal-history?limit=${limit}&skip=${skip}&sort=${sort}`);
   },
   fetchDepositHistory (limit, skip, sort) {
-    return get(`/api/account/deposit-history?limit=${limit}&skip=${skip}&sort=${sort}`);
+    return get(`/api/wallet/deposit-history?limit=${limit}&skip=${skip}&sort=${sort}`);
   },
   fetchPendingDeposits (limit, skip, sort) {
     // TODO: Pending deposits from backend;
     return Promise.resolve({data: {results: [], count: 0}});
   },
   fetchWhitelistedAddresses () {
-    return get('/api/account/whitelisted-address');
+    return get('/api/wallet/whitelisted-address');
   },
   removeWhitelistedAddress (currency, otp) {
-    return post('/api/account/whitelisted-address/remove', {currency, otp});
+    return post('/api/wallet/whitelisted-address/remove', {currency, otp});
   },
   addWhitelistedAddress (currency, address, otp) {
-    return post('/api/account/whitelisted-address/add', {currency, address, otp});
+    return post('/api/wallet/whitelisted-address/add', {currency, address, otp});
+  },
+  fetchRecommendedFee () {
+    return get('/api/wallet/recommended-btc-txn-fee');
+  },
+  sendTip (data) {
+    return post('/api/wallet/send-tip', data);
   },
   toggleStatsHidden (option) {
-    return post('/api/account/toggle-stats-hidden', {option});
+    return post('/api/bets/toggle-stats-hidden', {option});
   },
   disableBetting () {
-    return post('/api/account/disable-betting');
+    return post('/api/bets/disable-betting');
+  },
+  fetchBetDetails (id) {
+    return get(`/api/bets/bet-details?id=${id}`);
   },
   fetchBetStats () {
     return get('/api/stats/bets');
@@ -164,40 +173,31 @@ export default {
   generateNewDiceSeed (clientSeed) {
     return post('/api/dice/generate-new-seed', {clientSeed});
   },
-  fetchBetDetails (id) {
-    return get(`/api/bets/bet-details?id=${id}`);
-  },
   fetchUserStats (username) {
     return get(`/api/stats/user-stats?username=${username}`);
   },
   ignoreUser (username) {
-    return post('/api/account/ignore-user', {username});
+    return post('/api/chat/ignore-user', {username});
   },
   unIgnoreUser (username) {
-    return post('/api/account/unignore-user', {username});
+    return post('/api/chat/unignore-user', {username});
   },
   toggleDisplayHighrollersInChat (option) {
-    return post('/api/account/toggle-display-highrollers-in-chat', {option});
-  },
-  fetchRecommendedFee () {
-    return get('/api/recommended-btc-txn-fee');
-  },
-  sendTip (data) {
-    return post('/api/account/send-tip', data);
+    return post('/api/chat/toggle-display-highrollers-in-chat', {option});
   },
   raiseSupportTicket (name, email, message) {
-    return post('/api/support', {name, email, message});
+    return post('/api/support/raise-ticket', {name, email, message});
   },
   fetchSupportTickets (limit, skip) {
-    return get(`/api/account/support-tickets?limit=${limit}&skip=${skip}`);
+    return get(`/api/support/tickets?limit=${limit}&skip=${skip}`);
   },
   getAffiliateSummary () {
-    return get('/api/account/affiliate-summary');
+    return get('/api/affiliate/summary');
   },
   getAffiliateUsers (limit, skip) {
-    return get(`/api/account/affiliate-users?limit=${limit}&skip=${skip}`);
+    return get(`/api/affiliate/users?limit=${limit}&skip=${skip}`);
   },
   getAffiliateAmountDue (affiliateId) {
-    return get(`/api/account/affiliate-amount-due?affiliateId=${affiliateId}`);
+    return get(`/api/affiliate/amount-due?affiliateId=${affiliateId}`);
   }
 };

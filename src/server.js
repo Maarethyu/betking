@@ -61,10 +61,16 @@ const startHttpServer = function () {
   const router = express.Router();
   router.use('/account', csrfProtection, require('./routes/account')(cache.currencyCache));
   router.use('/admin', require('./routes/admin')(cache.currencyCache));
+  router.use('/auth', require('./routes/auth')());
   router.use('/dice', require('./routes/dice')(cache.currencyCache));
   router.use('/stats', require('./routes/stats')(cache.statsCache, cache.exchangeRateCache));
+  router.use('/sessions', require('./routes/sessions')());
+  router.use('/wallet', require('./routes/wallet')(cache.currencyCache, cache.recommendedBitcoinTxnFeeCache));
   router.use('/bets', require('./routes/bets')());
-  router.use('', csrfProtection, require('./routes/index')(cache.currencyCache, cache.recommendedBitcoinTxnFeeCache));
+  router.use('/chat', require('./routes/chat')());
+  router.use('/support', require('./routes/support')());
+  router.use('/affiliate', require('./routes/affiliate')());
+  router.use('', csrfProtection, require('./routes/index')());
   app.use('/api', router);
 
   // TODO - review
@@ -87,8 +93,12 @@ const startHttpServer = function () {
   }
 
   app.use(function (error, req, res, next) {
-    if (error.code === 'EBADCSRFTOKEN') {
+    if (error.code === 'EBADCSRFTOKEN' && !res.headersSent) {
       return res.status(403).send('Invalid request token');
+    }
+
+    if (error.name === 'ValidationError' && !res.headersSent) {
+      return res.status(error.code).json(error.response);
     }
 
     const query = error.query ? error.query.toString() : null;
@@ -99,7 +109,9 @@ const startHttpServer = function () {
 
     console.log(source, error);
 
-    res.status(500).send('An error occured');
+    if (!res.headersSent) {
+      res.status(500).send('An error occured');
+    }
   });
 
   const server = app.listen(config.get('PORT'));

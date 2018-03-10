@@ -1,19 +1,19 @@
 const express = require('express');
 const db = require('../db');
 const {hashServerSeed} = require('../games/dice');
+const {eventEmitter, types} = require('../eventEmitter');
+
+const {
+  validateBetDetails,
+  validateToggleStatsHidden
+} = require('./validators/betValidators');
 
 module.exports = () => {
   const router = express.Router();
 
   router.get('/bet-details', async function (req, res, next) {
-    req.checkQuery('id', 'Invalid id')
-      .exists()
-      .isInt();
+    await validateBetDetails(req);
 
-    const validationResult = await req.getValidationResult();
-    if (!validationResult.isEmpty()) {
-      return res.status(400).json({errors: validationResult.array()});
-    }
     try {
       const result = await db.getBetDetails(req.query.id);
       let userName = result.username;
@@ -44,6 +44,25 @@ module.exports = () => {
 
       throw e;
     }
+  });
+
+  router.post('/toggle-stats-hidden', async function (req, res, next) {
+    await validateToggleStatsHidden(req);
+
+    await db.toggleStatsHidden(req.currentUser.id, req.body.option);
+
+    eventEmitter.emit(types.TOGGLE_STATS_HIDDEN, {
+      username: req.currentUser.username,
+      statsHidden: req.body.option
+    });
+
+    res.end();
+  });
+
+  router.post('/disable-betting', async function (req, res, next) {
+    await db.disableBetting(req.currentUser.id);
+
+    res.end();
   });
 
   return router;
