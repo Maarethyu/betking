@@ -42,7 +42,7 @@
           </b-col>
 
           <b-col cols="4">
-            <b-btn variant="default" disabled><i class="fa fa-comments-o"></i>&nbsp;Private chat</b-btn>
+            <b-btn variant="default" @click="joinPrivateChatWithUser"><i class="fa fa-comments-o"></i>&nbsp;Private chat</b-btn>
           </b-col>
 
           <b-col cols="4">
@@ -206,7 +206,7 @@ export default {
         this.fetchingData = false;
         this.fetchSuccess = true;
         this.user = res.data.user;
-        this.stats = res.data.stats.filter(s => s.currency !== null);
+        this.stats = res.data.stats ? res.data.stats.filter(s => s.currency !== null) : [];
       })
       .catch(error => {
         this.fetchingData = false;
@@ -271,7 +271,17 @@ export default {
     },
     sendTip () {
       bus.$emit('show-send-tip-modal', this.user.username);
-    }
+    },
+    joinPrivateChatWithUser () {
+      if (this.user && this.user.username) {
+        const user = Object.assign({}, this.user);
+        this.$root.$emit('bv::show::modal', 'privateChatModal');
+        this.$store.dispatch('setCurrentPrivateChatUser', {
+          username: user.username,
+          userId: user.id
+        });
+      }
+    },
   }
 };
 </script>

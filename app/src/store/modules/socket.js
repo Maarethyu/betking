@@ -21,7 +21,9 @@ const state = {
   isChatModerator: false,
   unreadChatMessages: 0,
   moderators: [],
-  welcomeMessages: []
+  welcomeMessages: [],
+  currentPrivateChatUser: null,
+  privateChatMessages: [],
 };
 
 // getters
@@ -44,7 +46,19 @@ const getters = {
   },
   unreadChatMessages: state => state.unreadChatMessages,
   isChatModerator: state => state.isChatModerator,
-  bannedUsernames: state => state.bannedUsernames
+  bannedUsernames: state => state.bannedUsernames,
+  isPrivateChatDialogVisible: state => state.isPrivateChatDialogVisible,
+  currentPrivateChatUser: state => state.currentPrivateChatUser,
+  privateChatMessages: state => state.privateChatMessages,
+  totalUnreadCount: state => {
+    let totalCount = 0;
+
+    state.privateChatMessages.forEach(c => {
+      totalCount += c.unreadCount;
+    });
+
+    return totalCount;
+  }
 };
 
 // actions
@@ -174,6 +188,30 @@ const actions = {
         commit(types.CLEAR_USERS_CHAT, msg);
       });
 
+      socket.on('newPrivateMessage', (message) => {
+        if (rootState.account.ignoredUsers.indexOf(message.fromUsername) === -1) {
+          commit(types.ADD_PRIVATE_CHAT_MESSAGE, {message, username: rootState.account.username});
+        }
+      });
+
+      socket.on('privateChatMessages', (chats) => {
+        const isIgnored = (username) => rootState.account.ignoredUsers.indexOf(username) !== -1;
+
+        chats.forEach((chat, idx) => {
+          if (isIgnored(chat.fromUsername) || isIgnored(chat.toUsername)) {
+            chats.splice(idx, 1);
+          }
+        });
+
+        commit(types.SET_PRIVATE_CHATS, {chats, username: rootState.account.username});
+      });
+
+      socket.on('privateChatMessagesWithUser', (msg) => {
+        if (rootState.account.ignoredUsers.indexOf(msg.username) === -1) {
+          commit(types.RESET_PRIVATE_CHAT_MESSAGES_FOR_USER, msg);
+        }
+      });
+
       socket.on('highrollerBet', (bet) => {
         const betAmount = formatBigAmount.call(rootState.funds, bet.bet_amount, bet.currency);
         const profit = formatBigAmount.call(rootState.funds, bet.profit, bet.currency);
@@ -228,6 +266,38 @@ const actions = {
 
   clearUsersChat ({commit, state}, username) {
     state.webSocket.emit('clearUsersChat', {username});
+  },
+
+  setCurrentPrivateChatUser ({commit}, {username, userId}) {
+    commit(types.SET_CURRENT_PRIVATE_CHAT_USER, {username, userId});
+  },
+
+  resetCurrentPrivateChatUser ({commit}) {
+    commit(types.RESET_CURRENT_PRIVATE_CHAT_USER);
+  },
+
+  sendPrivateChat ({commit, state}, {toUsername, toUserId, message}) {
+    state.webSocket.emit('privateChatMessage', {toUsername, toUserId, message});
+  },
+
+  markChatAsRead ({commit, state}, {username}) {
+    state.webSocket.emit('markPrivateChatAsRead', {username});
+  },
+
+  joinPrivateChat ({commit, state, rootState}) {
+    if (!rootState.account.isAuthenticated) return;
+    state.webSocket.emit('joinPrivateChat', {});
+  },
+
+  joinPrivateChatWithUser ({commit, state}, {username}) {
+    state.webSocket.emit('joinPrivateChatWithUser', {username});
+  },
+
+  archiveConversation ({commit, state}, username) {
+    state.webSocket.emit('archiveConversation', {username});
+  },
+  archiveAllConversations ({commit, state}) {
+    state.webSocket.emit('archiveAllConversations', {});
   },
 
   showChatWelcomeMessage ({commit}) {
@@ -402,6 +472,65 @@ const mutations = {
 
         Vue.set(state.chatChannels, language, {messages: filteredMessages});
       }
+    });
+  },
+
+  [types.SET_CURRENT_PRIVATE_CHAT_USER] (state, {username, userId}) {
+    state.currentPrivateChatUser = {username, userId};
+
+    const {privateChatMessages} = state;
+
+    const messagesIndex = privateChatMessages.findIndex(messagesWithUser => messagesWithUser.otherUser === username);
+    if (messagesIndex !== -1) {
+      Vue.set(privateChatMessages[messagesIndex], 'unreadCount', 0);
+    }
+  },
+
+  [types.RESET_CURRENT_PRIVATE_CHAT_USER] (state) {
+    state.currentPrivateChatUser = null;
+  },
+
+  [types.SET_PRIVATE_CHATS] (state, {chats, username}) {
+    state.privateChatMessages = chats.map(message => ({
+      otherUser: username !== message.fromUsername ? message.fromUsername : message.toUsername,
+      messages: [],
+      unreadCount: message.unreadCount,
+      lastChat: message
+    }));
+  },
+
+  [types.ADD_PRIVATE_CHAT_MESSAGE] (state, {message, username}) {
+    const {privateChatMessages, currentPrivateChatUser} = state;
+
+    const messagesIndex = privateChatMessages.findIndex(messagesWithUser =>
+      (messagesWithUser.otherUser === message.fromUsername || messagesWithUser.otherUser === message.toUsername));
+
+    if (messagesIndex !== -1) {
+      Vue.set(privateChatMessages[messagesIndex], 'messages', [...privateChatMessages[messagesIndex].messages, message]);
+      const updatedUnreadCount = currentPrivateChatUser && currentPrivateChatUser.username === privateChatMessages[messagesIndex].otherUser
+        ? 0
+        : privateChatMessages[messagesIndex].unreadCount + 1;
+
+      Vue.set(privateChatMessages[messagesIndex], 'unreadCount', updatedUnreadCount);
+    } else {
+      Vue.set(privateChatMessages, privateChatMessages.length, {
+        lastChat: message,
+        otherUser: username !== message.fromUsername ? message.fromUsername : message.toUsername,
+        messages: [message],
+        unreadCount: 1
+      });
+    }
+  },
+
+  [types.RESET_PRIVATE_CHAT_MESSAGES_FOR_USER] (state, {messages, username}) {
+    const {privateChatMessages, currentPrivateChatUser} = state;
+
+    const messagesIndex = privateChatMessages.findIndex(messagesWithUser => messagesWithUser.otherUser === username);
+    Vue.set(state.privateChatMessages, messagesIndex !== -1 ? messagesIndex : privateChatMessages.length, {
+      otherUser: username,
+      messages: messages.reverse(),
+      lastChat: messages[messages.length - 1],
+      unreadCount: currentPrivateChatUser && currentPrivateChatUser.username === username ? 0 : messages.length
     });
   },
 

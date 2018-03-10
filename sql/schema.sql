@@ -241,6 +241,18 @@ CREATE TABLE chats (
   is_hidden boolean DEFAULT false NOT NULL
 );
 
+CREATE table private_chats (
+  id bigserial PRIMARY KEY,
+  message text NOT NULL,
+  from_username text NOT NULL,
+  from_user_id bigint NOT NULL REFERENCES users(id),
+  to_username text NOT NULL,
+  to_user_id bigint NOT NULL REFERENCES users(id),
+  date timestamp with time zone NOT NULL DEFAULT NOW(),
+  is_read boolean DEFAULT false NOT NULL,
+  archived_by text[]
+);
+
 CREATE TABLE support_tickets (
   id bigserial PRIMARY KEY,
   name text NOT NULL,
