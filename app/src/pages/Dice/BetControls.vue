@@ -372,6 +372,10 @@
           this.stopAutoBet();
         }
       });
+
+      bus.$on('leaving-dice-page', () => {
+        this.disableAutoBet();
+      });
     },
     watch: {
       autoBetStarted: function (newValue) { // eslint-disable-line object-shorthand

@@ -227,6 +227,7 @@
 
   import {mapGetters} from 'vuex';
   import BigNumber from 'bignumber.js';
+  import bus from 'src/bus';
 
   import {
     updateTargets,
@@ -298,6 +299,17 @@
       },
       currency () {
         return this.currencies.find(c => c.id === this.activeCurrency);
+      }
+    },
+    mounted () {
+      bus.$on('leaving-dice-page', () => {
+        this.resetDefaultValues();
+      });
+    },
+    watch: {
+      activeCurrency: function () { // eslint-disable-line object-shorthand
+        this.resetDefaultValues();
+        this.$store.dispatch('stopAutoBet');
       }
     },
     methods: {
