@@ -59,6 +59,24 @@ const startSocketServer = function (server, cache) {
     socket.on('clearUsersChat', (data) => {
       chat.clearUsersChat(data.username, currentUsername, currentUserId);
     });
+    socket.on('privateChatMessage', function (data) {
+      chat.privateChatMessage(currentUsername, currentUserId, data.toUsername, data.toUserId, data.message);
+    });
+    socket.on('joinPrivateChat', function () {
+      chat.joinPrivateChat(currentUsername, currentUserId);
+    });
+    socket.on('joinPrivateChatWithUser', function (data) {
+      chat.getLastPrivateChatsForUser(currentUsername, currentUserId, data.username);
+    });
+    socket.on('markPrivateChatAsRead', function (data) {
+      chat.markPrivateChatAsRead(currentUsername, data.username);
+    });
+    socket.on('archiveConversation', function (data) {
+      chat.archiveConversation(currentUsername, data.username);
+    });
+    socket.on('archiveAllConversations', function () {
+      chat.archiveAllConversations(currentUsername);
+    });
     socket.on('disconnect', function () {
       if (currentUserId) {
         chat.userLeaveApp(currentUsername);

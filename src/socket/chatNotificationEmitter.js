@@ -9,7 +9,10 @@ const types = {
   CHAT_BANNED_USER: 'chatBannedUser',
   CHAT_UNBANNED_USER: 'chatUnbannedUser',
   CLEAR_ALL_CHAT: 'clearAllChat',
-  CLEAR_USERS_CHAT: 'clearUsersChat'
+  CLEAR_USERS_CHAT: 'clearUsersChat',
+  NEW_PRIVATE_MESSAGE: 'newPrivateMessage',
+  PRIVATE_CHAT_MESSAGES: 'privateChatMessages',
+  PRIVATE_CHAT_MESSAGES_WITH_USER: 'privateChatMessagesWithUser'
 };
 
 class ChatNotificationEmitter extends BaseEventEmitter {
