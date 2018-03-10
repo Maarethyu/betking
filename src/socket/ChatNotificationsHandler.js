@@ -87,6 +87,19 @@ class ChatNotificationsHandler {
     const content = {username: payload.username};
     this.io.to('public').emit(type, content);
   }
+
+  newPrivateMessage (type, payload) {
+    this.io.to(payload.toUserId).emit(type, payload.chatMessage);
+    this.io.to(payload.fromUserId).emit(type, payload.chatMessage);
+  }
+
+  privateChatMessages (type, payload) {
+    this.io.to(payload.userId).emit(type, payload.chatUsers);
+  }
+
+  privateChatMessagesWithUser (type, payload) {
+    this.io.to(payload.userId).emit(type, {messages: payload.messages, username: payload.otherUsername});
+  }
 }
 
 module.exports = ChatNotificationsHandler;

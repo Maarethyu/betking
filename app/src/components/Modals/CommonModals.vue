@@ -9,6 +9,7 @@
     <BetDetailsModal :id="betId" />
     <UserLookupModal :username="username" />
     <SendTipModal :username="tipUserName" />
+    <PrivateChatModal />
   </div>
 </template>
 
@@ -22,6 +23,7 @@ import ValidateTwoFactorModal from './ValidateTwoFactorModal';
 import BetDetailsModal from './BetDetailsModal';
 import UserLookupModal from './UserLookupModal';
 import SendTipModal from './SendTipModal';
+import PrivateChatModal from './PrivateChatModal/PrivateChatModal';
 
 import bus from 'src/bus';
 
@@ -36,7 +38,8 @@ export default {
     ValidateTwoFactorModal,
     BetDetailsModal,
     UserLookupModal,
-    SendTipModal
+    SendTipModal,
+    PrivateChatModal
   },
   data: () => ({
     betId: null,

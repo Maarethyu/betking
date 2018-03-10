@@ -22,6 +22,10 @@
     </div>
 
     <b-navbar-nav class="ml-auto" v-if="isAuthenticated">
+      <b-nav-item @click="showPrivateChatModal">
+        <i class="fa fa-envelope"></i>
+        <b-badge variant="danger" v-if="totalUnreadCount">{{totalUnreadCount}}</b-badge>
+      </b-nav-item>
       <HeaderDropdown/>
       <div class='d-none d-lg-inline-block'>
       </div>
@@ -99,7 +103,8 @@ export default {
     ...mapGetters({
       isAuthenticated: 'isAuthenticated',
       isLoggedOut: 'isLoggedOut',
-      activeCurrency: 'activeCurrency'
+      activeCurrency: 'activeCurrency',
+      totalUnreadCount: 'totalUnreadCount'
     }),
   },
   methods: {
@@ -108,6 +113,9 @@ export default {
     },
     showDepositModal () {
       this.$store.dispatch('showDepositModal', this.activeCurrency);
+    },
+    showPrivateChatModal () {
+      this.$root.$emit('bv::show::modal', 'privateChatModal');
     }
   }
 };

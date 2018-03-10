@@ -70,125 +70,125 @@
       display: flex;
       flex-flow: column nowrap;
     }
-  }
 
-  .chat-messages {
-    /* height: 366px;
-    max-height: 366px; */
-    max-height: calc(100% - 34px);
-    overflow-y: auto;
-  }
-
-  .chat-actions {
-    height: 34px;
-    background-color: #374850;
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .chat-actions input.form-control {
-    width: 100%;
-    max-width: 100%;
-    text-align: left;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .chat-actions input.form-control.warning-shown {
-    padding-right: 33px;
-  }
-
-  .chat-actions .chat-sign-in {
-    padding-top: 5px;
-    padding-left: 10px;
-  }
-
-  .chat-item {
-    margin: 0 20px;
-    padding: 5px 0;
-    vertical-align: top;
-    min-height: 1.5em;
-  }
-
-  .chat-item:last-child {
-    padding-bottom: 10px;
-  }
-
-  .chat-item .chat-item-detail .chat-item-detail-date {
-    float:right;
-    color:#878e92;
-  }
-
-  .chat-item .chat-item-detail .chat-item-detail-username {
-    font-weight: bold;
-    color:#878e92;
-  }
-
-  .chat-item .chat-item-text {
-    padding-right: 20px;
-    word-wrap: break-word;
-    width: 95%;
-  }
-
-  .chat-item-text a{
-    color: #ff2a68;
-  }
-
-  .chat-item.text-green .chat-item-text a {
-    color: #8EC919;
-  }
-
-  .mention{
-    color: #ff2a68;
-  }
-
-  .message-length-warning {
-    position: absolute;
-    right: 0;
-    bottom: 2px;
-    margin-right: 4px;
-    padding: 5px;
-  }
-
-  .chat-lang {
-    right: 0;
-    top: 0;
-  }
-
-  .chat-lang .dropdown-menu {
-    left: auto;
-    right: 0;
-    width: 120px;
-    max-width: 120px;
-  }
-
-  .chat-lang .dropdown-toggle {
-    border-radius: 0;
-    padding: 6px;
-    height: 34px;
-  }
-
-  .chat-actions .online-users {
-    height: 34px;
-    font-size: 13px;
-    color: #878e92;
-    background-color: #fff;
-    padding: 10px 6px 6px;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-
-  @media only screen and (max-width: 480px) {
-    .chat-actions .online-users {
-      display: none;
+    .chat-messages {
+      /* height: 366px;
+      max-height: 366px; */
+      max-height: calc(100% - 34px);
+      overflow-y: auto;
     }
-  }
 
-  .chat-input {
-    width: 100%;
-    position: relative;
+    .chat-actions {
+      height: 34px;
+      background-color: #374850;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-actions input.form-control {
+      width: 100%;
+      max-width: 100%;
+      text-align: left;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .chat-actions input.form-control.warning-shown {
+      padding-right: 33px;
+    }
+
+    .chat-actions .chat-sign-in {
+      padding-top: 5px;
+      padding-left: 10px;
+    }
+
+    .chat-item {
+      margin: 0 20px;
+      padding: 5px 0;
+      vertical-align: top;
+      min-height: 1.5em;
+    }
+
+    .chat-item:last-child {
+      padding-bottom: 10px;
+    }
+
+    .chat-item .chat-item-detail .chat-item-detail-date {
+      float:right;
+      color:#878e92;
+    }
+
+    .chat-item .chat-item-detail .chat-item-detail-username {
+      font-weight: bold;
+      color:#878e92;
+    }
+
+    .chat-item .chat-item-text {
+      padding-right: 20px;
+      word-wrap: break-word;
+      width: 95%;
+    }
+
+    .chat-item-text a{
+      color: #ff2a68;
+    }
+
+    .chat-item.text-green .chat-item-text a {
+      color: #8EC919;
+    }
+
+    .mention{
+      color: #ff2a68;
+    }
+
+    .message-length-warning {
+      position: absolute;
+      right: 0;
+      bottom: 2px;
+      margin-right: 4px;
+      padding: 5px;
+    }
+
+    .chat-lang {
+      right: 0;
+      top: 0;
+    }
+
+    .chat-lang .dropdown-menu {
+      left: auto;
+      right: 0;
+      width: 120px;
+      max-width: 120px;
+    }
+
+    .chat-lang .dropdown-toggle {
+      border-radius: 0;
+      padding: 6px;
+      height: 34px;
+    }
+
+    .chat-actions .online-users {
+      height: 34px;
+      font-size: 13px;
+      color: #878e92;
+      background-color: #fff;
+      padding: 10px 6px 6px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    @media only screen and (max-width: 480px) {
+      .chat-actions .online-users {
+        display: none;
+      }
+    }
+
+    .chat-input {
+      width: 100%;
+      position: relative;
+    }
   }
 </style>
 

@@ -8,6 +8,7 @@ const truncateAndTrim = (content) => content.slice(0, 255).trim();
 
 class ChatService {
   constructor (db) {
+    this.db = db;
     this.cache = new ChatCache(db);
   }
 
@@ -141,6 +142,58 @@ class ChatService {
         moderatorId
       });
     }
+  }
+
+  async privateChatMessage (fromUsername, fromUserId, toUsername, toUserId, content) {
+    const message = htmlencode.htmlEncode(truncateAndTrim(removeUnicode(content)));
+    if (message.length > 0) {
+      const chatMessage = await this.db.addPrivateMessage(fromUsername, fromUserId, toUsername, toUserId, message);
+
+      chatNotificationEmitter.emit(types.NEW_PRIVATE_MESSAGE, {
+        chatMessage: {
+          fromUsername: chatMessage.from_username,
+          toUsername: chatMessage.to_username,
+          message: chatMessage.message,
+          date: chatMessage.date,
+          fromUserId: chatMessage.from_user_id,
+          toUserId: chatMessage.to_user_id,
+          isRead: chatMessage.is_read
+        },
+        fromUserId,
+        toUserId
+      });
+    }
+  }
+
+  async joinPrivateChat (username, userId) {
+    const chatUsers = await this.db.fetchLastConversations(username);
+
+    chatNotificationEmitter.emit(types.PRIVATE_CHAT_MESSAGES, {
+      chatUsers,
+      userId
+    });
+  }
+
+  async getLastPrivateChatsForUser (requesterName, requesterId, otherUsername) {
+    const messages = await this.db.getLastPrivateChatsForUser(requesterName, otherUsername, 20);
+
+    chatNotificationEmitter.emit(types.PRIVATE_CHAT_MESSAGES_WITH_USER, {
+      userId: requesterId,
+      otherUsername,
+      messages
+    });
+  }
+
+  async markPrivateChatAsRead (requesterName, fromUsername) {
+    await this.db.markPrivateChatAsRead(fromUsername, requesterName);
+  }
+
+  async archiveConversation (requesterName, otherUsername) {
+    await this.db.archiveConversation(requesterName, otherUsername);
+  }
+
+  async archiveAllConversations (requesterName) {
+    await this.db.archiveAllConversations(requesterName);
   }
 }
 
