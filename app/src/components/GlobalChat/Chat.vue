@@ -31,7 +31,7 @@
                 <div class="message-length-warning" v-if="message.length > 205" :class="{'text-red': 255 - message.length < 0}">{{ 255 - message.length }}</div>
               </template>
             </div>
-            <button class="btn btn-primary send-button" type="button" @click="send" :disabled="!isSocketConnected || chatLocked">
+            <button class="btn btn-danger send-button" type="button" @click="send" :disabled="!isSocketConnected || chatLocked">
                 SEND
             </button>
             <div class="online-users" v-on:click="showOnlineUsersDialog">
@@ -173,7 +173,7 @@
       height: 34px;
       font-size: 13px;
       color: #878e92;
-      background-color: #303E46;
+      background-color: #fff;
       padding: 10px 6px 6px;
       white-space: nowrap;
       cursor: pointer;
