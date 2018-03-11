@@ -35,18 +35,18 @@ module.exports = (currencyCache) => {
     let latestUserBets = [];
 
     if (req.currentUser) {
-      diceSeed = await db.getActiveDiceSeed(req.currentUser.id);
+      diceSeed = await db.diceGame.getActiveDiceSeed(req.currentUser.id);
       if (!diceSeed) {
         const newServerSeed = dice.generateServerSeed();
         const newClientSeed = req.query.clientSeed;
 
-        diceSeed = await db.addNewDiceSeed(req.currentUser.id, newServerSeed, newClientSeed);
+        diceSeed = await db.diceGame.addNewDiceSeed(req.currentUser.id, newServerSeed, newClientSeed);
       }
 
-      latestUserBets = await db.getLatestUserDiceBets(req.currentUser.id);
+      latestUserBets = await db.diceGame.getLatestDiceBets(req.currentUser.id);
     }
 
-    const bankRoll = await db.getBankrollByCurrency(req.query.currency);
+    const bankRoll = await db.bets.getBankrollByCurrency(req.query.currency);
 
     res.json({
       clientSeed: diceSeed.client_seed,
@@ -90,7 +90,7 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Betting disabled on account'});
     }
 
-    const bankRoll = await db.getBankrollByCurrency(req.body.currency);
+    const bankRoll = await db.bets.getBankrollByCurrency(req.body.currency);
 
     const currency = parseInt(req.body.currency, 10);
     const betAmount = new BigNumber(req.body.betAmount);
@@ -124,12 +124,12 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Profit greater than max'});
     }
 
-    const seed = await db.getActiveDiceSeed(req.currentUser.id);
+    const seed = await db.diceGame.getActiveDiceSeed(req.currentUser.id);
     const roll = dice.calculateDiceRoll(seed.server_seed, seed.client_seed, seed.nonce);
     const profit = dice.calculateProfit(roll, chance, betAmount.toString(), target);
 
     try {
-      const result = await db.doDiceBet(
+      const result = await db.diceGame.doDiceBet(
         req.currentUser.id,
         betAmount.toString(),
         currency,
@@ -150,7 +150,7 @@ module.exports = (currencyCache) => {
       };
       eventEmitter.emit(types.DICE_BET, eventPayload);
 
-      await db.updateMonthlyBetStats(req.currentUser.id, result.date, betAmount.toString(), currency, profit, 'dice');
+      await db.bets.updateMonthlyBetStats(req.currentUser.id, result.date, betAmount.toString(), currency, profit, 'dice');
     } catch (e) {
       if (e.message === 'INSUFFICIENT_BALANCE') {
         return res.status(400).json({error: 'Balance too low'});
@@ -171,7 +171,7 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Invalid client seed'});
     }
 
-    const seed = await db.setNewDiceClientSeed(req.currentUser.id, req.body.clientSeed);
+    const seed = await db.diceGame.setNewDiceClientSeed(req.currentUser.id, req.body.clientSeed);
 
     res.json(seed);
   });
@@ -187,7 +187,7 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Invalid client seed'});
     }
 
-    const result = await db.generateNewSeed(req.currentUser.id, req.body.clientSeed);
+    const result = await db.diceGame.generateNewSeed(req.currentUser.id, req.body.clientSeed);
 
     res.json(result);
   });

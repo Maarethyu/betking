@@ -16,13 +16,13 @@ module.exports = () => {
   router.post('/ignore-user', async function (req, res, next) {
     await validateIgnoreUser(req);
 
-    const userExists = await db.getUserByName(req.body.username);
+    const userExists = await db.users.getUserByName(req.body.username);
 
     if (!userExists) {
       return res.status(400).json({error: 'USER_NOT_FOUND'});
     }
 
-    await db.ignoreUser(req.currentUser.id, req.body.username);
+    await db.chat.ignoreUser(req.currentUser.id, req.body.username);
 
     res.end();
   });
@@ -30,13 +30,13 @@ module.exports = () => {
   router.post('/unignore-user', async function (req, res, next) {
     await validateIgnoreUser(req);
 
-    const userExists = await db.getUserByName(req.body.username);
+    const userExists = await db.users.getUserByName(req.body.username);
 
     if (!userExists) {
       return res.status(400).json({error: 'USER_NOT_FOUND'});
     }
 
-    await db.unIgnoreUser(req.currentUser.id, req.body.username);
+    await db.chat.unIgnoreUser(req.currentUser.id, req.body.username);
 
     res.end();
   });
@@ -44,7 +44,7 @@ module.exports = () => {
   router.post('/toggle-display-highrollers-in-chat', async function (req, res, next) {
     await validateToggleDisplayHighrollersInChat(req);
 
-    await db.toggleDisplayHighrollersInChat(req.currentUser.id, req.body.option);
+    await db.chat.toggleDisplayHighrollersInChat(req.currentUser.id, req.body.option);
 
     res.end();
   });

@@ -20,7 +20,7 @@ const milliSecondsInYear = 31536000000;
 const milliSecondsInTwoWeeks = 1209600000;
 
 const createSession = async function (res, userId, rememberMe, ip, fingerprint) {
-  const session = await db.createSession(userId, rememberMe ? '365 days' : '2 weeks', ip, fingerprint);
+  const session = await db.sessions.createSession(userId, rememberMe ? '365 days' : '2 weeks', ip, fingerprint);
 
   res.cookie('session', session.id,
     {
@@ -50,7 +50,7 @@ module.exports = () => {
       return res.status(401).json({error: 'Login failed'});
     }
 
-    const failedLoginAttempts = await db.getConsecutiveFailedLoginAttempts(user.id);
+    const failedLoginAttempts = await db.logs.getConsecutiveFailedLoginAttempts(user.id);
 
     if (failedLoginAttempts >= 3) {
       const captchaValid = await captchaValidator.validateCaptcha(req.body['g-recaptcha-response']);
@@ -68,7 +68,7 @@ module.exports = () => {
 
     // Check if ip whitelisted
     // TODO: Should we let user know if his ip was not whitelisted?
-    const isIpWhitelisted = await db.isIpWhitelisted(helpers.getIp(req), user.id);
+    const isIpWhitelisted = await db.users.isIpWhitelisted(helpers.getIp(req), user.id);
 
     let isTwoFactorOk = false;
     if (user.is_2fa_enabled) {
@@ -76,20 +76,20 @@ module.exports = () => {
 
       if (isOtpValid) {
         try {
-          await db.saveUsedTwoFactorCode(user.id, req.body.otp);
-          await db.log2faAttempt(user.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
+          await db.logs.saveUsedTwoFactorCode(user.id, req.body.otp);
+          await db.logs.log2faAttempt(user.id, true, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
           isTwoFactorOk = true;
         } catch (e) {
           if (e.message === 'CODE_ALREADY_USED') {
             // TODO: Should we let the user know that his OTP has just expired??
-            await db.log2faAttempt(user.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
+            await db.logs.log2faAttempt(user.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
             isTwoFactorOk = false;
           } else {
             throw e;
           }
         }
       } else {
-        await db.log2faAttempt(user.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
+        await db.logs.log2faAttempt(user.id, false, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
         isTwoFactorOk = false;
       }
     } else {
@@ -99,7 +99,7 @@ module.exports = () => {
 
     const isLoginSuccessful = isPasswordCorrect && isIpWhitelisted && isTwoFactorOk;
 
-    await db.logLoginAttempt(user.id, isLoginSuccessful, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
+    await db.logs.logLoginAttempt(user.id, isLoginSuccessful, helpers.getIp(req), helpers.getFingerPrint(req), helpers.getUserAgentString(req));
 
     if (!isLoginSuccessful) {
       if (failedLoginAttempts >= 2) {
@@ -111,7 +111,7 @@ module.exports = () => {
 
       // Lock Account after 5 failed attempts in last 1 minute
       if (failedLoginAttempts >= 4) {
-        await db.lockUserAccount(user.id);
+        await db.users.lockUserAccount(user.id);
       }
 
       return res.status(401).json({error: 'Login failed'});
@@ -153,13 +153,13 @@ module.exports = () => {
 
     const mfaKey = helpers.getNew2faSecret();
 
-    const user = await db.createUser(req.body.username, hash, req.body.email, affiliateId, mfaKey);
+    const user = await db.users.createUser(req.body.username, hash, req.body.email, affiliateId, mfaKey);
 
     if (user) {
       await createSession(res, user.id, false, helpers.getIp(req), helpers.getFingerPrint(req));
 
       if (user.email) {
-        const verifyEmailToken = await db.createVerifyEmailToken(user.id, user.email);
+        const verifyEmailToken = await db.users.createVerifyEmailToken(user.id, user.email);
         mailer.sendWelcomeEmail(user.username, user.email, verifyEmailToken.id);
       }
 
@@ -189,19 +189,19 @@ module.exports = () => {
       Click the link in the email to reset your password.
       If you don't see the email, check your spam folder.`;
 
-    const user = await db.getUserByEmail(req.body.email.trim());
+    const user = await db.users.getUserByEmail(req.body.email.trim());
 
     if (!user) {
       return res.status(200).json({message: successMessage});
     }
 
     // If user has an active reset token, do not send email // TODO why?
-    const activeToken = await db.findLatestActiveResetToken(user.id);
+    const activeToken = await db.users.findLatestActiveResetToken(user.id);
     if (activeToken) {
       return res.status(200).json({message: successMessage});
     }
 
-    const resetToken = await db.createResetToken(user.id);
+    const resetToken = await db.users.createResetToken(user.id);
 
     mailer.sendResetPasswordEmail(user.username, user.email, resetToken.id);
 
@@ -214,7 +214,7 @@ module.exports = () => {
     const hash = await bcrypt.hash(req.body.password2, 10);
 
     try {
-      await db.resetUserPasswordByToken(req.body.token, hash);
+      await db.users.resetUserPasswordByToken(req.body.token, hash);
 
       res.status(200).json({message: 'Password changed successfully'});
     } catch (e) {
@@ -230,7 +230,7 @@ module.exports = () => {
     await validateVerifyEmail(req);
 
     try {
-      await db.markEmailAsVerified(req.body.token);
+      await db.users.markEmailAsVerified(req.body.token);
 
       res.status(200).json({message: 'Email successfully verified.'});
     } catch (e) {
@@ -243,7 +243,7 @@ module.exports = () => {
   });
 
   router.post('/logout', mw.requireLoggedIn, async function (req, res, next) {
-    await db.logoutSession(req.currentUser.id, req.cookies.session);
+    await db.sessions.logoutSession(req.currentUser.id, req.cookies.session);
     res.end();
   });
 

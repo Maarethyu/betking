@@ -31,7 +31,7 @@
         </b-row>
       </template>
     </b-table>
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" @change="fetchDepositHistory" />
+    <b-pagination :total-rows="totalRows" :per-page="perPage" align="center" @change="fetchDepositHistory" />
   </div>
 </template>
 
@@ -72,7 +72,7 @@
       data: {
         type: Object,
         required: true,
-        default: []
+        default: () => ({})
       },
       perPage: {
         type: Number,

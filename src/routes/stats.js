@@ -26,7 +26,7 @@ module.exports = (statsCache, exchangeRateCache) => {
     }
 
     try {
-      const results = await db.getUserStats(req.query.username);
+      const results = await db.bets.getUserStats(req.query.username);
 
       const user = {
         id: results[0].id,

@@ -9,7 +9,7 @@ const NotificationsHandler = require('./NotificationsHandler');
 const ChatNotificationsHandler = require('./ChatNotificationsHandler');
 const ChatService = require('../chat/ChatService');
 
-const chat = new ChatService(db);
+const chat = new ChatService(db.chat);
 
 const startSocketServer = function (server, cache) {
   const io = socketIo.listen(server);

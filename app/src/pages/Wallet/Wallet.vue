@@ -14,13 +14,13 @@
       </b-col>
       <b-col cols="12">
         <div class="table-title">Pending Withdrawals</div>
-        <PendingWithdrawals />
+        <PendingWithdrawals :data="pendingWithdrawals" :perPage="perPage" />
         <header></header>
       </b-col>
 
       <b-col cols="12">
         <div class="table-title">Withdrawal History</div>
-        <WithdrawalHistory />
+        <WithdrawalHistory :data="withdrawalHistory" :perPage="perPage" />
       </b-col>
 
       <b-row>
@@ -28,7 +28,7 @@
           <b-row class="align-center">
             <b-col cols="12" class="col-md-8">
               <div class="table-title">Withdrawal Whitelist</div>
-              <WithdrawalWhitelist />
+              <WithdrawalWhitelist :data="whitelistedAddresses" />
             </b-col>
 
             <b-col cols="12" class="col-md-4">
@@ -47,12 +47,12 @@
       </b-col>
       <b-col cols="12">
         <div class="table-title">Pending Deposits</div>
-        <PendingDeposits />
+        <PendingDeposits :data="pendingDeposits" :perPage="perPage" />
       </b-col>
 
       <b-col cols="12">
         <div class="table-title">Deposit History</div>
-        <DepositHistory />
+        <DepositHistory :data="depositHistory" :perPage="perPage" />
       </b-col>
     </b-row>
   </b-container>
@@ -125,4 +125,3 @@
     }
   }
 </style>
-

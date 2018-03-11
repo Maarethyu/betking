@@ -15,7 +15,7 @@ module.exports = () => {
     await validateBetDetails(req);
 
     try {
-      const result = await db.getBetDetails(req.query.id);
+      const result = await db.bets.getBetDetails(req.query.id);
       let userName = result.username;
 
       if (result.stats_hidden && ((req.currentUser && req.currentUser.id !== result.player_id) || !req.currentUser)) {
@@ -49,7 +49,7 @@ module.exports = () => {
   router.post('/toggle-stats-hidden', async function (req, res, next) {
     await validateToggleStatsHidden(req);
 
-    await db.toggleStatsHidden(req.currentUser.id, req.body.option);
+    await db.bets.toggleStatsHidden(req.currentUser.id, req.body.option);
 
     eventEmitter.emit(types.TOGGLE_STATS_HIDDEN, {
       username: req.currentUser.username,
@@ -60,7 +60,7 @@ module.exports = () => {
   });
 
   router.post('/disable-betting', async function (req, res, next) {
-    await db.disableBetting(req.currentUser.id);
+    await db.bets.disableBetting(req.currentUser.id);
 
     res.end();
   });

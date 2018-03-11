@@ -374,7 +374,7 @@
       });
 
       bus.$on('leaving-dice-page', () => {
-        this.disableAutoBet();
+        this.$store.dispatch('setAutoBetMode', false);
       });
     },
     watch: {

@@ -51,7 +51,7 @@ module.exports = (currencyCache, txnFeeCache) => {
     await validateConfirmWithdraw(req);
 
     try {
-      await db.confirmWithdrawByToken(req.body.token);
+      await db.wallet.confirmWithdrawByToken(req.body.token);
 
       res.end();
     } catch (e) {
@@ -74,7 +74,7 @@ module.exports = (currencyCache, txnFeeCache) => {
 
   router.get('/balances', mw.requireLoggedIn, mw.requireWhitelistedIp, async function (req, res, next) {
     // TODO: Do we need pagination for this api? It is always going to send limited amount of data
-    const balances = await db.getAllBalancesForUser(req.currentUser.id);
+    const balances = await db.wallet.getAllBalancesForUser(req.currentUser.id);
 
     res.json({balances});
   });
@@ -85,12 +85,12 @@ module.exports = (currencyCache, txnFeeCache) => {
     const currency = parseInt(req.query.currency, 10);
     const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currencyCache, currency);
     try {
-      const address = await db.getDepositAddress(req.currentUser.id, currencyToQuery);
+      const address = await db.wallet.getDepositAddress(req.currentUser.id, currencyToQuery);
       const addressQr = await helpers.getAddressQr(address);
       res.json({address, addressQr});
     } catch (e) {
       if (e.message === 'NO_DEPOSIT_ADDRESS_AVAILABLE') {
-        await db.logNoDepositAddressAvailableError(e.message, e.stack, req.id, req.currentUser && req.currentUser.id, req.query.currency);
+        await db.logs.logNoDepositAddressAvailableError(e.message, e.stack, req.id, req.currentUser && req.currentUser.id, req.query.currency);
         return res.status(400).send({error: 'NO_DEPOSIT_ADDRESS_AVAILABLE'});
       }
 
@@ -112,7 +112,7 @@ module.exports = (currencyCache, txnFeeCache) => {
       return res.status(400).json({error: 'Requested amount is less than minimum withdrawal limit'});
     }
 
-    const isAddressWhitelisted = await db.isAddressWhitelisted(req.currentUser.id, req.body.currency, req.body.address);
+    const isAddressWhitelisted = await db.wallet.isAddressWhitelisted(req.currentUser.id, req.body.currency, req.body.address);
     if (!isAddressWhitelisted) {
       return res.status(400).json({error: 'Cannot withdraw to a non-whitelisted address'});
     }
@@ -130,7 +130,7 @@ module.exports = (currencyCache, txnFeeCache) => {
       .toString();
 
     try {
-      await db.createWithdrawalEntry(
+      await db.wallet.createWithdrawalEntry(
         req.currentUser.id,
         req.body.currency,
         withdrawalFee,
@@ -174,7 +174,7 @@ module.exports = (currencyCache, txnFeeCache) => {
     },
     async function (req, res, next) {
       try {
-        await db.setConfirmWithdrawalByEmail(req.currentUser.id, req.body.option);
+        await db.wallet.setConfirmWithdrawalByEmail(req.currentUser.id, req.body.option);
 
         res.end();
       } catch (e) {
@@ -190,22 +190,22 @@ module.exports = (currencyCache, txnFeeCache) => {
   router.get('/wallet-info', mw.requireLoggedIn, mw.requireWhitelistedIp, async function (req, res, next) {
     // TODO: Get pending deposits from db
     res.json({
-      pendingWithdrawals: await getWalletTransactions(db.getPendingWithdrawals)(req, res, next),
-      withdrawalHistory: await getWalletTransactions(db.getWithdrawalHistory)(req, res, next),
-      depositHistory: await getWalletTransactions(db.getDepositHistory)(req, res, next),
+      pendingWithdrawals: await getWalletTransactions(db.wallet.getPendingWithdrawals)(req, res, next),
+      withdrawalHistory: await getWalletTransactions(db.wallet.getWithdrawalHistory)(req, res, next),
+      depositHistory: await getWalletTransactions(db.wallet.getDepositHistory)(req, res, next),
       pendingDeposits: {},
-      whitelistedAddresses: await db.getWhitelistedAddresses(req.currentUser.id)
+      whitelistedAddresses: await db.wallet.getWhitelistedAddresses(req.currentUser.id)
     });
   });
 
-  router.get('/pending-withdrawals', mw.requireLoggedIn, mw.requireWhitelistedIp, sendWalletTransactions(db.getPendingWithdrawals));
+  router.get('/pending-withdrawals', mw.requireLoggedIn, mw.requireWhitelistedIp, sendWalletTransactions(db.wallet.getPendingWithdrawals));
 
-  router.get('/withdrawal-history', mw.requireLoggedIn, mw.requireWhitelistedIp, sendWalletTransactions(db.getWithdrawalHistory));
+  router.get('/withdrawal-history', mw.requireLoggedIn, mw.requireWhitelistedIp, sendWalletTransactions(db.wallet.getWithdrawalHistory));
 
-  router.get('/deposit-history', mw.requireLoggedIn, mw.requireWhitelistedIp, sendWalletTransactions(db.getDepositHistory));
+  router.get('/deposit-history', mw.requireLoggedIn, mw.requireWhitelistedIp, sendWalletTransactions(db.wallet.getDepositHistory));
 
   router.get('/whitelisted-address', mw.requireLoggedIn, mw.requireWhitelistedIp, async function (req, res, next) {
-    const whitelistedAddresses = await db.getWhitelistedAddresses(req.currentUser.id);
+    const whitelistedAddresses = await db.wallet.getWhitelistedAddresses(req.currentUser.id);
 
     res.json({whitelistedAddresses});
   });
@@ -214,7 +214,7 @@ module.exports = (currencyCache, txnFeeCache) => {
     await validateAddWhitelistedAddress(req, currencyCache);
 
     try {
-      await db.addWhitelistedAddress(
+      await db.wallet.addWhitelistedAddress(
         req.currentUser.id,
         parseInt(req.body.currency, 10),
         req.body.address
@@ -233,7 +233,7 @@ module.exports = (currencyCache, txnFeeCache) => {
   router.post('/whitelisted-address/remove', mw.requireLoggedIn, mw.requireWhitelistedIp, mw.require2fa, async function (req, res, next) {
     await validateRemoveWhitelistedAddress(req, currencyCache);
 
-    await db.removeWhitelistedAddress(
+    await db.wallet.removeWhitelistedAddress(
       req.currentUser.id,
       parseInt(req.body.currency, 10)
     );
@@ -251,7 +251,7 @@ module.exports = (currencyCache, txnFeeCache) => {
     }
 
     try {
-      await db.sendTip(req.currentUser.id, req.body.username, req.body.amount, req.body.currency);
+      await db.wallet.sendTip(req.currentUser.id, req.body.username, req.body.amount, req.body.currency);
     } catch (e) {
       if (e.message === 'INSUFFICIENT_BALANCE' || e.message === 'USERNAME_DOES_NOT_EXIST') {
         return res.status(400).json({error: e.message});

@@ -38,7 +38,7 @@
               </b-form>
             </b-col>
             <b-col cols="3">
-              <b-button class="float-right" variant="success" type="submit">Enable</b-button>
+              <b-button class="float-right" variant="success" type="submit" @click="enableTwoFactorAuth">Enable</b-button>
             </b-col>
           </b-row>
           <CopyToClipboard v-bind:text="newKey"></CopyToClipboard>
@@ -155,4 +155,3 @@
     }
   };
 </script>
-

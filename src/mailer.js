@@ -16,7 +16,7 @@ const sendMail = function (address, subject, htmlBody) {
 };
 
 const logEmailErrors = (address, msg) => (e) => {
-  db.logEmailError(e.message, e.stack, address, msg);
+  db.logs.logEmailError(e.message, e.stack, address, msg);
   console.log('MAIL_ERROR', address, msg, e);
 };
 
