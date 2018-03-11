@@ -29,7 +29,7 @@
       </template>
     </b-table>
 
-    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" @change="fetchPendingWithdrawals"/>
+    <b-pagination :total-rows="totalRows" :per-page="perPage" align="center" @change="fetchPendingWithdrawals"/>
   </div>
 </template>
 
@@ -76,7 +76,7 @@
       data: {
         type: Object,
         required: true,
-        default: []
+        default: () => ({})
       },
       perPage: {
         type: Number,
