@@ -14,8 +14,8 @@ class BetsCache {
   }
 
   async load () {
-    const allBets = await this.db.getLatestDiceBets(this.numBetsInCache);
-    const highrollerBets = await this.db.getLatestDiceHighrollerBets(this.numBetsInCache);
+    const allBets = await this.db.diceGame.getLatestDiceBets(this.numBetsInCache);
+    const highrollerBets = await this.db.diceGame.getLatestDiceHighrollerBets(this.numBetsInCache);
 
     this.buildStatsHiddenMapFromBetsPayload(allBets);
     this.buildStatsHiddenMapFromBetsPayload(highrollerBets);
@@ -27,7 +27,7 @@ class BetsCache {
   }
 
   async loadHighrollerAmounts () {
-    const bankrolls = await this.db.getAllBankrolls();
+    const bankrolls = await this.db.bets.getAllBankrolls();
     bankrolls.forEach(b => {
       this.currencyToHighrollerAmounts[b.currency] = b.highroller_amount;
     });

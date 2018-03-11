@@ -20,12 +20,12 @@ const {eventEmitter} = require('./eventEmitter');
 // TODO - should these be before express is created?
 // TODO - Moved express creation inside startServer function
 process.on('unhandledRejection', (reason, promise) => {
-  db.logUnhandledRejectionError(reason, promise);
+  db.logs.logUnhandledRejectionError(reason, promise);
   console.log('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 process.on('uncaughtException', (err) => {
-  db.logUncaughtExceptionError(err.message, err.stack);
+  db.logs.logUncaughtExceptionError(err.message, err.stack);
   console.log('Uncaught Exception', err);
 });
 
@@ -70,7 +70,6 @@ const startHttpServer = function () {
   router.use('/chat', require('./routes/chat')());
   router.use('/support', require('./routes/support')());
   router.use('/affiliate', require('./routes/affiliate')());
-  router.use('', csrfProtection, require('./routes/index')());
   app.use('/api', router);
 
   // TODO - review
@@ -105,7 +104,7 @@ const startHttpServer = function () {
     const code = error.code || null;
     const source = error.DB_ERROR ? 'DB_ERROR' : 'API_ERROR';
 
-    db.logError(error.message, error.stack, req.id, req.currentUser && req.currentUser.id, source, query, code);
+    db.logs.logError(error.message, error.stack, req.id, req.currentUser && req.currentUser.id, source, query, code);
 
     console.log(source, error);
 

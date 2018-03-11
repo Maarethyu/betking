@@ -29,7 +29,7 @@ module.exports = () => {
   });
 
   router.get('/active-sessions', async function (req, res, next) {
-    const result = await db.getActiveSessions(req.currentUser.id);
+    const result = await db.sessions.getActiveSessions(req.currentUser.id);
 
     const sessions = result.map(session => ({
       id: session.id,
@@ -43,18 +43,18 @@ module.exports = () => {
   router.post('/logout-session', async function (req, res, next) {
     await validateLogoutSession(req);
 
-    await db.logoutSession(req.currentUser.id, req.body.id);
+    await db.sessions.logoutSession(req.currentUser.id, req.body.id);
 
     res.end();
   });
 
   router.post('/logout-all-sessions', async function (req, res, next) {
-    await db.logoutAllSessions(req.currentUser.id);
+    await db.sessions.logoutAllSessions(req.currentUser.id);
     res.end();
   });
 
   router.get('/get-login-attempts', async function (req, res, next) {
-    const loginAttempts = await db.getLoginAttempts(req.currentUser.id);
+    const loginAttempts = await db.logs.getLoginAttempts(req.currentUser.id);
 
     res.json({loginAttempts});
   });

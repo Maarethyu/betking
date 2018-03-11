@@ -35,7 +35,7 @@ module.exports = (currencyCache) => {
     const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currencyCache, currency);
 
     try {
-      const newUserBalance = await db.addDeposit(
+      const newUserBalance = await db.wallet.addDeposit(
         currencyToQuery,
         currency,
         req.body.amount,

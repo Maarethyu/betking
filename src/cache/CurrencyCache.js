@@ -5,7 +5,7 @@ class CurrencyCache {
   }
 
   async load () {
-    this.currenciesCache = await this.db.getAllCurrencies();
+    this.currenciesCache = await this.db.wallet.getAllCurrencies();
   }
 
   get currencies () {

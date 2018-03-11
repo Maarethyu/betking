@@ -16,8 +16,8 @@ module.exports = (currencyCache) => {
   router.get('/summary', async function (req, res, next) {
     await validatePaginatedList(req);
 
-    const summary = await db.getAffiliateSummary(req.currentUser.username, req.currentUser.id);
-    const affiliateUsers = await db.getAffiliateUsers(req.currentUser.username, req.query.limit || 10, req.query.skip || 0);
+    const summary = await db.affiliate.getAffiliateSummary(req.currentUser.username, req.currentUser.id);
+    const affiliateUsers = await db.affiliate.getAffiliateUsers(req.currentUser.username, req.query.limit || 10, req.query.skip || 0);
 
     res.json({summary, affiliateUsers});
   });
@@ -25,7 +25,7 @@ module.exports = (currencyCache) => {
   router.get('/users', async function (req, res, next) {
     await validatePaginatedList(req);
 
-    const affiliateUsers = await db.getAffiliateUsers(req.currentUser.username, req.query.limit || 10, req.query.skip || 0);
+    const affiliateUsers = await db.affiliate.getAffiliateUsers(req.currentUser.username, req.query.limit || 10, req.query.skip || 0);
 
     res.json({affiliateUsers});
   });
@@ -33,7 +33,7 @@ module.exports = (currencyCache) => {
   router.get('/amount-due', async function (req, res, next) {
     await validateAffiliateAmountDue(req);
 
-    const amountsDueByCurrency = await db.getAmountDueByAffiliate(req.currentUser.username, req.currentUser.id, req.query.affiliateId);
+    const amountsDueByCurrency = await db.affiliate.getAmountDueByAffiliate(req.currentUser.username, req.currentUser.id, req.query.affiliateId);
 
     res.json({amountsDueByCurrency});
   });

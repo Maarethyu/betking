@@ -7,7 +7,7 @@ const attachCurrentUserToRequest = async (req, res, next) => {
   const sessionId = req.cookies.session;
 
   if (sessionId && helpers.isValidUuid(sessionId)) {
-    const user = await db.getUserBySessionId(sessionId);
+    const user = await db.sessions.getUserBySessionId(sessionId);
     if (user) {
       req.currentUser = user; // TODO - make sure this is not available client side
     }
@@ -41,7 +41,7 @@ const require2fa = async (req, res, next) => {
 
     if (isOtpValid) {
       try {
-        await db.saveUsedTwoFactorCode(req.currentUser.id, req.body.otp);
+        await db.logs.saveUsedTwoFactorCode(req.currentUser.id, req.body.otp);
         next();
       } catch (e) {
         if (e.message === 'CODE_ALREADY_USED') {
@@ -63,9 +63,9 @@ const require2fa = async (req, res, next) => {
 const requireWhitelistedIp = async (req, res, next) => {
   const ip = helpers.getIp(req);
 
-  const isIpWhitelisted = await db.isIpWhitelisted(ip, req.currentUser.id);
+  const isIpWhitelisted = await db.users.isIpWhitelisted(ip, req.currentUser.id);
   if (!isIpWhitelisted) {
-    await db.logoutAllSessionsWithoutWhitelistedIps(req.currentUser.id); // TODO should we just logout all sessions?
+    await db.sessions.logoutAllSessionsWithoutWhitelistedIps(req.currentUser.id); // TODO should we just logout all sessions?
     return res.status(401).json({error: 'IP not whitelisted'});
   }
 

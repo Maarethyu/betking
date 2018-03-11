@@ -15,7 +15,7 @@ class StatsCache {
   }
 
   async load () {
-    const betStatsByCurrency = await this.db.getBetStatsByCurrency();
+    const betStatsByCurrency = await this.db.bets.getBetStatsByCurrency();
 
     this.totalBets = this.totalBetsFromStats(betStatsByCurrency);
     this.siteStats = this.siteStatsFromStats(betStatsByCurrency);
@@ -47,7 +47,7 @@ class StatsCache {
   async getWonLast24Hours () {
     if (!this.lastComputedWon24Hours ||
       (Date.now() - this.lastComputedWon24Hours) > this.cacheDurationWonLast24Hours) {
-      this.wonLast24Hours = await this.db.computeWonLast24Hours();
+      this.wonLast24Hours = await this.db.bets.computeWonLast24Hours();
       this.lastComputedWon24Hours = Date.now();
     }
 

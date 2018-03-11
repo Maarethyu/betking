@@ -1,4 +1,3 @@
-
 class UserService {
   constructor (db) {
     this.db = db;
@@ -6,9 +5,9 @@ class UserService {
 
   async getUserByLoginMethod (loginMethod, userName, emailAddress) {
     if (loginMethod === 'username') {
-      return this.db.getUserByName(userName);
+      return this.db.users.getUserByName(userName);
     } else if (loginMethod === 'email') {
-      return this.db.getUserByEmail(emailAddress);
+      return this.db.users.getUserByEmail(emailAddress);
     } else {
       return null;
     }
@@ -19,7 +18,7 @@ class UserService {
       return null;
     }
     if (affiliateId.indexOf('u:') === 0) {
-      const user = await this.db.getUserByName(affiliateId.replace('u:', ''));
+      const user = await this.db.users.getUserByName(affiliateId.replace('u:', ''));
       if (!user) {
         return null;
       }

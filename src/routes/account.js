@@ -21,9 +21,9 @@ module.exports = (currencyCache) => {
   router.post('/change-email', async function (req, res, next) {
     await validateChangeEmail(req);
 
-    await db.updateEmail(req.currentUser.id, req.body.email);
+    await db.users.updateEmail(req.currentUser.id, req.body.email);
 
-    const verifyEmailToken = await db.createVerifyEmailToken(req.currentUser.id, req.body.email);
+    const verifyEmailToken = await db.users.createVerifyEmailToken(req.currentUser.id, req.body.email);
     mailer.sendVerificationEmail(req.currentUser.username, req.body.email, verifyEmailToken.id);
 
     res.end();
@@ -34,7 +34,7 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Email not found'});
     }
 
-    const verifyEmailToken = await db.createVerifyEmailToken(req.currentUser.id, req.currentUser.email);
+    const verifyEmailToken = await db.users.createVerifyEmailToken(req.currentUser.id, req.currentUser.email);
     mailer.sendVerificationEmail(req.currentUser.username, req.currentUser.email, verifyEmailToken.id);
     res.end();
   });
@@ -49,7 +49,7 @@ module.exports = (currencyCache) => {
 
     const newPasswordHash = await bcrypt.hash(req.body.password2, 10);
 
-    await db.updatePassword(req.currentUser.id, newPasswordHash, req.cookies.session);
+    await db.users.updatePassword(req.currentUser.id, newPasswordHash, req.cookies.session);
 
     res.end();
   });
@@ -76,9 +76,9 @@ module.exports = (currencyCache) => {
       return res.status(400).json({error: 'Invalid two factor code'});
     }
 
-    await db.enableTwofactor(req.currentUser.id);
+    await db.users.enableTwofactor(req.currentUser.id);
 
-    await db.saveUsedTwoFactorCode(req.currentUser.id, req.body.otp);
+    await db.logs.saveUsedTwoFactorCode(req.currentUser.id, req.body.otp);
 
     res.end();
   });
@@ -90,7 +90,7 @@ module.exports = (currencyCache) => {
 
     const newMfaKey = helpers.getNew2faSecret();
 
-    await db.disableTwoFactor(req.currentUser.id, newMfaKey);
+    await db.users.disableTwoFactor(req.currentUser.id, newMfaKey);
 
     res.end();
   });
@@ -100,8 +100,8 @@ module.exports = (currencyCache) => {
 
     const ip = req.body.ip || helpers.getIp(req);
 
-    await db.addIpInWhitelist(ip, req.currentUser.id);
-    await db.logoutAllSessionsWithoutWhitelistedIps(req.currentUser.id);
+    await db.users.addIpInWhitelist(ip, req.currentUser.id);
+    await db.sessions.logoutAllSessionsWithoutWhitelistedIps(req.currentUser.id);
 
     res.end();
   });
@@ -109,13 +109,13 @@ module.exports = (currencyCache) => {
   router.post('/remove-whitelisted-ip', mw.require2fa, async function (req, res, next) {
     await validateWhitelistedIp(req, false);
 
-    await db.removeIpFromWhitelist(req.body.ip, req.currentUser.id);
+    await db.users.removeIpFromWhitelist(req.body.ip, req.currentUser.id);
 
     res.end();
   });
 
   router.get('/get-whitelisted-ips', async function (req, res, next) {
-    const ips = await db.getWhitelistedIps(req.currentUser.id);
+    const ips = await db.users.getWhitelistedIps(req.currentUser.id);
 
     res.json({ips});
   });

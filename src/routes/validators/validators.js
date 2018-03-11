@@ -28,7 +28,7 @@ const validateUsername = function (req) {
 
 const validateUsernameAvailable = function (req, db) {
   req.check('username', 'username already exists').exists()
-    .custom(value => db.isUserNameAlreadyTaken(req.body.username)
+    .custom(value => db.users.isUserNameAlreadyTaken(req.body.username)
       .then(userNameExists => {
         if (userNameExists) throw new Error();
       })
@@ -45,7 +45,7 @@ const validateEmail = function (req, isOptional) {
 
 const validateEmailAvailable = function (req, db, isOptional) {
   req.check('email', 'Email already exists').exists()
-    .custom(value => db.isEmailAlreadyTaken(value)
+    .custom(value => db.users.isEmailAlreadyTaken(value)
       .then(emailExists => {
         if (emailExists) throw new Error();
       })
