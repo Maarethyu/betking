@@ -1,5 +1,6 @@
 const socketIo = require('socket.io');
 const cookieParser = require('cookie-parser');
+const uuid = require('uuid');
 const db = require('../db');
 const {notificationEmitter} = require('./notificationEmitter');
 const {chatNotificationEmitter} = require('./chatNotificationEmitter');
@@ -10,6 +11,17 @@ const ChatNotificationsHandler = require('./ChatNotificationsHandler');
 const ChatService = require('../chat/ChatService');
 
 const chat = new ChatService(db.chat);
+
+const socketErrorHandler = (socket) => async (error) => {
+  userId = socket.request.currentUser && socket.request.currentUser.id;
+  const query = error.query ? error.query.toString() : null;
+  const code = error.code || null;
+  const source = error.DB_ERROR ? 'DB_ERROR' : 'SOCKET_ERROR';
+
+  await db.logs.logError(error.message, error.stack, socket.request.id, userId, source, query, code);
+
+  console.log(source, error);
+};
 
 const startSocketServer = function (server, cache) {
   const io = socketIo.listen(server);
@@ -27,6 +39,11 @@ const startSocketServer = function (server, cache) {
     attachCurrentUserToRequest(socket.request, null, next);
   });
 
+  io.use(function (socket, next) {
+    socket.request.id = uuid.v4();
+    next();
+  });
+
   io.on('connection', function (socket) {
     const currentUser = socket.request.currentUser;
     const currentUserId = currentUser && currentUser.id;
@@ -42,47 +59,64 @@ const startSocketServer = function (server, cache) {
     }
 
     socket.on('joinChat', (data) => {
-      chat.joinChat(data.language, socket.id, currentUsername);
+      chat.joinChat(data.language, socket.id, currentUsername)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('newChatMessage', (data) => {
-      chat.newChatMessage(data.language, data.message, currentUsername, currentUserId);
+      chat.newChatMessage(data.language, data.message, currentUsername, currentUserId)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('banUser', (data) => {
-      chat.banUser(data.username, currentUsername, currentUserId);
+      chat.banUser(data.username, currentUsername, currentUserId)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('unBanUser', (data) => {
-      chat.unBanUser(data.username, currentUsername, currentUserId);
+      chat.unBanUser(data.username, currentUsername, currentUserId)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('clearAllChat', (data) => {
-      chat.clearAllChat(data.language, currentUsername, currentUserId);
+      chat.clearAllChat(data.language, currentUsername, currentUserId)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('clearUsersChat', (data) => {
-      chat.clearUsersChat(data.username, currentUsername, currentUserId);
+      chat.clearUsersChat(data.username, currentUsername, currentUserId)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('privateChatMessage', function (data) {
-      chat.privateChatMessage(currentUsername, currentUserId, data.toUsername, data.toUserId, data.message);
+      chat.privateChatMessage(currentUsername, currentUserId, data.toUsername, data.toUserId, data.message)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('joinPrivateChat', function () {
-      chat.joinPrivateChat(currentUsername, currentUserId);
+      chat.joinPrivateChat(currentUsername, currentUserId)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('joinPrivateChatWithUser', function (data) {
-      chat.getLastPrivateChatsForUser(currentUsername, currentUserId, data.username);
+      chat.getLastPrivateChatsForUser(currentUsername, currentUserId, data.username)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('markPrivateChatAsRead', function (data) {
-      chat.markPrivateChatAsRead(currentUsername, data.username);
+      chat.markPrivateChatAsRead(currentUsername, data.username)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('archiveConversation', function (data) {
-      chat.archiveConversation(currentUsername, data.username);
+      chat.archiveConversation(currentUsername, data.username)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('archiveAllConversations', function () {
-      chat.archiveAllConversations(currentUsername);
+      chat.archiveAllConversations(currentUsername)
+        .catch(socketErrorHandler(socket));
     });
     socket.on('disconnect', function () {
       if (currentUserId) {
-        chat.userLeaveApp(currentUsername);
+        chat.userLeaveApp(currentUsername)
+          .catch(socketErrorHandler(socket));
       } else {
-        chat.anonymousUserLeaveApp();
+        chat.anonymousUserLeaveApp()
+          .catch(socketErrorHandler(socket));
       }
+    });
+    socket.on('error', function (e) {
+      console.log('CAUGHT', e);
     });
   });
 
