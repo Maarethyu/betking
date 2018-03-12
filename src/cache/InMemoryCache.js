@@ -6,6 +6,7 @@ const RecommendedBitcoinTxnFeeCache = require('./RecommendedBitcoinTxnFeeCache')
 
 class Cache {
   constructor (db) {
+    this.db = db;
     this.currencyCache = new CurrencyCache(db);
     this.statsCache = new StatsCache(db);
     this.betsCache = new BetsCache(db);
@@ -23,16 +24,31 @@ class Cache {
 
   async load () {
     for (const cache of this.cacheItems) {
-      await cache.load();
+      try {
+        await cache.load();
+      } catch (e) {
+        this.errorHandler(e);
+      }
     }
   }
 
   handle (event) {
     this.cacheItems.forEach(cache => {
       if (typeof cache.handle === 'function') {
-        cache.handle(event);
+        cache.handle(event)
+          .catch(error => this.errorHandler(error));
       }
     });
+  }
+
+  async errorHandler (error) {
+    const query = error.query ? error.query.toString() : null;
+    const code = error.code || null;
+    const source = error.DB_ERROR ? 'DB_ERROR' : 'CACHE_ERROR';
+
+    await this.db.logs.logError(error.message, error.stack, null, null, source, query, code);
+
+    console.log(source, error);
   }
 }
 

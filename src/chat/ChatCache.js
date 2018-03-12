@@ -39,27 +39,31 @@ class ChatCache {
   }
 
   listPerLanguage (language = 'EN') {
-    return new Promise(async resolve => {
+    return new Promise(async (resolve, reject) => {
       const item = this.messagesPerLanguage.find(item => item.language === language);
       if (item) {
         resolve(item);
       } else {
-        const messages = await this.db.getLastChatMessages(language, 100);
-        const bannedUsernames = await this.getBannedUsernames();
+        try {
+          const messages = await this.db.getLastChatMessages(language, 100);
+          const bannedUsernames = await this.getBannedUsernames();
 
-        const newItem = {
-          language,
-          messages: messages.map(msg => ({
-            userId: msg.user_id,
-            username: msg.username,
-            message: msg.message,
-            isBanned: bannedUsernames.indexOf(msg.username) > -1,
-            date: msg.date
-          }))
-        };
+          const newItem = {
+            language,
+            messages: messages.map(msg => ({
+              userId: msg.user_id,
+              username: msg.username,
+              message: msg.message,
+              isBanned: bannedUsernames.indexOf(msg.username) > -1,
+              date: msg.date
+            }))
+          };
 
-        this.messagesPerLanguage.push(newItem);
-        resolve(newItem);
+          this.messagesPerLanguage.push(newItem);
+          resolve(newItem);
+        } catch (e) {
+          reject(e);
+        }
       }
     });
   }
