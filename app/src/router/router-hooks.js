@@ -1,6 +1,10 @@
 import store from 'src/store';
 
 export const beforeEach = async (to, from, next) => {
+  if (to.name === 'poker') {
+    window.location = '/poker';
+  }
+
   if (!store.state.funds.isReady) {
     try {
       await store.dispatch('fetchCurrencies');

@@ -3,8 +3,7 @@ import store from 'src/store';
 import {routeUserOnLogout} from 'src/router/route-helpers';
 
 const csrfToken = () => {
-  const el = document.getElementById('csrfToken');
-  return el && el.value;
+  return window.settings.csrfToken;
 };
 
 const errorHandler = function (error) {

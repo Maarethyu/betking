@@ -147,7 +147,6 @@ module.exports = () => {
     }
 
     const affiliateId = await userService.extractAffiliateId(req.cookies.aff_id);
-    console.log(affiliateId);
 
     const hash = await bcrypt.hash(req.body.password, 10);
 
@@ -245,6 +244,21 @@ module.exports = () => {
   router.post('/logout', mw.requireLoggedIn, async function (req, res, next) {
     await db.sessions.logoutSession(req.currentUser.id, req.cookies.session);
     res.end();
+  });
+
+  router.get('/cubeia-token', async function (req, res) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
+    res.setHeader('Expires', 'Fri, 01 Jan 2010 00:00:00 GMT');
+
+    if (req.currentUser) {
+      const isVip = await userService.isVip(req.currentUser.id);
+
+      const cubeiaToken = await db.cubeia.tokenFor(req.currentUser.id, req.currentUser.username, isVip, req.currentUser.username === 'dean');
+      res.json({cubeiaToken});
+    } else {
+      const cubeiaToken = await db.cubeia.tokenForAnonymous();
+      res.json({cubeiaToken});
+    }
   });
 
   return router;

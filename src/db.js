@@ -20,5 +20,6 @@ module.exports = {
   support: require('./models/support')(db),
   users: require('./models/users')(db),
   wallet: require('./models/wallet')(db),
-  bets: require('./models/bets')(db)
+  bets: require('./models/bets')(db),
+  cubeia: require('./models/cubeia')(db)
 };

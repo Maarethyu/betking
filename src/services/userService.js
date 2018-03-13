@@ -26,6 +26,28 @@ class UserService {
     }
     return affiliateId;
   }
+
+  async isVip (userId) {
+    const isAlreadyVip = await this.db.cubeia.isUserSetAsVip(userId);
+    let isVipByStats = false;
+
+    if (!isAlreadyVip) {
+      // TODO: Remove hardcoding here
+      const btcStats = await this.db.bets.getUserStatsByCurrency(userId, 0);
+      const ethStats = await this.db.bets.getUserStatsByCurrency(userId, 1);
+
+      const isVipByBtcStats = !!btcStats && (btcStats.total_wagered >= 0.5 || btcStats.total_profit <= -0.1);
+      const isVipByEthStats = !!ethStats && (ethStats.total_wagered >= 5 || ethStats.total_profit <= -1);
+
+      isVipByStats = isVipByBtcStats || isVipByEthStats;
+
+      if (isVipByStats) {
+        await this.db.cubeia.toggleVipStatus(userId, true);
+      }
+    }
+
+    return isAlreadyVip || isVipByStats;
+  }
 }
 
 module.exports = UserService;

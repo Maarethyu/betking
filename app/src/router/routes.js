@@ -30,6 +30,7 @@ const routes = [
   {path: '/reset-password', component: () => import('pages/ResetPassword')},
   {path: '/verify-email', component: () => import('pages/VerifyEmail')},
   {path: '/confirm-withdrawal', component: () => import('pages/ConfirmWithdrawal')},
+  {path: '/poker', name: 'poker'},
 
   /* Shows PageNotFound component in dev mode, redirects to /404 route in prod */
   {path: '/404', component: () => import('pages/PageNotFound'), alias: '*'},
