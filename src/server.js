@@ -70,7 +70,10 @@ const startHttpServer = function () {
   router.use('/chat', require('./routes/chat')());
   router.use('/support', require('./routes/support')());
   router.use('/affiliate', require('./routes/affiliate')());
+  router.use('/cubeia', require('./routes/cubeia')(cache.currencyCache));
   app.use('/api', router);
+
+  app.use('/poker', require('./routes/poker')());
 
   // TODO - review
   const frontendStaticPath = path.join(__dirname, '..', 'app/dist');

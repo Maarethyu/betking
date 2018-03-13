@@ -183,6 +183,5 @@ export const formatBetAsMessage = (id, date, username, betAmount, currencySymbol
 });
 
 export const getCaptchaSiteKey = () => {
-  const el = document.getElementById('captchaSiteKey');
-  return el && el.value;
+  return window.settings.captchaSiteKey;
 };

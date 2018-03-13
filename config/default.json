@@ -18,5 +18,7 @@
   "DISALLOWED_COUNTRIES": ["US", "GB"],
   "RATE_LIMITER_REGISTER_WINDOW_IN_MS": 1000,
   "RATE_LIMITER_DELAY_AFTER": 1,
-  "RATE_LIMITER_DELAY_IN_MS": 200
+  "RATE_LIMITER_DELAY_IN_MS": 200,
+  "CUBEIA_API_KEY": "apiKey",
+  "CUBEIA_URL": "https://poker-test-public-lb.cubeia.com/poker-client/poker/login/90"
 }
