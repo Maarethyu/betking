@@ -4,17 +4,15 @@ const uuid = require('uuid');
 const db = require('../db');
 const {notificationEmitter} = require('./notificationEmitter');
 const {chatNotificationEmitter} = require('./chatNotificationEmitter');
-const {userNotificationEmitter} = require('./userNotificationEmitter');
 const {attachCurrentUserToRequest} = require('../middleware');
 
 const NotificationsHandler = require('./NotificationsHandler');
-const UserNotificationsHandler = require('./UserNotificationsHandler');
 const ChatNotificationsHandler = require('./ChatNotificationsHandler');
 const ChatService = require('../chat/ChatService');
 const UserNotificationService = require('../notifications/UserNotificationService');
 
 const chat = new ChatService(db.chat);
-const userNotification = new UserNotificationService(db.notifications);
+const userNotificationService = new UserNotificationService(db.notifications);
 
 const socketErrorHandler = (socket) => async (error) => {
   const userId = socket.request.currentUser && socket.request.currentUser.id;
@@ -31,7 +29,6 @@ const startSocketServer = function (server, cache) {
   const io = socketIo.listen(server);
   const notificationsHandler = new NotificationsHandler(io);
   const chatNotificationsHandler = new ChatNotificationsHandler(io);
-  const userNotificationsHandler = new UserNotificationsHandler(io);
   const {betsCache} = cache;
 
   console.log(`websockets listening`);
@@ -111,6 +108,13 @@ const startSocketServer = function (server, cache) {
       chat.archiveAllConversations(currentUsername)
         .catch(socketErrorHandler(socket));
     });
+    socket.on('fetchNotifications', function () {
+      userNotificationService.fetchNotifications(currentUserId)
+        .catch(socketErrorHandler(socket));
+    });
+    socket.on('markNotificationAsRead', function ({id}) {
+      userNotificationService.markNotificationAsRead(currentUserId, id);
+    });
     socket.on('disconnect', function () {
       if (currentUserId) {
         chat.userLeaveApp(currentUsername)
@@ -138,16 +142,12 @@ const startSocketServer = function (server, cache) {
   });
 
   notificationEmitter.addListener((notification) => {
+    userNotificationService.handle(notification);
     notificationsHandler.handle(notification);
   });
 
   chatNotificationEmitter.addListener((notification) => {
     chatNotificationsHandler.handle(notification);
-  });
-
-  userNotificationEmitter.addListener((notification) => {
-    userNotification.handle(notification);
-    userNotificationsHandler.handle(notification);
   });
 };
 

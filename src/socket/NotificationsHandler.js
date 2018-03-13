@@ -96,6 +96,18 @@ class NotificationsHandler {
     this.io.to(payload.userId).emit(type, payload);
   }
 
+  allNotifications (type, payload) {
+    this.io.to(payload.userId).emit(type, payload);
+  }
+
+  newNotification (type, payload) {
+    this.io.to(payload.userId).emit(type, payload);
+  }
+
+  markedNotificationAsRead (type, payload) {
+    this.io.to(payload.userId).emit(type, payload);
+  }
+
   statsUpdate (type, payload) {
     if (!this.lastStatsBroadcast || (new Date() - this.lastStatsBroadcast) >= this.statsUpdateDelay) {
       this.lastStatsBroadcast = Date.now();

@@ -4,7 +4,11 @@ const types = {
   STATS_UPDATE: 'statsUpdate',
   DICE_BET: 'diceBet',
   LOAD_ALL_BETS: 'loadAllBets',
-  DEPOSIT_CONFIRMED: 'depositConfirmed'
+  DEPOSIT_CONFIRMED: 'depositConfirmed',
+  ALL_NOTIFICATIONS: 'allNotifications',
+  NEW_NOTIFICATION: 'newNotification',
+  MARKED_NOTIFICATION_AS_READ: 'markedNotificationAsRead'
+
 };
 
 class NotificationEmitter extends BaseEventEmitter {
