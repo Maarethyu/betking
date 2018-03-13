@@ -11,6 +11,11 @@ module.exports = (db) => {
     return result;
   };
 
+  const getBalanceForUserByCurrency = async (userId, currency) => {
+    const result = await db.oneOrNone('SELECT balance FROM user_balances WHERE user_id = $1 AND currency = $2', [userId, currency]);
+    return result;
+  };
+
   const createWithdrawalEntry = async (userId, currency, withdrawalFee, amount, amountReceived, address, withdrawalStatus, verificationToken) => { // wallet
     await db.tx(t => {
       return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amount, userId, currency])
@@ -65,6 +70,34 @@ module.exports = (db) => {
     });
 
     return result;
+  };
+
+  const depositToCubeia = async (userId, amount, currency, requestId) => {
+    await db.tx(t => {
+      return t.oneOrNone('UPDATE user_balances SET balance = balance - $1 WHERE user_id = $2 AND currency = $3 AND balance >= $1 RETURNING balance', [amount, userId, currency])
+        .then(res => {
+          if (!res) {
+            throw new Error('INSUFFICIENT_BALANCE');
+          }
+
+          return t.none('INSERT INTO cubeia_transactions (user_id, currency, amount, request_id, type) VALUES ($1, $2, $3, $4)', [userId, currency, amount, requestId, 'deposit'])
+            .then(() => {
+              return res.balance;
+            });
+        });
+    });
+  };
+
+  const withdrawFromCubeia = async (userId, amount, currency, requestId) => {
+    await db.tx(t => {
+      return t.one('INSERT INTO user_balances (user_id, currency, balance) VALUES ($1, $2, $3) ON CONFLICT (user_id, currency) DO UPDATE SET balance = user_balances.balance + $3 RETURNING balance', [userId, currency, amount])
+        .then(res => {
+          return t.none('INSERT INTO cubeia_transactions (user_id, currency, amount, request_id, type) VALUES ($1, $2, $3, $4)', [userId, currency, amount, requestId, 'withdrawal'])
+            .then(() => {
+              return res.balance;
+            });
+        });
+    });
   };
 
   const getDepositAddress = async (userId, currency) => {
@@ -182,9 +215,12 @@ module.exports = (db) => {
   return {
     getAllCurrencies,
     getAllBalancesForUser,
+    getBalanceForUserByCurrency,
     createWithdrawalEntry,
     confirmWithdrawByToken,
     addDeposit,
+    depositToCubeia,
+    withdrawFromCubeia,
     getDepositAddress,
     getPendingWithdrawals,
     getWithdrawalHistory,

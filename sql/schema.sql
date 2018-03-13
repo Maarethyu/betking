@@ -13,6 +13,7 @@ CREATE TABLE users (
   ignored_users text[],
   show_highrollers_in_chat boolean NOT NULL DEFAULT true,
   date_joined timestamp with time zone NOT NULL DEFAULT NOW(),
+  is_vip boolean NOT NULL DEFAULT false,
   locked_at timestamp with time zone NULL
 );
 
@@ -297,4 +298,39 @@ CREATE TABLE affiliate_payments (
   earnings numeric (36, 0) NOT NULL,
   currency integer NOT NULL REFERENCES currencies(id),
   created_at timestamp with time zone NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE cubeia_requests (
+  id bigserial PRIMARY KEY,
+  date timestamp with time zone NOT NULL DEFAULT NOW(),
+  request_id text NOT NULL,
+  request jsonb,
+  response jsonb,
+  type text
+);
+
+CREATE TABLE cubeia_requests_processed (
+  id bigserial PRIMARY KEY,
+  date timestamp with time zone NOT NULL DEFAULT NOW(),
+  request_id text,
+  balance numeric (36, 0)
+);
+
+CREATE TABLE cubeia_tokens (
+  id bigserial PRIMARY KEY,
+  date timestamp with time zone NOT NULL,
+  token text,
+  user_id bigint NOT NULL REFERENCES users(id),
+  username text,
+  is_vip boolean NOT NULL DEFAULT false,
+  is_admin boolean NOT NULL DEFAULT false
+);
+
+CREATE TABLE cubeia_transactions (
+  id bigserial PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  currency integer NOT NULL REFERENCES currencies(id),
+  amount numeric (36, 0) NOT NULL,
+  request_id text NOT NULL,
+  type text NOT NULL
 );

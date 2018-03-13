@@ -38,11 +38,15 @@ const isValidUuid = function (id) {
 const addConfigVariables = function (csrfToken) {
   const parser = new Transform();
 
+  const settings = {
+    captchaSiteKey: config.get('CAPTCHA_SITE_KEY'),
+    csrfToken
+  };
+
   parser._transform = function (data, encoding, done) { // eslint-disable-line no-underscore-dangle
     const str = data.toString().replace(
       '</body>',
-      `<input type="hidden" id="csrfToken" value="${csrfToken}"/>
-      <input type="hidden" id="captchaSiteKey" value="${config.get('CAPTCHA_SITE_KEY')}"/>
+      `<script type="text/javascript">window.settings=${JSON.stringify(settings)}</script>
       </body>`
     );
     done(null, str);

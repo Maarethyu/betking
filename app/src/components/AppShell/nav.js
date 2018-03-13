@@ -21,6 +21,11 @@ export default {
           icon: 'icon-game-controller'
         },
         {
+          name: 'Poker',
+          url: '/poker',
+          icon: 'icon-game-controller'
+        },
+        {
           name: 'Blackjack',
           url: '/blackjack',
           icon: 'icon-game-controller',

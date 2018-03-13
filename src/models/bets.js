@@ -59,6 +59,16 @@ module.exports = (db) => {
     return results;
   };
 
+  const getUserStatsByCurrency = async (userId, currency) => {
+    const result = await db.oneOrNone(`
+      SELECT SUM(total_wagered) as total_wagered, SUM(total_profit) as total_profit
+      FROM monthly_bet_stats
+      WHERE player_id = $1 AND currency = $2
+    `, [userId, currency]);
+
+    return result;
+  };
+
   const computeWonLast24Hours = async () => {
     const result = await db.any('SELECT SUM(profit) AS won_last_24_hours, currency FROM bets WHERE profit > 0 AND date > NOW() - interval \'24 hours\' GROUP BY currency');
     return result;
@@ -76,6 +86,7 @@ module.exports = (db) => {
     getBetStatsByCurrency,
     getBetDetails,
     getUserStats,
+    getUserStatsByCurrency,
     computeWonLast24Hours,
     toggleStatsHidden
   };

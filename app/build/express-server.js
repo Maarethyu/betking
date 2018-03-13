@@ -53,11 +53,14 @@ module.exports = (app) => {
         }
         res.set('content-type','text/html');
 
-        // Add csrf token
+        const settings = {
+          captchaSiteKey: serverConfig.get('CAPTCHA_SITE_KEY'),
+          csrfToken: req.csrfToken()
+        };
+
         const str = result.toString().replace(
           '</body>',
-          `<input type="hidden" id="csrfToken" value="${req.csrfToken()}"/>
-          <input type="hidden" id="captchaSiteKey" value="${serverConfig.get('CAPTCHA_SITE_KEY')}"/>
+          `<script type="text/javascript">window.settings=${JSON.stringify(settings)}</script>
           </body>`
         );
 
