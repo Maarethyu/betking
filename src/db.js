@@ -21,5 +21,6 @@ module.exports = {
   users: require('./models/users')(db),
   wallet: require('./models/wallet')(db),
   bets: require('./models/bets')(db),
+  notifications: require('./models/notification')(db),
   cubeia: require('./models/cubeia')(db)
 };

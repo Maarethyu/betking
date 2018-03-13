@@ -9,11 +9,13 @@ const {attachCurrentUserToRequest} = require('../middleware');
 const NotificationsHandler = require('./NotificationsHandler');
 const ChatNotificationsHandler = require('./ChatNotificationsHandler');
 const ChatService = require('../chat/ChatService');
+const UserNotificationService = require('../notifications/UserNotificationService');
 
 const chat = new ChatService(db.chat);
+const userNotificationService = new UserNotificationService(db.notifications);
 
 const socketErrorHandler = (socket) => async (error) => {
-  userId = socket.request.currentUser && socket.request.currentUser.id;
+  const userId = socket.request.currentUser && socket.request.currentUser.id;
   const query = error.query ? error.query.toString() : null;
   const code = error.code || null;
   const source = error.DB_ERROR ? 'DB_ERROR' : 'SOCKET_ERROR';
@@ -106,6 +108,13 @@ const startSocketServer = function (server, cache) {
       chat.archiveAllConversations(currentUsername)
         .catch(socketErrorHandler(socket));
     });
+    socket.on('fetchNotifications', function () {
+      userNotificationService.fetchNotifications(currentUserId)
+        .catch(socketErrorHandler(socket));
+    });
+    socket.on('markNotificationAsRead', function ({id}) {
+      userNotificationService.markNotificationAsRead(currentUserId, id);
+    });
     socket.on('disconnect', function () {
       if (currentUserId) {
         chat.userLeaveApp(currentUsername)
@@ -133,6 +142,7 @@ const startSocketServer = function (server, cache) {
   });
 
   notificationEmitter.addListener((notification) => {
+    userNotificationService.handle(notification);
     notificationsHandler.handle(notification);
   });
 

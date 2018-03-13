@@ -175,6 +175,17 @@ CREATE TABLE user_deposits (
 CREATE UNIQUE INDEX unique_user_id_txid ON user_deposits(user_id, txid);
 CREATE INDEX user_deposits_created_at_user_id_idx ON user_withdrawals USING btree (user_id, created_at);
 
+CREATE TABLE user_notifications (
+  id bigserial PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users(id),
+  body text NULL,
+  title text NOT NULL,
+  is_read boolean DEFAULT false NOT NULL,
+  created_at timestamp with time zone NOT NULL  DEFAULT NOW()
+);
+
+CREATE INDEX user_notifications_user_id_created_at_idx ON user_notifications USING btree (user_id, created_at);
+
 CREATE TABLE whitelisted_addresses (
   id bigserial PRIMARY KEY,
   user_id bigint NULL REFERENCES users(id),

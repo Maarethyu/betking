@@ -33,6 +33,7 @@ module.exports = (currencyCache) => {
 
     const currency = parseInt(req.body.currency, 10);
     const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currencyCache, currency);
+    const symbol = currencyCache.getFieldById(currency, 'symbol');
 
     try {
       const newUserBalance = await db.wallet.addDeposit(
@@ -46,6 +47,7 @@ module.exports = (currencyCache) => {
       notificationEmitter.emit(types.DEPOSIT_CONFIRMED, {
         userId: newUserBalance.user_id,
         currency: newUserBalance.currency,
+        symbol,
         amount: req.body.amount,
         balance: newUserBalance.balance
       });

@@ -10,6 +10,7 @@
     <UserLookupModal :username="username" />
     <SendTipModal :username="tipUserName" />
     <PrivateChatModal />
+    <NotificationModal />
   </div>
 </template>
 
@@ -24,6 +25,7 @@ import BetDetailsModal from './BetDetailsModal';
 import UserLookupModal from './UserLookupModal';
 import SendTipModal from './SendTipModal';
 import PrivateChatModal from './PrivateChatModal/PrivateChatModal';
+import NotificationModal from './NotificationModal/NotificationModal';
 
 import bus from 'src/bus';
 
@@ -39,7 +41,8 @@ export default {
     BetDetailsModal,
     UserLookupModal,
     SendTipModal,
-    PrivateChatModal
+    PrivateChatModal,
+    NotificationModal
   },
   data: () => ({
     betId: null,

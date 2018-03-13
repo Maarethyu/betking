@@ -22,6 +22,10 @@
     </div>
 
     <b-navbar-nav class="ml-auto" v-if="isAuthenticated">
+      <b-nav-item @click="showNotificationsModal">
+        <i class="fa fa-bell"></i>
+        <b-badge variant="danger" v-if="totalUnreadNotificationCount">{{totalUnreadNotificationCount}}</b-badge>
+      </b-nav-item>
       <b-nav-item @click="showPrivateChatModal">
         <i class="fa fa-envelope"></i>
         <b-badge variant="danger" v-if="totalUnreadCount">{{totalUnreadCount}}</b-badge>
@@ -104,7 +108,8 @@ export default {
       isAuthenticated: 'isAuthenticated',
       isLoggedOut: 'isLoggedOut',
       activeCurrency: 'activeCurrency',
-      totalUnreadCount: 'totalUnreadCount'
+      totalUnreadCount: 'totalUnreadCount',
+      totalUnreadNotificationCount: 'totalUnreadNotificationCount'
     }),
   },
   methods: {
@@ -116,6 +121,9 @@ export default {
     },
     showPrivateChatModal () {
       this.$root.$emit('bv::show::modal', 'privateChatModal');
+    },
+    showNotificationsModal () {
+      this.$root.$emit('bv::show::modal', 'notificationModal');
     }
   }
 };

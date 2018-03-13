@@ -24,6 +24,8 @@ const state = {
   welcomeMessages: [],
   currentPrivateChatUser: null,
   privateChatMessages: [],
+  notifications: [],
+  unreadNotification: 0
 };
 
 // getters
@@ -58,7 +60,9 @@ const getters = {
     });
 
     return totalCount;
-  }
+  },
+  totalUnreadNotificationCount: state => state.notifications.filter(n => !n.is_read).length,
+  notifications: state => state.notifications
 };
 
 // actions
@@ -85,6 +89,18 @@ const actions = {
         }
         socket.disconnect();
         commit(types.SET_SOCKET_CONNECTION, false);
+      });
+
+      socket.on('allNotifications', (msg) => {
+        commit(types.SET_NOTIFICATIONS, msg.notifications);
+      });
+
+      socket.on('newNotification', (msg) => {
+        commit(types.ADD_NEW_NOTIFICATION, msg.notification);
+      });
+
+      socket.on('markedNotificationAsRead', (msg) => {
+        commit(types.MARK_NOTIFICATION_AS_READ, msg.notificationId);
       });
 
       socket.on('depositConfirmed', (msg) => {
@@ -354,6 +370,14 @@ const actions = {
 
   toggleWatchBetsPaused ({commit}, shouldPause) {
     commit(types.SET_WATCH_BETS_PAUSED, shouldPause);
+  },
+
+  fetchNotifications ({commit, state}) {
+    state.webSocket.emit('fetchNotifications', {});
+  },
+
+  markNotificationAsRead ({commit, state}, id) {
+    state.webSocket.emit('markNotificationAsRead', {id});
   }
 };
 
@@ -536,6 +560,22 @@ const mutations = {
 
   [types.SET_MODERATORS] (state, moderators) {
     state.moderators = moderators;
+  },
+
+  [types.SET_NOTIFICATIONS] (state, notifications) {
+    state.notifications = notifications;
+  },
+
+  [types.ADD_NEW_NOTIFICATION] (state, notification) {
+    Vue.set(state.notifications, 0, notification);
+  },
+
+  [types.MARK_NOTIFICATION_AS_READ] (state, notificationId) {
+    state.notifications.forEach((n, i, a) => {
+      if (n.id === notificationId) {
+        a[i].is_read = true;
+      }
+    });
   }
 };
 
