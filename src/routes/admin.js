@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../db');
 const mw = require('../middleware');
 const helpers = require('../helpers');
-const {notificationEmitter, types} = require('../socket/notificationEmitter');
+const {userNotificationEmitter, types} = require('../socket/userNotificationEmitter');
 
 module.exports = (currencyCache) => {
   const router = express.Router();
@@ -33,6 +33,7 @@ module.exports = (currencyCache) => {
 
     const currency = parseInt(req.body.currency, 10);
     const currencyToQuery = helpers.getCurrencyToQueryFromAddressTable(currencyCache, currency);
+    const symbol = currencyCache.getFieldById(currency, 'symbol');
 
     try {
       const newUserBalance = await db.wallet.addDeposit(
@@ -43,9 +44,10 @@ module.exports = (currencyCache) => {
         req.body.txid
       );
 
-      notificationEmitter.emit(types.DEPOSIT_CONFIRMED, {
+      userNotificationEmitter.emit(types.DEPOSIT_CONFIRMED, {
         userId: newUserBalance.user_id,
         currency: newUserBalance.currency,
+        symbol,
         amount: req.body.amount,
         balance: newUserBalance.balance
       });

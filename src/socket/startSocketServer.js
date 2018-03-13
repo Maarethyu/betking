@@ -4,16 +4,20 @@ const uuid = require('uuid');
 const db = require('../db');
 const {notificationEmitter} = require('./notificationEmitter');
 const {chatNotificationEmitter} = require('./chatNotificationEmitter');
+const {userNotificationEmitter} = require('./userNotificationEmitter');
 const {attachCurrentUserToRequest} = require('../middleware');
 
 const NotificationsHandler = require('./NotificationsHandler');
+const UserNotificationsHandler = require('./UserNotificationsHandler');
 const ChatNotificationsHandler = require('./ChatNotificationsHandler');
 const ChatService = require('../chat/ChatService');
+const UserNotificationService = require('../notifications/UserNotificationService');
 
 const chat = new ChatService(db.chat);
+const userNotification = new UserNotificationService(db.notifications);
 
 const socketErrorHandler = (socket) => async (error) => {
-  userId = socket.request.currentUser && socket.request.currentUser.id;
+  const userId = socket.request.currentUser && socket.request.currentUser.id;
   const query = error.query ? error.query.toString() : null;
   const code = error.code || null;
   const source = error.DB_ERROR ? 'DB_ERROR' : 'SOCKET_ERROR';
@@ -27,6 +31,7 @@ const startSocketServer = function (server, cache) {
   const io = socketIo.listen(server);
   const notificationsHandler = new NotificationsHandler(io);
   const chatNotificationsHandler = new ChatNotificationsHandler(io);
+  const userNotificationsHandler = new UserNotificationsHandler(io);
   const {betsCache} = cache;
 
   console.log(`websockets listening`);
@@ -138,6 +143,11 @@ const startSocketServer = function (server, cache) {
 
   chatNotificationEmitter.addListener((notification) => {
     chatNotificationsHandler.handle(notification);
+  });
+
+  userNotificationEmitter.addListener((notification) => {
+    userNotification.handle(notification);
+    userNotificationsHandler.handle(notification);
   });
 };
 
