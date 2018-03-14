@@ -39,6 +39,7 @@
       width: 100%;
       .dropdown-toggle {
         width: 100%;
+        text-shadow: none;
       }
     }
 
