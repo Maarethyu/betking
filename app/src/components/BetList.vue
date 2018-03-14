@@ -5,8 +5,16 @@
     responsive striped small outlined hover fixed
     :items="bets"
     :fields="fields"
-    :show-empty="true"
-    :empty-text="emptyText">
+    :show-empty="true">
+
+    <template v-if="isAuthenticated" slot="empty">
+      <div class="text-center">You have not placed any bets yet.</div>
+    </template>
+    <template v-else slot="empty">
+      <div class="text-center">
+        <a href="#" v-b-modal.loginModal>Login</a> or <a href="#" v-b-modal.registerModal>Register</a> to place bets.
+      </div>
+    </template>
 
     <template slot="username" slot-scope="data">
       <b-link href="#" @click="showUserDetails(data.value)" :class="{'username-hidden': data.value === '[HIDDEN]'}" >
@@ -46,6 +54,7 @@
 <script>
   import bTable from 'bootstrap-vue/es/components/table/table';
   import bLink from 'bootstrap-vue/es/components/link/link';
+  import vBModal from 'bootstrap-vue/es/directives/modal/modal';
 
   import CurrencyIcon from 'components/CurrencyIcon';
   import moment from 'moment';
@@ -61,6 +70,9 @@
       'b-link': bLink,
       CurrencyIcon
     },
+    directives: {
+      'b-modal': vBModal
+    },
     props: {
       bets: {
         type: Array,
@@ -69,14 +81,12 @@
       showUsername: {
         type: Boolean,
         default: false
-      },
-      emptyText: {
-        type: String
       }
     },
     computed: {
       ...mapGetters({
-        currencies: 'currencies'
+        currencies: 'currencies',
+        isAuthenticated: 'isAuthenticated'
       }),
       fields () {
         return [
