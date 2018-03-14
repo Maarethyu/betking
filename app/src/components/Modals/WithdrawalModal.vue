@@ -6,20 +6,20 @@
     <div class="alert alert-danger" v-if="errors.global">{{errors.global}}</div>
     <b-container fluid>
       <b-row>
-        <b-col cols="6">Available Balance</b-col>
+        <b-col cols="8">Available Balance</b-col>
         <b-col>{{addCommas(formatAmount(balance, withdrawalModalCurrency))}}</b-col>
       </b-row>
       <b-row v-if="withdrawalModalCurrency !== 0">
-        <b-col cols="6">Withdrawal Fee</b-col>
+        <b-col cols="8">Withdrawal Fee</b-col>
         <b-col>{{addCommas(formatAmount(withdrawalFee, withdrawalModalCurrency))}}</b-col>
       </b-row>
       <b-row>
-        <b-col cols="6">Minimum Withdrawal Amount</b-col>
+        <b-col cols="8">Minimum Withdrawal Amount</b-col>
         <b-col>{{addCommas(formatAmount(minWithdrawalLimit, withdrawalModalCurrency))}}</b-col>
       </b-row>
       <set-withdrawal-fee @onFeeChange="onFeeChange" v-if="withdrawalModalCurrency === 0" />
       <b-row v-if="isAmountValid">
-        <b-col cols="6">Amount Received</b-col>
+        <b-col cols="8">Amount Received</b-col>
         <b-col>{{addCommas(formatAmount(amountReceived, withdrawalModalCurrency))}}</b-col>
       </b-row>
       <br />

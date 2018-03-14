@@ -2,12 +2,12 @@
   <div>
     <br />
     <b-row>
-      <b-col cols="6">
+      <b-col sm="12" md="6">
         Withdrawal Fee
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="6">
+      <b-col sm="12" md="8">
         <div v-if="!fetchingRecommendedFee">
           <div v-if="mode === modes.AUTO">
             <b-form-select
@@ -27,7 +27,7 @@
           <b-form-text v-if="mode !== modes.AUTO">satoshis/byte</b-form-text>
         </div>
       </b-col>
-      <b-col>
+      <b-col sm="12" md="4">
         <div>{{cost}}</div>
         <a
           v-if="mode === modes.AUTO"
